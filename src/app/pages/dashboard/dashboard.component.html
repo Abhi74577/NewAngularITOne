@@ -1,0 +1,104 @@
+<div class="p-6 bg-background space-y-6">
+  <!-- Page Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-3xl md:text-4xl font-bold text-on-background mb-2">Dashboard</h1>
+      <p class="text-on-background-variant">Welcome back! Here's what's happening with your business today.</p>
+    </div>
+    <button class="hidden md:inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors duration-200 font-medium">📥 Export Report</button>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+    <div
+      *ngFor="let card of cards"
+      class="p-5 bg-surface border border-surface-variant rounded-2xl transition-all duration-200 hover:shadow-lg hover:border-primary-600/30"
+    >
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-3xl">{{ card.icon }}</span>
+        <span class="text-sm font-semibold transition-colors duration-200" [class.text-green-500]="card.trend.startsWith('+')
+          " [class.text-red-500]="!card.trend.startsWith('+')"
+        >
+          {{ card.trend }}
+        </span>
+      </div>
+      <h3 class="text-sm text-on-surface-variant font-medium mb-1">{{ card.title }}</h3>
+      <p class="text-2xl font-bold text-on-surface">{{ card.value }}</p>
+    </div>
+  </div>
+
+  <!-- Content Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+    <!-- Charts Section -->
+    <div class="lg:col-span-2">
+      <div class="p-6 bg-surface border border-surface-variant rounded-2xl">
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-lg font-semibold text-on-surface">Revenue Overview</h2>
+          <select class="px-3 py-2 bg-background border border-surface-variant rounded-lg text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary-600">
+            <option>This Month</option>
+            <option>Last Month</option>
+            <option>Last 3 Months</option>
+            <option>Last Year</option>
+          </select>
+        </div>
+        <div class="flex flex-col items-center justify-center p-12 bg-background/50 rounded-xl border border-dashed border-surface-variant">
+          <p class="text-2xl mb-2">📊</p>
+          <p class="text-center text-on-background">Chart visualization would go here</p>
+          <p class="text-xs text-on-background-variant text-center mt-2">Integrate with a charting library like Chart.js or Recharts</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Activity Section -->
+    <div class="lg:col-span-1">
+      <div class="p-6 bg-surface border border-surface-variant rounded-2xl">
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-lg font-semibold text-on-surface">Recent Activity</h2>
+          <a href="#" class="text-primary-600 hover:text-primary-700 transition-colors duration-200 text-sm font-medium">View All →</a>
+        </div>
+        <div class="space-y-4">
+          <div
+            *ngFor="let activity of recentActivity"
+            class="flex items-center gap-3 p-3 bg-background rounded-lg hover:bg-background/80 transition-colors duration-200"
+          >
+            <div class="flex items-center justify-center w-10 h-10 rounded-full bg-primary-600/10 text-on-surface text-sm font-semibold flex-shrink-0">
+              {{ activity.user.split(' ')[0][0] }}{{ activity.user.split(' ')[1][0] }}
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-on-surface truncate">{{ activity.user }}</p>
+              <p class="text-xs text-on-surface-variant truncate">{{ activity.action }}</p>
+            </div>
+            <span class="text-xs text-on-surface-variant whitespace-nowrap">{{ activity.time }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features Section -->
+  <div>
+    <h2 class="text-2xl font-bold text-on-background mb-6">Quick Features</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div class="p-5 bg-surface border border-surface-variant rounded-2xl text-center transition-all duration-200 hover:shadow-lg hover:border-primary-600/30">
+        <span class="text-4xl mb-3 inline-block">⚡</span>
+        <h3 class="font-semibold text-on-surface mb-2">Fast Performance</h3>
+        <p class="text-sm text-on-surface-variant">Optimized for speed and responsiveness</p>
+      </div>
+      <div class="p-5 bg-surface border border-surface-variant rounded-2xl text-center transition-all duration-200 hover:shadow-lg hover:border-primary-600/30">
+        <span class="text-4xl mb-3 inline-block">🎨</span>
+        <h3 class="font-semibold text-on-surface mb-2">Beautiful Design</h3>
+        <p class="text-sm text-on-surface-variant">Modern UI with smooth animations</p>
+      </div>
+      <div class="p-5 bg-surface border border-surface-variant rounded-2xl text-center transition-all duration-200 hover:shadow-lg hover:border-primary-600/30">
+        <span class="text-4xl mb-3 inline-block">📱</span>
+        <h3 class="font-semibold text-on-surface mb-2">Responsive</h3>
+        <p class="text-sm text-on-surface-variant">Works perfectly on all devices</p>
+      </div>
+      <div class="p-5 bg-surface border border-surface-variant rounded-2xl text-center transition-all duration-200 hover:shadow-lg hover:border-primary-600/30">
+        <span class="text-4xl mb-3 inline-block">🔒</span>
+        <h3 class="font-semibold text-on-surface mb-2">Secure</h3>
+        <p class="text-sm text-on-surface-variant">Built with security best practices</p>
+      </div>
+    </div>
+  </div>
+</div>

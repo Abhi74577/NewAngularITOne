@@ -1,0 +1,21 @@
+<div class="grid grid-rows-[auto_1fr_auto] h-screen bg-background transition-colors duration-300">
+  <!-- Header -->
+  <app-header
+    [isSidebarExpanded]="isSidebarExpanded"
+    (sidebarToggled)="toggleSidebar()"
+  ></app-header>
+
+  <!-- Sidebar -->
+  <app-sidebar [isExpanded]="isSidebarExpanded"></app-sidebar>
+
+  <!-- Main Content -->
+  <main
+    class="mt-16 mb-35 pt-2 pb-12 flex-1 overflow-y-auto overflow-x-hidden transition-all duration-300 ease-out"
+    [style.marginLeft]="isSidebarExpanded() ? '280px' : '80px'"
+  >
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Footer -->
+  <app-footer></app-footer>
+</div>

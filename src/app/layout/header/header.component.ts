@@ -1,0 +1,45 @@
+import { Component, Input, Output, EventEmitter, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ThemeService } from '../../core/services/theme.service';
+import { ClickOutsideDirective } from '../../shared/directives/click-outside.directive';
+
+@Component({
+  selector: 'app-header',
+  standalone: true,
+  imports: [CommonModule, ClickOutsideDirective],
+  templateUrl: './header.component.html',
+})
+export class HeaderComponent {
+  @Input() isSidebarExpanded = signal(true);
+  @Output() sidebarToggled = new EventEmitter<void>();
+
+  isProfileDropdownOpen = signal(false);
+
+  constructor(public themeService: ThemeService) {}
+
+  toggleSidebar(): void {
+    this.sidebarToggled.emit();
+  }
+
+  toggleTheme(): void {
+    this.themeService.toggleTheme();
+  }
+
+  toggleProfileDropdown(): void {
+    this.isProfileDropdownOpen.update((value) => !value);
+  }
+
+  closeProfileDropdown(): void {
+    this.isProfileDropdownOpen.set(false);
+  }
+
+  logout(): void {
+    console.log('Logout clicked');
+    this.closeProfileDropdown();
+    // Add logout logic here
+  }
+
+  getThemeIcon(): string {
+    return this.themeService.getTheme() === 'light' ? '🌙' : '☀️';
+  }
+}
