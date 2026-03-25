@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ThemeService } from '../../core/services/theme.service';
 import { ClickOutsideDirective } from '../../shared/directives/click-outside.directive';
@@ -14,6 +14,10 @@ export class HeaderComponent {
   @Output() sidebarToggled = new EventEmitter<void>();
 
   isProfileDropdownOpen = signal(false);
+  themeIcon = computed(() => {
+    const currentTheme = this.themeService.getTheme();
+    return currentTheme === 'light' ? '🌙' : '☀️';
+  });
 
   constructor(public themeService: ThemeService) {}
 
@@ -40,6 +44,7 @@ export class HeaderComponent {
   }
 
   getThemeIcon(): string {
-    return this.themeService.getTheme() === 'light' ? '🌙' : '☀️';
+    return this.themeIcon();
   }
 }
+

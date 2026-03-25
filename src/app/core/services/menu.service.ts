@@ -18,7 +18,7 @@ export class MenuService {
       id: 'dashboard',
       label: 'Dashboard',
       icon: '📊',
-      route: '/dashboard',
+      route: '/',
     },
     {
       id: 'analytics',
@@ -76,7 +76,7 @@ export class MenuService {
           id: 'team',
           label: 'Team',
           icon: '👨‍💼',
-          route: '/users/team',
+          route: '/users',
         },
         {
           id: 'permissions',

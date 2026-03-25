@@ -1,0 +1,208 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.demo-table-container {
+  @apply w-full   p-6 dark:bg-slate-900 from-slate-50;
+
+  /* Page Header */
+  .page-header {
+    @apply mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6;
+
+    .header-info {
+      @apply flex-1;
+
+      .page-title {
+        @apply text-4xl font-bold text-gray-900 dark:text-white mb-2;
+      }
+
+      .page-description {
+        @apply text-gray-600 dark:text-gray-400 text-lg leading-relaxed;
+      }
+    }
+
+    .header-actions {
+      @apply flex gap-3 flex-wrap md:flex-nowrap;
+
+      .btn {
+        @apply px-6 py-3 rounded-lg font-medium text-sm transition-all duration-200
+               flex items-center gap-2 cursor-pointer border-0;
+
+        &.btn-primary {
+          @apply bg-blue-600 dark:bg-blue-700 text-white
+                 hover:bg-blue-700 dark:hover:bg-blue-800
+                 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                 dark:focus:ring-offset-slate-900 active:transform active:scale-95;
+
+          svg {
+            @apply w-5 h-5;
+          }
+        }
+      }
+    }
+  }
+
+  /* Controls Card */
+  .controls-card {
+    @apply mb-8 bg-white dark:bg-slate-800 rounded-lg shadow-md dark:shadow-lg
+           p-6 flex flex-col md:flex-row items-center justify-between gap-6;
+
+    .control-group {
+      @apply flex items-center gap-4;
+
+      .control-label {
+        @apply font-medium text-gray-700 dark:text-gray-300;
+      }
+
+      .control-select {
+        @apply px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg
+               bg-white dark:bg-slate-700 text-gray-900 dark:text-white
+               font-medium cursor-pointer
+               transition-all duration-200
+               focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+               dark:focus:ring-offset-slate-800 hover:border-gray-400 dark:hover:border-slate-500;
+
+        option {
+          @apply dark:bg-slate-700 text-gray-900 dark:text-white;
+        }
+      }
+    }
+
+    .control-info {
+      @apply flex items-center gap-4 flex-wrap;
+
+      .info-badge {
+        @apply px-4 py-2 rounded-full text-sm font-medium
+               bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300;
+
+        &.info-active {
+          @apply bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400;
+        }
+      }
+    }
+  }
+
+  /* Feature Information Card */
+  .info-card {
+    @apply mt-8 bg-white dark:bg-slate-800 rounded-lg shadow-md dark:shadow-lg p-8;
+
+    .info-title {
+      @apply text-2xl font-bold text-gray-900 dark:text-white mb-6;
+    }
+
+    .features-grid {
+      @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6;
+
+      .feature-item {
+        @apply flex flex-col items-start gap-3 p-4 rounded-lg
+               bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600
+               transition-all duration-200
+               hover:shadow-md dark:hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-600;
+
+        svg {
+          @apply w-8 h-8 text-blue-600 dark:text-blue-400;
+        }
+
+        h4 {
+          @apply text-lg font-semibold text-gray-900 dark:text-white;
+        }
+
+        p {
+          @apply text-sm text-gray-600 dark:text-gray-400 leading-relaxed;
+        }
+      }
+    }
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .demo-table-container {
+    @apply p-4;
+
+    .page-header {
+      @apply mb-6 gap-4;
+
+      .header-info {
+        .page-title {
+          @apply text-2xl;
+        }
+
+        .page-description {
+          @apply text-base;
+        }
+      }
+
+      .header-actions {
+        @apply w-full;
+
+        .btn {
+          @apply w-full justify-center;
+        }
+      }
+    }
+
+    .controls-card {
+      @apply mb-6 gap-4 flex-col;
+
+      .control-group,
+      .control-info {
+        @apply w-full flex-col;
+
+        .control-select {
+          @apply w-full;
+        }
+      }
+    }
+
+    .info-card {
+      @apply p-6;
+
+      .info-title {
+        @apply text-xl;
+      }
+
+      .features-grid {
+        @apply grid-cols-1;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .demo-table-container {
+    @apply p-3;
+
+    .page-header {
+      .header-info {
+        .page-title {
+          @apply text-xl;
+        }
+
+        .page-description {
+          @apply text-sm;
+        }
+      }
+    }
+
+    .controls-card {
+      @apply p-4;
+
+      .control-group {
+        @apply gap-2;
+
+        .control-label {
+          @apply text-sm;
+        }
+      }
+    }
+
+    .info-card {
+      @apply p-4;
+
+      .info-title {
+        @apply text-lg;
+      }
+    }
+  }
+}

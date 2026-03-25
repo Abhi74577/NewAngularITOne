@@ -2,6 +2,7 @@ import { Component, Input, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MenuService, MenuItem } from '../../core/services/menu.service';
+import { ThemeService } from '../../core/services/theme.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -16,7 +17,7 @@ export class SidebarComponent implements OnInit {
   hoveredMenuId = signal<string | null>(null);
   hoveredSubmenuId = signal<string | null>(null);
 
-  constructor(private menuService: MenuService) {}
+  constructor(private menuService: MenuService, public themeService: ThemeService) {}
 
   ngOnInit(): void {
     this.menuItems.set(this.menuService.getMenuItems());

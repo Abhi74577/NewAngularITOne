@@ -1,6 +1,9 @@
 import { Routes } from '@angular/router';
 import { LayoutComponent } from './layout/layout.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
+import { UserFormComponent } from './pages/user-form/user-form.component';
+import { UsersComponent } from './pages/users/users.component';
+import { DemoTableComponent } from './layout/demo-table/demo-table.component';
 
 export const APP_ROUTES: Routes = [
   {
@@ -18,7 +21,7 @@ export const APP_ROUTES: Routes = [
       },
       {
         path: 'analytics',
-        component: DashboardComponent,
+        component: DemoTableComponent,
       },
       {
         path: 'products',
@@ -26,7 +29,7 @@ export const APP_ROUTES: Routes = [
       },
       {
         path: 'users',
-        component: DashboardComponent,
+        component: UsersComponent,
       },
       {
         path: 'settings',

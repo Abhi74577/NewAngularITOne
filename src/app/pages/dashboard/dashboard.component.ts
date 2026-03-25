@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ThemeService } from '../../core/services/theme.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -8,6 +9,7 @@ import { CommonModule } from '@angular/common';
   templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent {
+  constructor(public themeService: ThemeService) {}
   cards = [
     { title: 'Total Users', value: '12,345', icon: '👥', trend: '+12%' },
     { title: 'Revenue', value: '$45,231', icon: '💰', trend: '+8%' },
