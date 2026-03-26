@@ -8,7 +8,7 @@
       (click)="toggleSidebar()"
       title="Toggle Sidebar"
     >
-      <span>☰</span>
+      <i class="fa-solid fa-bars"></i>
     </button>
   </div>
 
@@ -21,7 +21,7 @@
       [title]="themeService.getTheme() === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'"
       class="w-10 h-10 flex items-center justify-center rounded-xl text-on-surface dark:text-slate-200 transition-all duration-200 hover:bg-surface-variant dark:hover:bg-slate-800 hover:text-primary-600 dark:hover:text-blue-400 active:scale-95 focus-visible:outline-2 focus-visible:outline-primary-600"
     >
-      {{ getThemeIcon() }}
+      <i [ngClass]="themeIcon()" class="text-lg"></i>
     </button>
 
     <!-- Divider -->

@@ -11,10 +11,10 @@ import { ThemeService } from '../../core/services/theme.service';
 export class DashboardComponent {
   constructor(public themeService: ThemeService) {}
   cards = [
-    { title: 'Total Users', value: '12,345', icon: '👥', trend: '+12%' },
-    { title: 'Revenue', value: '$45,231', icon: '💰', trend: '+8%' },
-    { title: 'Orders', value: '1,234', icon: '📦', trend: '+23%' },
-    { title: 'Conversion', value: '3.2%', icon: '📈', trend: '+4%' },
+    { title: 'Total Users', value: '12,345', icon: '👥', iconClass: 'fa-solid fa-users', trend: '+12%' },
+    { title: 'Revenue', value: '$45,231', icon: '💰', iconClass: 'fa-solid fa-dollar-sign', trend: '+8%' },
+    { title: 'Orders', value: '1,234', icon: '📦', iconClass: 'fa-solid fa-box', trend: '+23%' },
+    { title: 'Conversion', value: '3.2%', icon: '📈', iconClass: 'fa-solid fa-chart-line', trend: '+4%' },
   ];
 
   recentActivity = [

@@ -1,6 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DynamicTableComponent, ColumnConfig } from '../../shared/components/DynamicTable/dynamic-table.component';
+import { DynamicTableComponent, ColumnConfig, ExpandableTableConfig } from '../../shared/components/DynamicTable/dynamic-table.component';
 
 interface DemoUser {
   id: number;
@@ -26,10 +26,19 @@ export class DemoTableComponent implements OnInit {
     { key: 'name', label: 'Name', type: 'text', sortable: true, width: '180px' },
     { key: 'email', label: 'Email', type: 'text', sortable: true, width: '220px' },
     { key: 'department', label: 'Department', type: 'text', sortable: true, width: '150px' },
-    { key: 'role', label: 'Role', type: 'text', sortable: true, width: '120px' },
-    { key: 'status', label: 'Status', type: 'text', sortable: true, width: '120px' },
-    { key: 'joinDate', label: 'Join Date', type: 'text', sortable: true, width: '130px' },
   ];
+
+  // 🔹 Expanded table columns (for nested table)
+  expandableConfig: ExpandableTableConfig = {
+    enabled: true,
+    columns: [
+      { key: 'email', label: 'Email' },
+      { key: 'department', label: 'Department' },
+      { key: 'role', label: 'Role' },
+      { key: 'status', label: 'Status' },
+      { key: 'joinDate', label: 'Join Date' }
+    ]
+  };
 
   // State signals
   tableData = signal<DemoUser[]>([]);

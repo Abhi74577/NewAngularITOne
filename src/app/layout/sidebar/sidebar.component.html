@@ -5,7 +5,7 @@
   <!-- Logo -->
   <div class="flex items-center gap-3 px-5 py-4 border-b border-gray-200 dark:border-slate-700">
     <div class="w-11 h-11 flex items-center justify-center rounded-xl bg-primary-600/10 dark:bg-blue-900/30">
-      <span class="text-xl">💼</span>
+      <i class="fa-solid fa-briefcase text-xl text-primary-600 dark:text-blue-400"></i>
     </div>
 
     <span
@@ -23,24 +23,32 @@
 
       <!-- Main Item -->
       <div class="relative">
-       <button class="w-full flex items-center gap-3 px-3 py-3
+       <button 
+        [routerLink]="!hasChildren(item) && item.route ? item.route : null"
+        class="w-full flex items-center gap-3 px-3 py-3
         border-none bg-transparent text-on-surface dark:text-slate-300 rounded-lg 
         cursor-pointer transition-all duration-200 text-sm 
         font-medium text-left whitespace-nowrap hover:bg-surface-variant 
         dark:hover:bg-slate-800 hover:text-primary-600 dark:hover:text-blue-400 focus-visible:outline-2 
         focus-visible:outline-primary-600 focus-visible:outline-offset-0"
-         [class.bg-primary-100]="item.isExpanded" 
-         [class.dark:bg-blue-900]="item.isExpanded"
-         [class.text-primary-600]="item.isExpanded"
-         [class.dark:text-blue-300]="item.isExpanded"  
-         [routerLink]="item.route"
-          (mouseenter)="setHoveredMenu(hasChildren(item) ? item.id : null)" (mouseleave)="setHoveredMenu(null)" 
-          (click)="hasChildren(item) && isExpanded() ? toggleMenuExpand(item.id) : null" [title]="!isExpanded() ? item.label : ''" > 
-          <span class="flex-shrink-0 text-xl flex items-center justify-center w-6 h-6">
-            {{ item.icon }}</span> 
+         [class.bg-primary-100]="isItemActive(item) || item.isExpanded" 
+         [class.dark:bg-blue-900]="isItemActive(item) || item.isExpanded"
+         [class.text-primary-600]="isItemActive(item) || item.isExpanded"
+         [class.dark:text-blue-300]="isItemActive(item) || item.isExpanded"
+         [class.shadow-md]="isItemActive(item)"
+         [class.dark:shadow-lg]="isItemActive(item)"
+         [class.border-l-4]="isItemActive(item)"
+         [class.border-primary-600]="isItemActive(item)"
+         [class.dark:border-blue-400]="isItemActive(item)"
+          (mouseenter)="setHoveredMenu(hasChildren(item) ? item.id : null)" 
+          (mouseleave)="setHoveredMenu(null)" 
+          (click)="handleMenuClick($event, item)"
+          [title]="!isExpanded() ? item.label : ''" > 
+          <i class="flex-shrink-0 flex items-center justify-center w-6 h-6" [ngClass]="item.iconClass || 'fa-solid fa-circle'"></i>
             <span class="flex-1 overflow-hidden text-ellipsis" 
              *ngIf="isExpanded()">{{ item.label }}</span>
-              <span class="flex-shrink-0 text-xs transition-transform duration-200" *ngIf="hasChildren(item) && isExpanded()" [class.rotate-180]="item.isExpanded" > ▼ </span> </button>
+              <span class="flex-shrink-0 text-xs transition-transform duration-200" *ngIf="hasChildren(item) && isExpanded()" [class.rotate-180]="item.isExpanded || hasActiveChild(item)" > ▼ </span> 
+       </button>
 
         <!-- Floating submenu (collapsed) -->
         <div
@@ -49,26 +57,44 @@
         >
           <button
             *ngFor="let child of item.children" [routerLink]="child.route"
+            [class.bg-primary-100]="isRouteActive(child.route)"
+            [class.dark:bg-blue-900]="isRouteActive(child.route)"
+            [class.text-primary-600]="isRouteActive(child.route)"
+            [class.dark:text-blue-300]="isRouteActive(child.route)"
+            [class.font-semibold]="isRouteActive(child.route)"
+            [class.border-l-4]="isRouteActive(child.route)"
+            [class.border-primary-600]="isRouteActive(child.route)"
+            [class.dark:border-blue-400]="isRouteActive(child.route)"
             class="w-full flex items-center gap-3 px-4 py-2 text-sm text-on-surface dark:text-slate-300 transition-all duration-200 hover:bg-surface-variant dark:hover:bg-slate-700 hover:text-primary-600 dark:hover:text-blue-400"
           >
-            <span class="text-base">{{ child.icon }}</span>
-            <span class="truncate">{{ child.label }}</span>
+            <i class="text-base w-5 h-5 flex items-center justify-center" [ngClass]="child.iconClass || 'fa-solid fa-circle'"></i>
+            <span class="truncate">{{ child.label }} p</span>
           </button>
         </div>
       </div>
 
       <!-- Inline submenu -->
       <div
-        *ngIf="hasChildren(item) && isExpanded() && item.isExpanded"
+        *ngIf="hasChildren(item) && isExpanded() && (item.isExpanded || hasActiveChild(item))"
         class="ml-5 mt-1 space-y-1 border-l border-surface-variant dark:border-slate-700 pl-3"
       >
         <button
           *ngFor="let child of item.children"
           [routerLink]="child.route"
+          [class.bg-primary-50]="isRouteActive(child.route)"
+          [class.dark:bg-blue-950]="isRouteActive(child.route)"
+          [class.text-primary-600]="isRouteActive(child.route)"
+          [class.dark:text-blue-300]="isRouteActive(child.route)"
+          [class.font-semibold]="isRouteActive(child.route)"
+          [class.border-l-2]="isRouteActive(child.route)"
+          [class.border-primary-600]="isRouteActive(child.route)"
+          [class.dark:border-blue-400]="isRouteActive(child.route)"
+          [class.ml-0]="isRouteActive(child.route)"
+          [class.pl-2]="isRouteActive(child.route)"
           class="w-full flex items-center gap-2 px-2 py-2 text-sm text-on-surface-variant dark:text-slate-400 rounded-lg transition-all duration-200 hover:bg-surface-variant dark:hover:bg-slate-800 hover:text-primary-600 dark:hover:text-blue-400"
         >
-          <span class="text-sm">{{ child.icon }}</span>
-          <span class="truncate">{{ child.label }}q</span>
+          <i class="text-sm w-4 h-4" [ngClass]="child.iconClass || 'fa-solid fa-circle'"></i>
+          <span class="truncate">{{ child.label }}</span>
         </button>
       </div>
 

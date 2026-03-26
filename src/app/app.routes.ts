@@ -4,6 +4,8 @@ import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { UserFormComponent } from './pages/user-form/user-form.component';
 import { UsersComponent } from './pages/users/users.component';
 import { DemoTableComponent } from './layout/demo-table/demo-table.component';
+import { LoginComponent } from './auth/login/login.component';
+
 
 export const APP_ROUTES: Routes = [
   {
@@ -37,7 +39,7 @@ export const APP_ROUTES: Routes = [
       },
       {
         path: 'help',
-        component: DashboardComponent,
+        component: LoginComponent,
       },
     ],
   },

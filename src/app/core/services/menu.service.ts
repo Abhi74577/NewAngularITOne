@@ -4,6 +4,7 @@ export interface MenuItem {
   id: string;
   label: string;
   icon: string;
+  iconClass?: string; // For Font Awesome class names
   route?: string;
   children?: MenuItem[];
   isExpanded?: boolean;
@@ -18,96 +19,43 @@ export class MenuService {
       id: 'dashboard',
       label: 'Dashboard',
       icon: '📊',
+      iconClass: 'fa-solid fa-chart-line',
       route: '/',
     },
-    {
-      id: 'analytics',
-      label: 'Analytics',
-      icon: '📈',
-      route: '/analytics',
-      children: [
-        {
-          id: 'reports',
-          label: 'Reports',
-          icon: '📄',
-          route: '/analytics/reports',
-        },
-        {
-          id: 'metrics',
-          label: 'Metrics',
-          icon: '📐',
-          route: '/analytics/metrics',
-        },
-        {
-          id: 'trends',
-          label: 'Trends',
-          icon: '📉',
-          route: '/analytics/trends',
-        },
-      ],
-    },
-    {
-      id: 'products',
-      label: 'Products',
-      icon: '🛍️',
-      route: '/products',
-      children: [
-        {
-          id: 'catalog',
-          label: 'Catalog',
-          icon: '📚',
-          route: '/products/catalog',
-        },
-        {
-          id: 'inventory',
-          label: 'Inventory',
-          icon: '📦',
-          route: '/products/inventory',
-        },
-      ],
-    },
-    {
-      id: 'users',
-      label: 'Users',
-      icon: '👥',
-      route: '/users',
-      children: [
-        {
-          id: 'team',
-          label: 'Team',
-          icon: '👨‍💼',
-          route: '/users',
-        },
-        {
-          id: 'permissions',
-          label: 'Permissions',
-          icon: '🔐',
-          route: '/users/permissions',
-        },
-      ],
-    },
+    
     {
       id: 'settings',
       label: 'Settings',
       icon: '⚙️',
-      route: '/settings',
+      iconClass: 'fa-solid fa-gear',
+      route: '',
       children: [
         {
-          id: 'general',
+          id: 'team',
+          label: 'User',
+          icon: '👨‍💼',
+          iconClass: 'fa-solid fa-user-tie',
+          route: '/users',
+        },
+        {
+          id: 'role',
           label: 'General',
           icon: '🔧',
-          route: '/settings/general',
+          iconClass: 'fa-solid fa-wrench',
+          route: '/analytics',
         },
         {
           id: 'notifications',
           label: 'Notifications',
           icon: '🔔',
+          iconClass: 'fa-solid fa-bell',
           route: '/settings/notifications',
         },
         {
           id: 'security',
           label: 'Security',
           icon: '🔒',
+          iconClass: 'fa-solid fa-shield',
           route: '/settings/security',
         },
       ],
@@ -116,6 +64,7 @@ export class MenuService {
       id: 'help',
       label: 'Help',
       icon: '❓',
+      iconClass: 'fa-solid fa-circle-question',
       route: '/help',
     },
   ]);

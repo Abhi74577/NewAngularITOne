@@ -16,6 +16,10 @@ export class HeaderComponent {
   isProfileDropdownOpen = signal(false);
   themeIcon = computed(() => {
     const currentTheme = this.themeService.getTheme();
+    return currentTheme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+  });
+  themeIconEmoji = computed(() => {
+    const currentTheme = this.themeService.getTheme();
     return currentTheme === 'light' ? '🌙' : '☀️';
   });
 

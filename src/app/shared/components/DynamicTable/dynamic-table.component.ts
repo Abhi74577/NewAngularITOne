@@ -23,6 +23,11 @@ export interface ColumnConfig {
   accessor?: string;
 }
 
+export interface ExpandableTableConfig {
+  columns: ColumnConfig[];
+  enabled?: boolean;
+}
+
 export interface TableActionsConfig {
   onEdit?: (row: any) => void;
   onDelete?: (row: any) => void;
@@ -41,6 +46,7 @@ export class DynamicTableComponent implements OnInit, OnChanges {
   @Input() actions?: TableActionsConfig;
   @Input() itemsPerPage = 10;
   @Input() isLoading = false;
+  @Input() expandableConfig?: ExpandableTableConfig;
 
   @Output() editClick = new EventEmitter<any>();
   @Output() deleteClick = new EventEmitter<any>();
@@ -52,6 +58,7 @@ export class DynamicTableComponent implements OnInit, OnChanges {
   currentPage = signal<number>(1);
   pageSize = signal<number>(10);
   pageSizeOptions = [10, 20, 50, 100];
+  expandedRowId = signal<string | number | null>(null);
 
   // Computed signals for filtered and sorted data
   filteredData = computed(() => {
@@ -284,5 +291,35 @@ export class DynamicTableComponent implements OnInit, OnChanges {
    */
   hasData(): boolean {
     return this.paginatedData().length > 0;
+  }
+
+  /**
+   * Toggle row expansion
+   */
+  toggleRowExpand(row: any): void {
+    const rowId = row.id;
+    if (this.expandedRowId() === rowId) {
+      this.expandedRowId.set(null);
+    } else {
+      this.expandedRowId.set(rowId);
+    }
+  }
+
+  /**
+   * Check if a row is expanded
+   */
+  isRowExpanded(row: any): boolean {
+    return this.expandedRowId() === row.id;
+  }
+
+  /**
+   * Get the number of columns including actions and expand icon
+   */
+  getColspanCount(): number {
+    let count = this.columns.length + 1; // +1 for actions
+    if (this.expandableConfig?.enabled) {
+      count += 1; // +1 for expand icon
+    }
+    return count;
   }
 }
