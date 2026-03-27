@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ThemeService } from '../../core/services/theme.service';
+import { AuthService } from '../../core/services/auth.service';
 import { ClickOutsideDirective } from '../../shared/directives/click-outside.directive';
 
 @Component({
@@ -23,7 +24,10 @@ export class HeaderComponent {
     return currentTheme === 'light' ? '🌙' : '☀️';
   });
 
-  constructor(public themeService: ThemeService) {}
+  constructor(
+    public themeService: ThemeService,
+    private authService: AuthService
+  ) {}
 
   toggleSidebar(): void {
     this.sidebarToggled.emit();
@@ -44,7 +48,7 @@ export class HeaderComponent {
   logout(): void {
     console.log('Logout clicked');
     this.closeProfileDropdown();
-    // Add logout logic here
+    this.authService.logout();
   }
 
   getThemeIcon(): string {

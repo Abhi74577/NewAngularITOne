@@ -6,12 +6,18 @@ import { UsersComponent } from './pages/users/users.component';
 import { DemoTableComponent } from './layout/demo-table/demo-table.component';
 import { LoginComponent } from './auth/login/login.component';
 import { BcdrrequestComponent } from './pages/bcdrrequest/bcdrrequest.component';
+import { AuthGuard } from './core/guards/auth.guard';
 
 
 export const APP_ROUTES: Routes = [
   {
+    path: 'login',
+    component: LoginComponent,
+  },
+  {
     path: '',
     component: LayoutComponent,
+    canActivate: [AuthGuard],
     children: [
       {
         path: '',
@@ -43,5 +49,9 @@ export const APP_ROUTES: Routes = [
         component: LoginComponent,
       },
     ],
+  },
+  {
+    path: '**',
+    redirectTo: 'login',
   },
 ];
