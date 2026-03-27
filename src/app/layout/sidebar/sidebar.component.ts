@@ -69,15 +69,15 @@ export class SidebarComponent implements OnInit {
 
   handleMenuClick(event: Event, item: MenuItem): void {
     // If item has children and sidebar is expanded, toggle menu and prevent navigation
-    if (this.hasChildren(item) && this.isExpanded()) {
+  
       event.preventDefault();
       this.toggleMenuExpand(item.id);
-    }
+    
     // Otherwise, allow normal routerLink navigation
   }
 
   getSidebarWidth(): string {
-    return this.isExpanded() ? '280px' : '80px';
+    return this.isExpanded() ? '250px' : '80px';
   }
 
   getLogoText(): string {

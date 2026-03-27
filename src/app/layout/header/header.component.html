@@ -1,13 +1,10 @@
 <header
-  class="fixed top-0 left-0 right-0 h-16 bg-surface/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-gray-300 dark:border-slate-700 flex items-center justify-between px-4 md:px-6 z-50 transition-all duration-300"
->
+  class="fixed top-0 left-0 right-0 h-16 bg-surface/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-gray-300 dark:border-slate-700 flex items-center justify-between px-4 md:px-6 z-50 transition-all duration-300">
   <!-- Left -->
-   <div class="flex items-center gap-4">
+  <div class="flex items-center gap-4">
     <button
       class="flex items-center justify-center w-10 h-10 border-none bg-transparent text-on-surface dark:text-slate-200 rounded-lg cursor-pointer transition-all duration-200 text-xl hover:bg-surface-variant dark:hover:bg-slate-800 hover:text-primary-600 dark:hover:text-blue-400 focus-visible:outline-2 focus-visible:outline-primary-600 focus-visible:outline-offset-0"
-      (click)="toggleSidebar()"
-      title="Toggle Sidebar"
-    >
+      (click)="toggleSidebar()" title="Toggle Sidebar">
       <i class="fa-solid fa-bars"></i>
     </button>
   </div>
@@ -16,12 +13,10 @@
   <div class="flex items-center gap-2">
 
     <!-- Theme Toggle -->
-    <button
-      (click)="toggleTheme()"
+    <button (click)="toggleTheme()"
       [title]="themeService.getTheme() === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'"
-      class="w-10 h-10 flex items-center justify-center rounded-xl text-on-surface dark:text-slate-200 transition-all duration-200 hover:bg-surface-variant dark:hover:bg-slate-800 hover:text-primary-600 dark:hover:text-blue-400 active:scale-95 focus-visible:outline-2 focus-visible:outline-primary-600"
-    >
-      <i [ngClass]="themeIcon()" class="text-lg"></i>
+      class="w-10 h-10 flex items-center justify-center rounded-xl text-on-surface dark:text-slate-200 transition-all duration-200 hover:bg-surface-variant dark:hover:bg-slate-800 hover:text-primary-600 dark:hover:text-blue-400 active:scale-95 focus-visible:outline-2 focus-visible:outline-primary-600">
+      <i [ngClass]="themeIcon()" class="text-md"></i>
     </button>
 
     <!-- Divider -->
@@ -31,38 +26,32 @@
     <div class="relative" appClickOutside (clickOutside)="closeProfileDropdown()">
 
       <!-- Profile Button -->
-      <button
-        (click)="toggleProfileDropdown()"
-        title="User Profile"
-        class="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-xl transition-all duration-200 hover:bg-surface-variant dark:hover:bg-slate-800 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-primary-600"
-      >
-        <img
+      <button (click)="toggleProfileDropdown()" title="User Profile"
+        class="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-xl transition-all duration-200 hover:bg-surface-variant dark:hover:bg-slate-800 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-primary-600">
+        <i class="fa-solid fa-user text-md text-blue-500 dark:text-slate-200"></i>
+        <!-- <img
           src="https://ui-avatars.com/api/?name=John+Doe&background=random"
           alt="User Avatar"
-          class="w-9 h-9 rounded-full ring-2 ring-primary-600/20"
-        />
+          class="w-8 h-8 rounded-full ring-2 ring-primary-600/20"
+        /> -->
 
         <span class="hidden md:block text-sm font-medium text-on-surface dark:text-slate-200">
           John Doe
         </span>
 
         <span class="hidden md:block text-xs text-on-surface-variant dark:text-slate-400">
-          ▾
+          <i class="fa-solid fa-chevron-down"></i>
         </span>
       </button>
 
       <!-- Dropdown -->
-      <div
-        *ngIf="isProfileDropdownOpen()"
-        class="absolute right-0 mt-3 w-64 bg-surface dark:bg-slate-800 border border-surface-variant dark:border-slate-700 rounded-2xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2"
-      >
+      <div *ngIf="isProfileDropdownOpen()"
+        class="absolute text-sm  right-0 mt-2 w-45 bg-surface dark:bg-slate-800 border border-surface-variant dark:border-slate-700 rounded-2xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2">
 
         <!-- User Info -->
-        <div class="flex items-center gap-3 px-4 py-4">
-          <img
-            src="https://ui-avatars.com/api/?name=John+Doe&background=random"
-            class="w-11 h-11 rounded-full ring-2 ring-primary-600/20"
-          />
+        <div class="flex items-center gap-2 px-4 py-4">
+          <i class="fa-solid fa-user text-lg text-blue-500 dark:text-slate-200"></i>
+          
           <div class="min-w-0">
             <p class="text-sm font-semibold text-on-surface dark:text-slate-200 truncate">
               John Doe
@@ -72,32 +61,17 @@
             </p>
           </div>
         </div>
+        <button (click)="logout()"
+          class="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-500
+           dark:text-red-400 transition-all duration-200 hover:bg-red-500/10
+            dark:hover:bg-red-500/20 hover:text-red-600 dark:hover:text-red-300">
+          🚪 <span>Logout</span></button>
 
-        <div class="h-px bg-surface-variant dark:bg-slate-700"></div>
 
-        <!-- Menu Items -->
-        <a
-          routerLink="/user-profile"
-          (click)="closeProfileDropdown()"
-          class="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface dark:text-slate-300 transition-all duration-200 hover:bg-surface-variant dark:hover:bg-slate-700 hover:text-primary-600 dark:hover:text-blue-400"
-        >
-          👤 <span>Profile</span>
-        </a>
-
-        <button
-          class="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-on-surface dark:text-slate-300 transition-all duration-200 hover:bg-surface-variant dark:hover:bg-slate-700 hover:text-primary-600 dark:hover:text-blue-400"
-        >
-          ⚙️ <span>Settings</span>
-        </button>
-
-        <div class="h-px bg-surface-variant dark:bg-slate-700 my-1"></div>
-
-        <button
-          (click)="logout()"
-          class="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-500 dark:text-red-400 transition-all duration-200 hover:bg-red-500/10 dark:hover:bg-red-500/20 hover:text-red-600 dark:hover:text-red-300"
-        >
+        <!-- <button (click)="logout()"
+          class="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-500 dark:text-red-400 transition-all duration-200 hover:bg-red-500/10 dark:hover:bg-red-500/20 hover:text-red-600 dark:hover:text-red-300">
           🚪 <span>Logout</span>
-        </button>
+        </button> -->
 
       </div>
     </div>

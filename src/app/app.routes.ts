@@ -5,6 +5,7 @@ import { UserFormComponent } from './pages/user-form/user-form.component';
 import { UsersComponent } from './pages/users/users.component';
 import { DemoTableComponent } from './layout/demo-table/demo-table.component';
 import { LoginComponent } from './auth/login/login.component';
+import { BcdrrequestComponent } from './pages/bcdrrequest/bcdrrequest.component';
 
 
 export const APP_ROUTES: Routes = [
@@ -27,7 +28,7 @@ export const APP_ROUTES: Routes = [
       },
       {
         path: 'products',
-        component: DashboardComponent,
+        component: BcdrrequestComponent,
       },
       {
         path: 'users',
@@ -35,7 +36,7 @@ export const APP_ROUTES: Routes = [
       },
       {
         path: 'settings',
-        component: DashboardComponent,
+        component: UserFormComponent,
       },
       {
         path: 'help',

@@ -47,7 +47,10 @@
           <i class="flex-shrink-0 flex items-center justify-center w-6 h-6" [ngClass]="item.iconClass || 'fa-solid fa-circle'"></i>
             <span class="flex-1 overflow-hidden text-ellipsis" 
              *ngIf="isExpanded()">{{ item.label }}</span>
-              <span class="flex-shrink-0 text-xs transition-transform duration-200" *ngIf="hasChildren(item) && isExpanded()" [class.rotate-180]="item.isExpanded || hasActiveChild(item)" > ▼ </span> 
+              <span class="flex-shrink-0 text-xs transition-transform 
+              duration-200" *ngIf="hasChildren(item) 
+              && isExpanded()" 
+              [class.rotate-180]="item.isExpanded || hasActiveChild(item)"  > ▼ </span> 
        </button>
 
         <!-- Floating submenu (collapsed) -->
