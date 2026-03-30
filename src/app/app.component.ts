@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ModalComponent } from './shared/components/modal/modal.component';
 import { ThemeService } from './core/services/theme.service';
+import { OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angular-datetime-picker';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, ModalComponent],
+  imports: [RouterOutlet, ModalComponent, OwlNativeDateTimeModule, OwlDateTimeModule],
   template: `
     <router-outlet></router-outlet>
     <app-modal></app-modal>

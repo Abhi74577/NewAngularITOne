@@ -112,6 +112,58 @@ body {
   background: rgba(var(--color-on-surface-variant), 0.5);
 }
 
+/* 🌙 DARK MODE FIX */
+.dark .owl-dt-container {
+  background: #0f172a !important; /* slate-900 */
+  color: #e2e8f0 !important;
+  border-radius: 12px;
+  border: 1px solid #334155;
+}
+
+/* Header */
+.dark .owl-dt-calendar-header,
+.dark .owl-dt-timer {
+  background: #020617 !important; /* darker */
+  color: #f1f5f9 !important;
+}
+
+/* Calendar cells */
+.dark .owl-dt-calendar-table .owl-dt-calendar-cell {
+  color: #cbd5f5 !important;
+}
+
+/* Hover */
+.dark .owl-dt-calendar-cell:hover {
+  background: #1e293b !important;
+}
+
+/* Selected date */
+.dark .owl-dt-calendar-cell-selected {
+  background: #3b82f6 !important;
+  color: white !important;
+}
+
+/* Today */
+.dark .owl-dt-calendar-cell-today:not(.owl-dt-calendar-cell-selected) {
+  border: 1px solid #3b82f6 !important;
+}
+
+/* Buttons */
+.dark .owl-dt-control-button {
+  color: #e2e8f0 !important;
+}
+
+/* Time picker */
+.dark .owl-dt-timer-input {
+  background: #1e293b !important;
+  color: white !important;
+}
+
+/* Divider */
+.dark .owl-dt-divider {
+  border-color: #334155 !important;
+}
+
 /* Animations */
 @keyframes slideIn {
   from {
@@ -166,10 +218,10 @@ body {
 }
 
 /* Focus Styles */
-:focus-visible {
-  outline: 2px solid rgba(var(--color-primary-600));
-  outline-offset: 2px;
-}
+// :focus-visible {
+//   outline: 2px solid rgba(var(--color-primary-600));
+//   outline-offset: 2px;
+// }
 
 /* Links */
 a {

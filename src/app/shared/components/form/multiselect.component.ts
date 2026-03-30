@@ -24,6 +24,7 @@ export interface SelectOption {
 export interface MultiSelectFieldConfig extends FieldConfig {
   options: SelectOption[];
   searchable?: boolean;
+  multi?: boolean; // ✅ NEW (default false → single select)
 }
 
 @Component({
@@ -32,107 +33,119 @@ export interface MultiSelectFieldConfig extends FieldConfig {
   imports: [CommonModule, ReactiveFormsModule],
   template: `
   <div class="mb-5 flex flex-col">
-  <label class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-    {{ config.label }}
-    <span *ngIf="config.required" class="text-red-500 ml-1">*</span>
-  </label>
-
-  <div class="relative border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800">
-
     
+    <!-- LABEL -->
+    <label class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+      {{ config.label }}
+      <span *ngIf="config.required" class="text-red-500">*</span>
+    </label>
 
-    <!-- Selected + Icons -->
-    <div (click)="toggleDropdown($event)"
-         class="flex justify-between items-center p-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700">
+    <!-- FIELD -->
+    <div class="relative border border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 shadow-sm">
 
-      <!-- LEFT: Selected -->
-      <div class="flex flex-wrap gap-2 flex-1">
-        <span *ngFor="let item of selectedItems; trackBy: trackByFn"
-              class="flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-900 text-xs rounded">
+      <!-- SELECT BOX -->
+      <div (click)="toggleDropdown($event)"
+           class="flex justify-between items-center p-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 transition">
 
-          {{ item.label }}
+        <!-- SELECTED ITEMS -->
+        <div class="flex flex-wrap gap-2 flex-1">
 
-          <button (click)="removeItem(item.value, $event)"
-                  class="font-bold hover:opacity-70">
-            ×
+          <ng-container *ngIf="selectedItems.length > 0; else placeholder">
+            <span *ngFor="let item of selectedItems; trackBy: trackByFn"
+                  class="flex items-center gap-1 px-2 py-1 text-xs rounded-lg bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
+
+              {{ item.label }}
+
+              <button *ngIf="isMulti"
+                      (click)="removeItem(item.value, $event)"
+                      class="font-bold hover:opacity-70">
+                ×
+              </button>
+            </span>
+          </ng-container>
+
+          <ng-template #placeholder>
+            <span class="text-sm text-slate-400">
+              {{ config.placeholder || 'Select option...' }}
+            </span>
+          </ng-template>
+
+        </div>
+
+        <!-- RIGHT ICONS -->
+        <div class="flex items-center gap-2">
+
+          <!-- CLEAR -->
+          <i *ngIf="selectedItems.length > 0"
+             (click)="clearAll($event)"
+             class="fas fa-times text-red-500 hover:text-red-700 cursor-pointer">
+          </i>
+
+          <!-- DROPDOWN -->
+          <i class="fas text-slate-500"
+             [ngClass]="isOpen ? 'fa-chevron-up' : 'fa-chevron-down'">
+          </i>
+
+        </div>
+      </div>
+
+      <!-- DROPDOWN -->
+      <div *ngIf="isOpen"
+           (click)="$event.stopPropagation()"
+           class="absolute w-full mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg max-h-64 overflow-auto z-50">
+
+        <!-- SEARCH -->
+        <div *ngIf="multiConfig.searchable"
+             class="p-2 border-b border-slate-200 dark:border-slate-700">
+
+          <input
+            type="text"
+            [formControl]="searchControl"
+            placeholder="Search..."
+            class="w-full px-2 py-1 text-sm rounded-md border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 outline-none"
+          />
+        </div>
+
+        <!-- ACTIONS (ONLY MULTI) -->
+        <div *ngIf="isMulti"
+             class="flex gap-2 p-2 border-b border-slate-200 dark:border-slate-700">
+          <button (click)="selectAll()"
+                  class="flex-1 text-xs bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded px-2 py-1">
+            Select All
           </button>
-        </span>
 
-        <span *ngIf="selectedItems.length === 0"
-              class="text-sm text-slate-500 dark:text-slate-400">
-          Select skills...
-        </span>
-      </div>
-      
+          <button (click)="clearAll($event)"
+                  class="flex-1 text-xs bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded px-2 py-1">
+            Clear
+          </button>
+        </div>
 
-      <!-- RIGHT: ICONS -->
-      <div class="flex items-center gap-2">
+        <!-- OPTIONS -->
+        <label *ngFor="let option of filteredOptions; trackBy: trackByFn"
+               class="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition">
 
-        <!-- ❌ CLEAR ALL -->
-        <i *ngIf="selectedItems.length > 0"
-           (click)="clearAll($event)"
-           class="fas fa-times text-red-500 hover:text-red-700 cursor-pointer">
-        </i>
+          <input
+            [type]="isMulti ? 'checkbox' : 'radio'"
+            [checked]="isSelected(option.value)"
+            (click)="$event.stopPropagation()"
+            (change)="toggleOption(option)"
+          />
 
-        <!-- ⬇⬆ DROPDOWN -->
-        <i class="fas text-slate-500"
-           [ngClass]="isOpen ? 'fa-chevron-up' : 'fa-chevron-down'">
-        </i>
+          <span class="text-sm text-slate-700 dark:text-slate-300">
+            {{ option.label }}
+          </span>
+        </label>
 
       </div>
     </div>
 
-    <!-- Dropdown -->
-    <div *ngIf="isOpen"
-         (click)="$event.stopPropagation()"
-         class="absolute w-full bg-white dark:bg-slate-800 border-t border-slate-300 dark:border-slate-600 rounded-b-lg shadow-lg max-h-60 overflow-auto z-10">
+    <!-- ERROR -->
+    <span *ngIf="control.invalid && control.touched"
+          class="text-red-500 text-xs mt-1">
+      {{ config.errorMessage || 'This field is required' }}
+    </span>
 
-         <!-- Search -->
-    <div *ngIf="multiConfig.searchable"
-         class="px-3 py-2 border-b border-slate-200 dark:border-slate-600">
-
-      <input
-        type="text"
-        [formControl]="searchControl"
-        placeholder="Search..."
-        class="w-full bg-transparent text-sm outline-none text-slate-900 dark:text-slate-100"
-      />
-    </div>
-
-      <!-- Actions -->
-      <div class="flex gap-2 p-2 border-b border-slate-200 dark:border-slate-600">
-        <button (click)="selectAll()" class="flex-1 text-xs bg-slate-100 dark:bg-slate-700 rounded px-2 py-1">
-          Select All
-        </button>
-        <button (click)="clearAll($event)" class="flex-1 text-xs bg-slate-100 dark:bg-slate-700 rounded px-2 py-1">
-          Clear All
-        </button>
-      </div>
-
-      <!-- Options -->
-      <label *ngFor="let option of filteredOptions; trackBy: trackByFn"
-             class="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700">
-
-        <input
-          type="checkbox"
-          [checked]="isSelected(option.value)"
-          (click)="$event.stopPropagation()"
-          (change)="toggleOption(option)"
-        />
-
-        <span class="text-sm text-slate-700 dark:text-slate-300">
-          {{ option.label }}
-        </span>
-      </label>
-    </div>
   </div>
-
-  <!-- Error -->
-  <span *ngIf="control.invalid && control.touched"
-        class="text-red-500 text-xs mt-1">
-    {{ config.errorMessage || 'This field is required' }}
-  </span>
-</div>
   `
 })
 export class MultiselectComponent implements OnInit, OnDestroy {
@@ -151,6 +164,10 @@ export class MultiselectComponent implements OnInit, OnDestroy {
     return this.config as MultiSelectFieldConfig;
   }
 
+  get isMulti(): boolean {
+    return this.multiConfig.multi ?? false;
+  }
+
   get filteredOptions() {
     const search = this.searchControl.value?.toLowerCase() || '';
     return this.multiConfig.options.filter(opt =>
@@ -165,18 +182,21 @@ export class MultiselectComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if (Array.isArray(this.control.value)) {
-      this.selectedValues = [...this.control.value];
-    } else if (this.config.value) {
-      this.selectedValues = [...this.config.value];
-      this.control.setValue(this.selectedValues);
+    if (this.isMulti) {
+      this.selectedValues = Array.isArray(this.control.value)
+        ? [...this.control.value]
+        : [];
+    } else {
+      this.selectedValues = this.control.value ? [this.control.value] : [];
     }
 
     this.control.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe(value => {
-        if (Array.isArray(value)) {
-          this.selectedValues = [...value];
+        if (this.isMulti) {
+          this.selectedValues = Array.isArray(value) ? [...value] : [];
+        } else {
+          this.selectedValues = value ? [value] : [];
         }
       });
   }
@@ -191,16 +211,24 @@ export class MultiselectComponent implements OnInit, OnDestroy {
   }
 
   toggleOption(option: SelectOption): void {
-    this.searchControl.setValue(''); // ✅ NEW: CLEAR SEARCH ON TOGGLE
-    const index = this.selectedValues.indexOf(option.value);
+    this.searchControl.setValue('');
 
-    if (index > -1) {
-      this.selectedValues.splice(index, 1);
+    if (this.isMulti) {
+      const index = this.selectedValues.indexOf(option.value);
+
+      if (index > -1) {
+        this.selectedValues.splice(index, 1);
+      } else {
+        this.selectedValues.push(option.value);
+      }
+
+      this.control.setValue([...this.selectedValues]);
     } else {
-      this.selectedValues.push(option.value);
+      // SINGLE SELECT
+      this.selectedValues = [option.value];
+      this.control.setValue(option.value);
+      this.isOpen = false;
     }
-
-    this.control.setValue([...this.selectedValues]);
   }
 
   removeItem(value: any, event: Event): void {
@@ -209,24 +237,22 @@ export class MultiselectComponent implements OnInit, OnDestroy {
     this.control.setValue([...this.selectedValues]);
   }
 
-  // ✅ NEW: CLEAR ALL FROM RIGHT ICON
   clearAll(event?: Event): void {
     if (event) event.stopPropagation();
     this.selectedValues = [];
-    this.control.setValue([]);
+    this.control.setValue(this.isMulti ? [] : null);
   }
 
   selectAll(): void {
+    if (!this.isMulti) return;
     this.selectedValues = this.multiConfig.options.map(opt => opt.value);
     this.control.setValue([...this.selectedValues]);
   }
 
   toggleDropdown(event?: Event): void {
     if (event) event.stopPropagation();
-
     this.isOpen = !this.isOpen;
 
-    // ✅ NEW: RESET SEARCH WHEN OPEN
     if (this.isOpen) {
       this.searchControl.setValue('');
     }

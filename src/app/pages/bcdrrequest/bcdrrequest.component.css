@@ -15,3 +15,33 @@
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-text-secondary);
 }
+
+
+
+.btn-primary {
+  @apply px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700;
+}
+
+.btn-secondary {
+  @apply px-5 py-2 bg-gray-300 rounded-lg hover:bg-gray-400;
+}
+
+.btn-danger {
+  @apply px-3 py-1 bg-red-500 text-white rounded;
+}
+
+.btn-success {
+  @apply px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700;
+}
+
+.input {
+  @apply w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600
+  bg-white dark:bg-gray-900 text-gray-800 dark:text-white text-sm
+  placeholder-gray-400
+  focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+  hover:border-blue-400 transition outline-none;
+}
+
+.label {
+  @apply text-sm font-medium text-gray-700 dark:text-gray-300;
+}
