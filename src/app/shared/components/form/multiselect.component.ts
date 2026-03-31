@@ -32,20 +32,21 @@ export interface MultiSelectFieldConfig extends FieldConfig {
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   template: `
-  <div class="mb-5 flex flex-col">
+  <div class="flex flex-col">
     
     <!-- LABEL -->
-    <label class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-      {{ config.label }}
-      <span *ngIf="config.required" class="text-red-500">*</span>
+    <label class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+     
+      <span *ngIf="config.required" class="text-red-500">*</span> {{ config.label }}
     </label>
 
     <!-- FIELD -->
-    <div class="relative border border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 shadow-sm">
+    <div class="relative border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+  hover:border-blue-400">
 
       <!-- SELECT BOX -->
       <div (click)="toggleDropdown($event)"
-           class="flex justify-between items-center p-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 transition">
+           class="flex justify-between items-center p-3 cursor-pointer hover:bg-gray-50 rounded-md  dark:hover:bg-gray-700 transition">
 
         <!-- SELECTED ITEMS -->
         <div class="flex flex-wrap gap-2 flex-1">
@@ -65,7 +66,7 @@ export interface MultiSelectFieldConfig extends FieldConfig {
           </ng-container>
 
           <ng-template #placeholder>
-            <span class="text-sm text-slate-400">
+            <span class="text-sm text-gray-400">
               {{ config.placeholder || 'Select option...' }}
             </span>
           </ng-template>
@@ -82,7 +83,7 @@ export interface MultiSelectFieldConfig extends FieldConfig {
           </i>
 
           <!-- DROPDOWN -->
-          <i class="fas text-slate-500"
+          <i class="fas text-gray-500"
              [ngClass]="isOpen ? 'fa-chevron-up' : 'fa-chevron-down'">
           </i>
 
@@ -92,37 +93,37 @@ export interface MultiSelectFieldConfig extends FieldConfig {
       <!-- DROPDOWN -->
       <div *ngIf="isOpen"
            (click)="$event.stopPropagation()"
-           class="absolute w-full mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg max-h-64 overflow-auto z-50">
+           class="absolute w-full mt-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-64 overflow-auto z-50">
 
         <!-- SEARCH -->
         <div *ngIf="multiConfig.searchable"
-             class="p-2 border-b border-slate-200 dark:border-slate-700">
+             class="p-2 border-b border-gray-200 dark:border-gray-700">
 
           <input
             type="text"
             [formControl]="searchControl"
             placeholder="Search..."
-            class="w-full px-2 py-1 text-sm rounded-md border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 outline-none"
+            class="w-full px-2 py-1 text-sm rounded-md border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 outline-none"
           />
         </div>
 
         <!-- ACTIONS (ONLY MULTI) -->
         <div *ngIf="isMulti"
-             class="flex gap-2 p-2 border-b border-slate-200 dark:border-slate-700">
+             class="flex gap-2 p-2 border-b border-gray-200 dark:border-gray-700">
           <button (click)="selectAll()"
-                  class="flex-1 text-xs bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded px-2 py-1">
+                  class="flex-1 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded px-2 py-1">
             Select All
           </button>
 
           <button (click)="clearAll($event)"
-                  class="flex-1 text-xs bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded px-2 py-1">
+                  class="flex-1 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded px-2 py-1">
             Clear
           </button>
         </div>
 
         <!-- OPTIONS -->
         <label *ngFor="let option of filteredOptions; trackBy: trackByFn"
-               class="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+               class="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition">
 
           <input
             [type]="isMulti ? 'checkbox' : 'radio'"
@@ -131,7 +132,7 @@ export interface MultiSelectFieldConfig extends FieldConfig {
             (change)="toggleOption(option)"
           />
 
-          <span class="text-sm text-slate-700 dark:text-slate-300">
+          <span class="text-sm text-gray-700 dark:text-gray-300">
             {{ option.label }}
           </span>
         </label>

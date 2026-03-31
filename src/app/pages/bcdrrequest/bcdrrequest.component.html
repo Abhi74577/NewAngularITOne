@@ -119,13 +119,11 @@
 
                 <!-- Scenario Title -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 ">
-                        Scenario Title <span class="text-red-500">*</span>
+                    <label class="label">
+                        <span class="text-red-500">*</span> Scenario Title
                     </label>
 
-                    <input type="text" formControlName="requestName" placeholder="Enter scenario title" class="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 
-                    bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                    focus:ring-2 focus:ring-blue-500 outline-none" />
+                    <input type="text" formControlName="requestName" placeholder="Enter scenario title" class="input" />
                 </div>
 
                 <!-- Scenario Overview -->
@@ -136,7 +134,7 @@
 
                     <textarea formControlName="subScenarioDetails" rows="4"
                         placeholder="Provide a brief overview of the scenario" class="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 
-                    bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                    bg-white dark:bg-gray-900 text-gray-900 dark:text-white
                     focus:ring-2 focus:ring-blue-500 outline-none">
                     </textarea>
                 </div>
@@ -157,7 +155,8 @@
 
                             <h2 class="text-sm font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1">
                                 <span class="text-red-500">*</span> Objectives
-                            </h2> <i class="fas text-gray-600" [ngClass]="isCollapsed ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
+                            </h2> <i class="fas text-gray-600"
+                                [ngClass]="isCollapsed ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
                         </div>
 
                         <!-- Add Button -->
@@ -179,7 +178,7 @@
                                  border-gray-200 dark:border-gray-700 
                                  rounded-lg p-2">
 
-                                <div class="w-full md:w-1/4 pt-2">
+                                <div class="w-full md:w-1/4 pt-3">
                                     <app-multiselect
                                         [config]="{ name: 'Division', label: '', placeholder: 'Select Division', searchable: true, multi: false, options: teamOptions }"
                                         [control]="$any(objectiveForm.get('objectiveTypeId'))"> </app-multiselect>
@@ -187,8 +186,8 @@
                                 <div class="w-full md:flex-1">
                                     <input type="text" formControlName="objectiveDetails"
                                         placeholder="Details of the objective" maxlength="200"
-                                        class="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600
-                                         bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" />
+                                        class="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600
+                                         bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" />
                                 </div> <!-- Remove Button -->
                                 <div class="flex items-center justify-center"> <button type="button"
                                         (click)="deleteObjective(i)" class="w-7 h-7 flex items-center justify-center rounded-full
@@ -203,51 +202,58 @@
 
                 </div>
 
-                <!-- Risk Section -->
-                <div class="md:col-span-2">
+
+                <!-- ----Risk Section -- -->
+
+
+                <div class="md:col-span-2 border
+                                 border-gray-200 dark:border-gray-700 rounded-lg">
 
                     <!-- Header -->
-                    <div class="flex items-center justify-between mb-3 border-b pb-2">
-                        <h2 class="text-base font-semibold text-gray-800 dark:text-white">
-                            <span class="text-red-500">*</span> Risk
-                        </h2>
+                    <div class=" flex justify-between items-center px-2 py-2  rounded-t-lg
+                      bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
 
-                        <button type="button" (click)="addRisks()" class="w-7 h-7 flex items-center justify-center rounded-full 
-                             bg-green-500 text-white hover:bg-green-600 shadow-sm">
-                            <i class="fas fa-plus"></i>
+                        <!-- Title -->
+                        <div class="flex items-center gap-2 cursor-pointer" (click)="toggleRiskSection()">
+
+
+                            <h2 class="text-sm font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                                <span class="text-red-500">*</span> Risk
+                            </h2> <i class="fas text-gray-600"
+                                [ngClass]="isRiskCollapsed ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
+                        </div>
+
+                        <!-- Add Button -->
+                        <button type="button" (click)="addRisks(); $event.stopPropagation()" class="w-7 h-7 flex items-center justify-center rounded-full 
+                         bg-green-500 text-white hover:bg-green-600 shadow-sm">
+                            <i class="fas fa-plus "></i>
                         </button>
                     </div>
 
-
                     <!-- Container -->
-                    <div class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 
-                            ounded-xl p-4 space-y-3">
+                    <div *ngIf="!isRiskCollapsed" class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 
+                         p-2 space-y-3 transition-all">
 
                         <ng-container formArrayName="lstbCDRRequestRisk">
 
                             <!-- Row -->
-                            <div *ngFor="let obj of Risks.controls; let r = index" [formGroupName]="r"
-                                class="flex flex-col md:flex-row items-start md:items-center gap-3">
+                            <div *ngFor="let risk of Risks.controls; let r = index" [formGroupName]="r" class="flex flex-col md:flex-row items-start md:items-center gap-3 bg-white dark:bg-gray-800 border
+                                 border-gray-200 dark:border-gray-700 
+                                 rounded-lg p-2">
 
 
-                                <!-- Details -->
                                 <div class="w-full md:flex-1">
 
-                                    <input type="text" formControlName="requestName" formControlName="details"
+                                    <input type="text" formControlName="details"
                                         placeholder="List down the risks associated with the test" maxlength="200"
                                         class="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 
-                                        bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                                        bg-white dark:bg-gray-900 text-gray-900 dark:text-white
                                         focus:ring-2 focus:ring-blue-500 outline-none" />
-
-                                </div>
-
-                                <!-- Remove Button -->
-                                <div class="flex items-center justify-center">
-                                    <button type="button" (click)="deleteRisks(r)" class="w-7 h-7 flex items-center justify-center rounded-full 
-                                      bg-red-500 text-white hover:bg-red-800 shadow-sm">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
+                                </div> <!-- Remove Button -->
+                                <div class="flex items-center justify-center"> <button type="button"
+                                        (click)="deleteRisks(r)" class="w-7 h-7 flex items-center justify-center rounded-full
+                                         bg-red-400 text-white hover:bg-red-800 shadow-sm">
+                                        <i class="fas fa-trash"></i> </button> </div>
 
                             </div>
 
@@ -257,51 +263,59 @@
 
                 </div>
 
+
+
                 <!-- Assumption/Constrains -->
-                <div class="md:col-span-2">
+
+                <div class="md:col-span-2 border
+                                 border-gray-200 dark:border-gray-700 rounded-lg">
 
                     <!-- Header -->
-                    <div class="flex items-center justify-between mb-3 border-b pb-2">
-                        <h2 class="text-base font-semibold text-gray-800 dark:text-white">
-                            <span class="text-red-500">*</span> Assumption/Constraints
-                        </h2>
+                    <div class=" flex justify-between items-center px-2 py-2  rounded-t-lg
+                      bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
 
-                        <button type="button" (click)="addRisks()" class="w-7 h-7 flex items-center justify-center rounded-full 
-                             bg-green-500 text-white hover:bg-green-600 shadow-sm">
-                            <i class="fas fa-plus"></i>
+                        <!-- Title -->
+                        <div class="flex items-center gap-2 cursor-pointer"
+                            (click)="toggleAssumptionConstraintsSection()">
+
+
+                            <h2 class="text-sm font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                                <span class="text-red-500">*</span> Assumption/Constraints
+                            </h2> <i class="fas text-gray-600"
+                                [ngClass]="showAssumptionConstraints ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
+                        </div>
+
+                        <!-- Add Button -->
+                        <button type="button" (click)="addAssumptions(); $event.stopPropagation()" class="w-7 h-7 flex items-center justify-center rounded-full 
+                         bg-green-500 text-white hover:bg-green-600 shadow-sm">
+                            <i class="fas fa-plus "></i>
                         </button>
                     </div>
 
-
                     <!-- Container -->
-                    <div class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 
-                            ounded-xl p-4 space-y-3">
+                    <div *ngIf="!showAssumptionConstraints" class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 
+                         p-2 space-y-3 transition-all">
 
-                        <ng-container formArrayName="lstbCDRRequestAssumption">
+                        <ng-container formArrayName="lstbCDRRequestRisk">
 
                             <!-- Row -->
                             <div *ngFor="let assumptionForm of Assumptions.controls; let a = index" [formGroupName]="a"
-                                class="flex flex-col md:flex-row items-start md:items-center gap-3">
+                                class="flex flex-col md:flex-row items-start md:items-center gap-3 bg-white dark:bg-gray-800 border
+                                 border-gray-200 dark:border-gray-700 
+                                 rounded-lg p-2">
 
 
-                                <!-- Details -->
                                 <div class="w-full md:flex-1">
 
-                                    <input type="text" formControlName="requestName"
-                                        placeholder="List down the factor that we are assuming."
-                                        formControlName="details" maxlength="200" class="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 
-                                        bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                                    <input type="text" formControlName="details"
+                                        placeholder="List down the factor that we are assuming." maxlength="200" class="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 
+                                        bg-white dark:bg-gray-900 text-gray-900 dark:text-white
                                         focus:ring-2 focus:ring-blue-500 outline-none" />
-
-                                </div>
-
-                                <!-- Remove Button -->
-                                <div class="flex items-center justify-center">
-                                    <button type="button" (click)="deleteAssumptions(a)" class="w-7 h-7 flex items-center justify-center rounded-full 
-                                      bg-red-500 text-white hover:bg-red-800 shadow-sm">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
+                                </div> <!-- Remove Button -->
+                                <div class="flex items-center justify-center"> <button type="button"
+                                        (click)="deleteAssumptions(a)" class="w-7 h-7 flex items-center justify-center rounded-full
+                                         bg-red-400 text-white hover:bg-red-800 shadow-sm">
+                                        <i class="fas fa-trash"></i> </button> </div>
 
                             </div>
 
@@ -310,6 +324,8 @@
                     </div>
 
                 </div>
+
+
 
                 <!-- Activity Timings (CST) -->
 
@@ -333,7 +349,7 @@
                             <div class="relative group">
                                 <input [owlDateTime]="startDatePicker" formControlName="activityStartDate"
                                     [owlDateTimeTrigger]="startDatePicker" placeholder="Activity Start Time" class="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 
-                                    bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                                    bg-white dark:bg-gray-900 text-gray-900 dark:text-white
                                     focus:ring-2 focus:ring-blue-500 outline-none pr-10" />
 
                                 <!-- Icon -->
@@ -352,7 +368,7 @@
                             <div class="relative group">
                                 <input [owlDateTime]="endDatePicker" formControlName="activityEndDate"
                                     [owlDateTimeTrigger]="endDatePicker" placeholder="Activity End Time" class="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 
-                                    bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                                    bg-white dark:bg-gray-900 text-gray-900 dark:text-white
                                     focus:ring-2 focus:ring-blue-500 outline-none pr-10" />
 
                                 <!-- Icon -->
@@ -395,7 +411,7 @@
 
                 </div>
 
-              
+
                 <!-- FORM SECTION -->
                 <div *ngIf="showPartnerDetails"
                     class="grid grid-cols-1 md:grid-cols-2 gap-4 transition-all duration-300 mt-2">
@@ -405,9 +421,9 @@
                         <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
                             Name
                         </label>
-                        <input type="text" placeholder="Name of the business partner" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 
+                        <input type="text" placeholder="Name of the business partner" class="input
                     bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
-                    focus:ring-2 focus:ring-blue-500 outline-none" />
+                    focus:ring-2 focus:ring-blue-500 outline-none" formControlName="bussinessPartnerName" />
                     </div>
 
                     <!-- CONTACT -->
@@ -415,9 +431,9 @@
                         <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
                             Contact Number
                         </label>
-                        <input type="text" placeholder="Contact number of the business partner" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 
-                        bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
-                        focus:ring-2 focus:ring-blue-500 outline-none" />
+                        <input type="text" placeholder="Contact number of the business partner"
+                            formControlName="bussinessPartnerContactNumber" class="input"
+                            formControlName="bussinessPartnerContactNumber" />
                     </div>
 
                     <!-- ADDRESS -->
@@ -425,7 +441,8 @@
                         <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
                             Address
                         </label>
-                        <textarea placeholder="Address of the business partner" rows="2" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 
+                        <textarea placeholder="Address of the business partner"
+                            formControlName="bussinessPartnerAddress" rows="2" class="input
                         bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
                         focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
                     </div>
@@ -435,7 +452,8 @@
                         <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
                             Email Address
                         </label>
-                        <input type="email" placeholder="Email address of the business partner" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 
+                        <input type="email" placeholder="Email address of the business partner"
+                            formControlName="bussinessPartnerEmailAddress" class="input
                         bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
                         focus:ring-2 focus:ring-blue-500 outline-none" />
                     </div>
@@ -462,44 +480,47 @@
 
 
                 <!-- FORM SECTION -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 transition-all duration-300 mt-2">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 transition-all duration-300 mt-2">
 
                     <!-- NAME -->
                     <div>
                         <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
-                            Name
+                            <span class="text-red-500">*</span> Name
                         </label>
-                        <input type="text" placeholder="Name of the business partner" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 
-                    bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
-                    focus:ring-2 focus:ring-blue-500 outline-none" />
+                        <input type="text" placeholder="Name of the production location"
+                            formControlName="productLocationName" maxlength="100" class="input
+                        bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
+                        focus:ring-2 focus:ring-blue-500 outline-none" />
+                    </div>
+
+
+
+                    <!-- Location -->
+                    <div>
+
+                        <app-multiselect
+                            [config]="{ name: 'Division', label: 'Location', placeholder: 'Please Select Location', searchable: true, multi: false, options: teamOptions, required: true }"
+                            [control]="$any(pageForm_bcdrRequest.get('productLocations'))"> </app-multiselect>
                     </div>
 
                     <!-- CONTACT -->
                     <div>
                         <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
-                            Contact Number
+                            <span class="text-red-500">*</span> Contact Number
                         </label>
-                        <input type="text" placeholder="Contact number of the business partner" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 
+                        <input type="text" formControlName="recoveryLocationContactNumber"
+                            placeholder="Contact number of the production location" class="input
                         bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
                         focus:ring-2 focus:ring-blue-500 outline-none" />
-                    </div>
-
-                    <!-- ADDRESS -->
-                    <div class="md:col-span-1">
-                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
-                            Address
-                        </label>
-                        <textarea placeholder="Address of the business partner" rows="2" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 
-                        bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
-                        focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
                     </div>
 
                     <!-- EMAIL -->
                     <div>
                         <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
-                            Email Address
+                             <span class="text-red-500">*</span> Email Address
                         </label>
-                        <input type="email" placeholder="Email address of the business partner" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 
+                        <input type="email" placeholder="Email address of the production location"
+                            formControlName="productLocationEmailAddress" class="input
                         bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
                         focus:ring-2 focus:ring-blue-500 outline-none" />
                     </div>
@@ -533,44 +554,48 @@
 
 
                 <!-- FORM SECTION -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 transition-all duration-300 mt-2">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 transition-all duration-300 mt-2">
 
                     <!-- NAME -->
                     <div>
                         <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
-                            Name
+                            <span class="text-red-500">*</span> Name
                         </label>
-                        <input type="text" placeholder="Name of the business partner" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 
-                    bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
-                    focus:ring-2 focus:ring-blue-500 outline-none" />
+                        <input type="text" placeholder="Name of the recovery location"
+                            formControlName="recoveryLocationName" maxlength="100" class="input
+                            bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
+                            focus:ring-2 focus:ring-blue-500 outline-none" />
+                    </div>
+
+                    <!-- Location -->
+                    <div>
+                        <!-- <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
+                            Location
+                        </label> -->
+                        <app-multiselect
+                            [config]="{ name: 'Division', label: 'Location', placeholder: 'Please Select Location', searchable: true, multi: false, options: teamOptions, required: true }"
+                            [control]="$any(pageForm_bcdrRequest.get('recoveryLocations'))"> </app-multiselect>
                     </div>
 
                     <!-- CONTACT -->
                     <div>
                         <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
-                            Contact Number
+                            <span class="text-red-500">*</span> Contact Number
                         </label>
-                        <input type="text" placeholder="Contact number of the business partner" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 
+                        <input type="text" formControlName="recoveryLocationContactNumber"
+                            placeholder="Contact number of the recovery location" maxlength="100" class="input
                         bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
                         focus:ring-2 focus:ring-blue-500 outline-none" />
                     </div>
 
-                    <!-- ADDRESS -->
-                    <div class="md:col-span-1">
-                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
-                            Address
-                        </label>
-                        <textarea placeholder="Address of the business partner" rows="2" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 
-                        bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
-                        focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
-                    </div>
 
                     <!-- EMAIL -->
                     <div>
                         <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
-                            Email Address
+                             <span class="text-red-500">*</span> Email Address
                         </label>
-                        <input type="email" placeholder="Email address of the business partner" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 
+                        <input type="email" formControlName="recoveryLocationEmailAddress"
+                            placeholder="Email address of the recovery location" maxlength="100" class="input
                         bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
                         focus:ring-2 focus:ring-blue-500 outline-none" />
                     </div>
@@ -579,7 +604,7 @@
 
             </div>
 
-            
+
             <!-- Conferance -->
             <div class="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-gray-700 px-3 py-2">
 
@@ -597,25 +622,26 @@
 
 
                 <!-- FORM SECTION -->
-                <div class="grid grid-cols-1  gap-4 transition-all duration-300 mt-2">
+                <div class="grid grid-cols-1  gap-4 transition-all duration-300 mt-3">
 
                     <!-- NAME -->
                     <div>
-                       
-                        <input type="text" placeholder="Teams meeting link" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 
+
+                        <input type="text" placeholder="Teams meeting link" class="input
                     bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
                     focus:ring-2 focus:ring-blue-500 outline-none" />
                     </div>
 
-                 
+
 
                 </div>
 
             </div>
 
 
-             <!-- Helpdesk  -->
-            <div class="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-gray-700 px-3 py-2">
+            <!-- Helpdesk  -->
+            <div
+                class="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4 space-y-5">
 
                 <!-- HEADER -->
 
@@ -629,45 +655,284 @@
 
                 </div>
 
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2 mt-3">
+                        <span class="text-red-500">*</span> Helpdesk Ticket Details
+                    </label>
 
-                <!-- FORM SECTION -->
-                <div class="flex justify-between gap-2 transition-all duration-300 mt-2">
+                    <!-- FORM SECTION -->
+                    <div class="flex justify-between gap-2 transition-all duration-300 mt-3">
 
-                    <!-- NAME -->
-                    <div class="w-1/2">
-                       
-                        <input type="text" placeholder="Ticket Number" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 
-                    bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
-                    focus:ring-2 focus:ring-blue-500 outline-none" />
+                        <!-- NAME -->
+                        <div class="w-1/2">
+
+                            <input type="text" placeholder="Ticket Number" class="input
+                            bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
+                            focus:ring-2 focus:ring-blue-500 outline-none" />
+                        </div>
+
+                        <div class="w-full">
+
+                            <input type="text" placeholder="Ticket Details" class="input
+                            bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
+                            focus:ring-2 focus:ring-blue-500 outline-none" />
+                        </div>
+
+
+
                     </div>
+                </div>
 
-                     <div class="w-full">
-                       
-                        <input type="text" placeholder="Ticket Details" class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 
-                    bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
-                    focus:ring-2 focus:ring-blue-500 outline-none" />
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2 mt-3">
+                        <span class="text-red-500">*</span> Helpdesk Contact Details
+                    </label>
+
+                    <!-- FORM SECTION -->
+                    <div class="flex justify-between gap-2 transition-all duration-300 mt-3">
+
+                        <!-- NAME -->
+                        <div class="w-1/2">
+
+                            <input type="text" placeholder="Contact Number" class="input
+                            bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
+                            focus:ring-2 focus:ring-blue-500 outline-none" />
+                        </div>
+
+                        <div class="w-full">
+
+                            <input type="email" placeholder="Email Address" class="input
+                            bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
+                            focus:ring-2 focus:ring-blue-500 outline-none" />
+                        </div>
+
+
+
                     </div>
+                </div>
 
-                 
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2 mt-3">
+                        <span class="text-red-500">*</span>Emergency Contact Details
+                    </label>
 
+                    <!-- FORM SECTION -->
+                    <div class="flex justify-between gap-2 transition-all duration-300 mt-3">
+
+                        <!-- NAME -->
+                        <div class="w-1/2">
+
+                            <input type="text" placeholder="Contact Number" class="input
+                            bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
+                            focus:ring-2 focus:ring-blue-500 outline-none" />
+                        </div>
+
+                        <div class="w-full">
+
+                            <input type="email" placeholder="Email Address" class="input
+                            bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
+                            focus:ring-2 focus:ring-blue-500 outline-none" />
+                        </div>
+
+
+
+                    </div>
+                </div>
+
+
+
+            </div>
+
+
+            <div class="space-y-4 px-1">
+
+                <!-- QUESTION 1 -->
+                <div class="flex flex-col md:flex-row md:items-center  md:justify-start gap-1.5">
+
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Was communication carried out with internal and external customers regarding the test?
+                    </label>
+
+                    <div class="flex items-center gap-2">
+
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="communication" value="yes"
+                                class="w-4 h-4 text-blue-600 focus:ring-blue-500" />
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Yes</span>
+                        </label>
+
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="communication" value="no"
+                                class="w-4 h-4 text-blue-600 focus:ring-blue-500" />
+                            <span class="text-sm text-gray-700 dark:text-gray-300">No</span>
+                        </label>
+
+                    </div>
+                </div>
+
+                <!-- QUESTION 2 -->
+                <div class="flex flex-col md:flex-row md:items-center md:justify-start gap-1.5">
+
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Was the external client informed of clear expectations prior to testing?
+                    </label>
+
+                    <div class="flex items-center gap-2">
+
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="clientInfo" value="yes"
+                                class="w-4 h-4 text-blue-600 focus:ring-blue-500" />
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Yes</span>
+                        </label>
+
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="clientInfo" value="no"
+                                class="w-4 h-4 text-blue-600 focus:ring-blue-500" />
+                            <span class="text-sm text-gray-700 dark:text-gray-300">No</span>
+                        </label>
+
+                    </div>
                 </div>
 
             </div>
 
 
-            <div class="grid md:grid-cols-2 gap-4">
-
-                <input formControlName="productLocationName" placeholder="Product Location" class="input" />
-                <input formControlName="productLocationEmailAddress" placeholder="Product Email" class="input" />
-                <input formControlName="recoveryLocationName" placeholder="Recovery Location" class="input" />
-                <input formControlName="recoveryLocationEmailAddress" placeholder="Recovery Email" class="input" />
-                <input formControlName="emergencyContactNumber" placeholder="Emergency Contact" class="input" />
-                <input formControlName="emergencyContactEmailAddress" placeholder="Emergency Email" class="input" />
-            </div>
 
             }
             <!-- TAB 3 -->
-            <div *ngIf="activeTab == 3">
+            <div *ngIf="activeTab == 3" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+
+                <!-- Recovery Time Objective (RTO)  -->
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <span class="text-red-500">*</span> Recovery Time Objective (RTO)
+                    </label>
+
+                    <textarea formControlName="recoveryTimeObjective" rows="2"
+                        placeholder="Provide a brief overview of the scenario" class="textbox">
+                    </textarea>
+                </div>
+                <!-- Recovery Point Objective (RPO) -->
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                       <span class="text-red-500">*</span> Recovery Point Objective (RPO)
+                    </label>
+
+                    <textarea formControlName="recoveryPointObjective" rows="2"
+                        placeholder="Provide a brief overview of the scenario" class="textbox">
+                    </textarea>
+                </div>
+
+
+                <!-- ---  Recovery Team Objectives  --- -->
+
+
+                <div class="md:col-span-2 border
+                                 border-gray-200 dark:border-gray-700 rounded-lg">
+
+                    <!-- Header -->
+                    <div class=" flex justify-between items-center px-2 py-2  rounded-t-lg
+                      bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+
+                        <!-- Title -->
+                        <div class="flex items-center gap-2 cursor-pointer" (click)="toggleRecoveryTeamSection()">
+
+
+                            <h2 class="text-sm font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                                <span class="text-red-500">*</span> Recovery Team
+                            </h2> <i class="fas text-gray-600"
+                                [ngClass]="isRecoveryTeamCollapsed ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
+                        </div>
+
+                    </div>
+
+                    <!-- Container -->
+                    <div *ngIf="!isRecoveryTeamCollapsed" class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 
+                         p-2 space-y-3 transition-all">
+
+                        <ng-container formArrayName="lstbCDRRequestObjective">
+
+                            <!-- Row -->
+                            <div *ngFor="let objectiveForm of objectives.controls; let o = index" [formGroupName]="o"
+                                class=" bg-white dark:bg-gray-800 border
+                                 border-gray-200 dark:border-gray-700 
+                                 rounded-lg p-4">
+
+
+                                <label class="flex items-center gap-2  justify-start">
+                                    <h2
+                                        class="text-sm font-medium text-blue-600 dark:text-blue-400 flex items-center gap-1">
+
+                                        {{objectiveForm.get('objectiveDetails')?.value || 'Objective ' + (o + 1) }}
+
+                                    </h2>
+                                    <input type="checkbox" name="showPartnerDetails" [value]="showPartnerDetails"
+                                        (change)="toggleDetails()" class="w-4 h-4 text-blue-600 rounded" />
+                                    <span class="text-sm text-gray-600 dark:text-gray-300 cursor-pointer">
+                                        Same as above
+                                    </span>
+                                </label>
+
+                                <div class="grid md:grid-cols-2 items-start md:items-center gap-2">
+
+
+
+                                    <div>
+                                        <label class="label">
+                                            <span class="text-red-500">*</span> Name</label>
+                                        <input type="text" placeholder="List down the factor that we are assuming."
+                                            maxlength="200" class="input" />
+                                    </div>
+
+                                    <div>
+                                        <label class="label">
+                                            <span class="text-red-500">*</span> Designation</label>
+                                        <input type="text" placeholder="List down the factor that we are assuming."
+                                            maxlength="200" class="input" />
+                                    </div>
+
+                                    <div>
+                                        <label class="label">
+                                            <span class="text-red-500">*</span> Supervisor</label>
+                                        <input type="text" placeholder="List down the factor that we are assuming."
+                                            maxlength="200" class="input" />
+                                    </div>
+                                    <div>
+                                        <label class="label">
+                                            <span class="text-red-500">*</span> Contact Number</label>
+                                        <input type="text" placeholder="List down the factor that we are assuming."
+                                            maxlength="200" class="input" />
+                                    </div>
+
+                                    <div>
+                                        <label class="label">
+                                            <span class="text-red-500">*</span> Email Address</label>
+                                        <input type="text" placeholder="List down the factor that we are assuming."
+                                            maxlength="200" class="input" />
+                                    </div>
+                                    <div>
+
+                                        <app-multiselect
+                                            [config]="{ name: 'Division', label: 'Location', placeholder: 'Please Select Location', searchable: true, multi: false, options: teamOptions, required: true }"
+                                            [control]="$any(pageForm_bcdrRequest.get('recoveryLocations'))">
+                                        </app-multiselect>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+
+
+                        </ng-container>
+
+                    </div>
+
+                </div>
+
+
 
                 <div class="flex justify-between mb-3">
                     <h3 class="font-semibold">Objectives</h3>

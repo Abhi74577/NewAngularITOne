@@ -154,11 +154,14 @@ export class BcdrrequestComponent implements OnInit {
     { label: "Architecture Team", value: 5 },
     { label: "DevOps Team", value: 6 }
   ];
-  activeTab: any = 1;
+  activeTab: any = 3;
   isCollapsed = false;
   rowCollapsed: boolean[] = [];
   collapsed: any;
   showPartnerDetails: boolean = false;
+  isRiskCollapsed: boolean = false;
+  showAssumptionConstraints: boolean = false;
+  isRecoveryTeamCollapsed: boolean = false;
 
   constructor(private fb: FormBuilder) {
     this.createPageForm();
@@ -168,8 +171,19 @@ export class BcdrrequestComponent implements OnInit {
     this.isCollapsed = !this.isCollapsed;
   }
 
+  toggleRiskSection() {
+     this.isRiskCollapsed = !this.isRiskCollapsed;
+  }
+
   toggleDetails() {
     this.showPartnerDetails = !this.showPartnerDetails;
+  }
+  toggleAssumptionConstraintsSection() {
+    this.showAssumptionConstraints = !this.showAssumptionConstraints;
+  }
+
+  toggleRecoveryTeamSection() {
+    this.isRecoveryTeamCollapsed = !this.isRecoveryTeamCollapsed;
   }
 
   createPageForm() {
@@ -238,6 +252,7 @@ export class BcdrrequestComponent implements OnInit {
     });
 
     this.addObjective();
+      this.addObjective();
     this.addRisks();
     this.addAssumptions();
     this.addTeamInvolvements();

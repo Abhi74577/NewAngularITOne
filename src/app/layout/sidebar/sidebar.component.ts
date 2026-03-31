@@ -81,7 +81,7 @@ export class SidebarComponent implements OnInit {
   }
 
   getLogoText(): string {
-    return this.isExpanded() ? 'TechDash Pro' : 'TD';
+    return this.isExpanded() ? 'ITOne' : 'IT';
   }
 
   /**
