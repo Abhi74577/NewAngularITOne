@@ -25,10 +25,10 @@ export class LayoutComponent {
   }
 
   getSidebarWidth(): string {
-    return this.isSidebarExpanded() ? '280px' : '80px';
+    return this.isSidebarExpanded() ? '260px' : '80px';
   }
 
   getMainMarginLeft(): string {
-    return this.isSidebarExpanded() ? 'calc(280px)' : 'calc(80px)';
+    return this.isSidebarExpanded() ? 'calc(260px)' : 'calc(80px)';
   }
 }

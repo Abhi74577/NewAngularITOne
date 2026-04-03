@@ -12,49 +12,77 @@ import { filter } from 'rxjs/operators';
   templateUrl: './sidebar.component.html',
 })
 export class SidebarComponent implements OnInit {
+
   @Input() isExpanded = signal(true);
 
   menuItems = signal<MenuItem[]>([]);
   hoveredMenuId = signal<string | null>(null);
-  hoveredSubmenuId = signal<string | null>(null);
   currentRoute = signal<string>('');
+  expandedItems = signal<Set<string>>(new Set());
 
-  constructor(private menuService: MenuService, public themeService: ThemeService, private router: Router) {}
+  constructor(
+    private menuService: MenuService,
+    public themeService: ThemeService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.menuItems.set(this.menuService.getMenuItems());
-    
-    // Set initial route
+
     this.currentRoute.set(this.router.url);
     this.autoExpandActiveParent();
-    
-    // Subscribe to router events to update current route
+
     this.router.events
-      .pipe(filter((event) => event instanceof NavigationEnd))
-      .subscribe((event) => {
-        if (event instanceof NavigationEnd) {
-          this.currentRoute.set(event.url);
-          this.autoExpandActiveParent();
-        }
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe((event: any) => {
+        this.currentRoute.set(event.url);
+        this.autoExpandActiveParent();
       });
   }
 
-  /**
-   * Auto-expand parent menus if a child route is active
-   */
   private autoExpandActiveParent(): void {
+    const expanded = new Set<string>();
     const items = this.menuItems();
-    items.forEach((item) => {
-      if (this.hasActiveChild(item)) {
-        item.isExpanded = true;
-      }
-    });
-    this.menuItems.set([...items]);
+    
+    const findActiveParent = (items: MenuItem[]) => {
+      items.forEach(item => {
+        if (this.hasActiveChild(item)) {
+          expanded.add(item.id);
+        }
+        if (item.children) {
+          findActiveParent(item.children);
+        }
+      });
+    };
+    
+    findActiveParent(items);
+    this.expandedItems.set(expanded);
   }
 
   toggleMenuExpand(itemId: string): void {
-    this.menuService.toggleMenuExpand(itemId);
-    this.menuItems.set(this.menuService.getMenuItems());
+    const expanded = new Set(this.expandedItems());
+    if (expanded.has(itemId)) {
+      expanded.delete(itemId);
+    } else {
+      expanded.add(itemId);
+    }
+    this.expandedItems.set(expanded);
+  }
+
+  isMenuExpanded(itemId: string): boolean {
+    const item = this.findMenuItemInList(itemId, this.menuItems());
+    return this.expandedItems().has(itemId) || (item ? this.hasActiveChild(item) : false);
+  }
+
+  private findMenuItemInList(id: string, items: MenuItem[]): MenuItem | null {
+    for (const item of items) {
+      if (item.id === id) return item;
+      if (item.children) {
+        const found = this.findMenuItemInList(id, item.children);
+        if (found) return found;
+      }
+    }
+    return null;
   }
 
   setHoveredMenu(itemId: string | null): void {
@@ -64,46 +92,34 @@ export class SidebarComponent implements OnInit {
   }
 
   hasChildren(item: MenuItem): boolean {
-    return !!(item.children && item.children.length > 0);
+    return !!item.children?.length;
   }
 
   handleMenuClick(event: Event, item: MenuItem): void {
-    // If item has children and sidebar is expanded, toggle menu and prevent navigation
-  
+    if (this.hasChildren(item)) {
       event.preventDefault();
       this.toggleMenuExpand(item.id);
-    
-    // Otherwise, allow normal routerLink navigation
+    }
   }
 
   getSidebarWidth(): string {
-    return this.isExpanded() ? '250px' : '80px';
+    return this.isExpanded() ? '260px' : '80px';
   }
 
   getLogoText(): string {
-    return this.isExpanded() ? 'ITOne' : 'IT';
+    return this.isExpanded() ? 'NewITOne' : 'N';
   }
 
-  /**
-   * Check if a menu item route is active
-   */
   isRouteActive(route?: string): boolean {
     if (!route) return false;
-    const currentUrl = this.currentRoute();
-    return currentUrl === route || currentUrl.startsWith(route + '/');
+    const current = this.currentRoute();
+    return current === route || current.startsWith(route + '/');
   }
 
-  /**
-   * Check if a menu item has any active children
-   */
   hasActiveChild(item: MenuItem): boolean {
-    if (!item.children) return false;
-    return item.children.some((child) => this.isRouteActive(child.route));
+    return item.children?.some(child => this.isRouteActive(child.route)) || false;
   }
 
-  /**
-   * Check if a menu item or its parent is active
-   */
   isItemActive(item: MenuItem): boolean {
     return this.isRouteActive(item.route) || this.hasActiveChild(item);
   }

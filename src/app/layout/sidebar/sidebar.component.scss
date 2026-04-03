@@ -1,0 +1,135 @@
+// ============================================================================
+// SIDEBAR COMPONENT STYLES
+// ============================================================================
+
+:host {
+  --sidebar-width-expanded: 260px;
+  --sidebar-width-collapsed: 80px;
+  --transition-duration: 300ms;
+  --transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// ============================================================================
+// SIDEBAR CONTAINER
+// ============================================================================
+
+:host ::ng-deep {
+  // Animations
+  @keyframes slideInFromLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slideInFromTop {
+    from {
+      opacity: 0;
+      transform: translateY(-5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  // Sidebar states
+  .sidebar-expanded {
+    width: var(--sidebar-width-expanded) !important;
+    transition: width var(--transition-duration) var(--transition-timing);
+  }
+
+  .sidebar-collapsed {
+    width: var(--sidebar-width-collapsed) !important;
+    transition: width var(--transition-duration) var(--transition-timing);
+  }
+
+  // Animation utilities
+  .animate-in {
+    animation: fadeIn var(--transition-duration) var(--transition-timing);
+
+    &.fade-in {
+      animation: fadeIn var(--transition-duration) var(--transition-timing);
+    }
+
+    &.slide-in-from-left-2 {
+      animation: slideInFromLeft var(--transition-duration) var(--transition-timing);
+    }
+
+    &.slide-in-from-top-1 {
+      animation: slideInFromTop var(--transition-duration) var(--transition-timing);
+    }
+  }
+
+  // Smooth transitions for all menu items
+  .group {
+    transition: all var(--transition-duration) var(--transition-timing);
+
+    &:hover {
+      transition: all 150ms ease-out;
+    }
+  }
+
+  // Chevron rotation animation
+  .fa-chevron-down {
+    transition: transform var(--transition-duration) var(--transition-timing);
+
+    &.rotate-180 {
+      transform: rotate(180deg);
+      transition: transform var(--transition-duration) var(--transition-timing);
+    }
+  }
+
+  // Smooth width transitions for labels and content
+  span {
+    transition: opacity var(--transition-duration) var(--transition-timing),
+                visibility var(--transition-duration) var(--transition-timing),
+                width var(--transition-duration) var(--transition-timing);
+  }
+
+  // Submenu smooth expand/collapse
+  .ml-6 {
+    animation: slideInFromTop var(--transition-duration) var(--transition-timing);
+
+    button {
+      transition: all 150ms ease-out;
+
+      &:hover {
+        padding-left: calc(0.5rem + 2px);
+      }
+    }
+  }
+
+  // Float menu styling and animation
+  nav > div > div:not(.space-y-1) {
+    animation-timing-function: var(--transition-timing);
+  }
+
+  // Icon smooth transitions
+  i {
+    transition: all 150ms ease-out;
+  }
+}
+
+// ============================================================================
+// RESPONSIVE DESIGN
+// ============================================================================
+
+@media (max-width: 768px) {
+  :host {
+    --sidebar-width-collapsed: 0px;
+  }
+}

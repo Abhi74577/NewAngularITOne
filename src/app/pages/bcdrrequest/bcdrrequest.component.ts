@@ -34,6 +34,7 @@ interface BcdrRequest {
 })
 
 export class BcdrrequestComponent implements OnInit {
+
   // Form
   pageForm_bcdrRequest!: FormGroup;
   currentCSTDateTime = new Date();
@@ -154,7 +155,7 @@ export class BcdrrequestComponent implements OnInit {
     { label: "Architecture Team", value: 5 },
     { label: "DevOps Team", value: 6 }
   ];
-  activeTab: any = 3;
+  activeTab: any = 5;
   isCollapsed = false;
   rowCollapsed: boolean[] = [];
   collapsed: any;
@@ -162,6 +163,10 @@ export class BcdrrequestComponent implements OnInit {
   isRiskCollapsed: boolean = false;
   showAssumptionConstraints: boolean = false;
   isRecoveryTeamCollapsed: boolean = false;
+  RecoveryPlanFile: any = [];
+  isRecoveryObjCollapsed: boolean = false;
+  ReturnToResultFiles: any = [];
+  isObjectiveResultCollapsed: boolean = false;
 
   constructor(private fb: FormBuilder) {
     this.createPageForm();
@@ -172,7 +177,7 @@ export class BcdrrequestComponent implements OnInit {
   }
 
   toggleRiskSection() {
-     this.isRiskCollapsed = !this.isRiskCollapsed;
+    this.isRiskCollapsed = !this.isRiskCollapsed;
   }
 
   toggleDetails() {
@@ -186,6 +191,9 @@ export class BcdrrequestComponent implements OnInit {
     this.isRecoveryTeamCollapsed = !this.isRecoveryTeamCollapsed;
   }
 
+  toggleRecoveryObjSection() {
+    this.isRecoveryObjCollapsed = !this.isRecoveryObjCollapsed;
+  }
   createPageForm() {
     this.pageForm_bcdrRequest = this.fb.group({
       requestId: [0],
@@ -252,7 +260,7 @@ export class BcdrrequestComponent implements OnInit {
     });
 
     this.addObjective();
-      this.addObjective();
+    this.addObjective();
     this.addRisks();
     this.addAssumptions();
     this.addTeamInvolvements();
@@ -300,12 +308,15 @@ export class BcdrrequestComponent implements OnInit {
       DateTimeCollector_recoveryObjective: [null]
     });
     this.objectives.push(objectiveForm);
+    // this.addObjectiveNewSchedule(this.objectives.length - 1);
   }
 
   deleteObjective(index: number) {
     this.objectives.removeAt(index);
     this.objectives.length === 0 && this.addObjective(); // Ensure at least one objective remains
   }
+
+
 
   // ============= RISKS =============
   get Risks(): FormArray {
@@ -426,6 +437,10 @@ export class BcdrrequestComponent implements OnInit {
   }
 
   // ============= OBJECTIVE NEW SCHEDULE =============
+  getNewScheduleControls(objectiveForm: any): FormArray {
+  return objectiveForm.get('lstbCDRRequestObjectiveNewScheduleModels') as FormArray;
+}
+
   getObjectiveNewScheduleFormArr(index: number): FormArray {
     return (this.pageForm_bcdrRequest.get('lstbCDRRequestObjective') as FormArray).at(index).get('lstbCDRRequestObjectiveNewScheduleModels') as FormArray;
   }
@@ -437,7 +452,7 @@ export class BcdrrequestComponent implements OnInit {
       requestObjectiveId: [0, Validators.required],
       result: [null, Validators.required],
       startTime: [this.currentCSTDateTime, Validators.required],
-      endDtime: [this.currentCSTDateTime, Validators.required],
+      endTime: [this.currentCSTDateTime, Validators.required],
       estimatedTime: [null, Validators.required],
       comment: [null, Validators.required],
       isActive: true,
@@ -449,8 +464,21 @@ export class BcdrrequestComponent implements OnInit {
     });
 
     if (this.getObjectiveNewScheduleFormArr(index).value.length == 0) {
-      this.getObjectiveNewScheduleFormArr(index).push(objectiveNewScheduleForm);
+    this.getObjectiveNewScheduleFormArr(index).push(objectiveNewScheduleForm);
     }
+  }
+  checkobjNewSchedule(index: number) {
+
+    const objectives = this.pageForm_bcdrRequest.get('lstbCDRRequestObjective') as FormArray;
+
+    const newScheduleArray = objectives
+      .at(index)
+      .get('lstbCDRRequestObjectiveNewScheduleModels') as FormArray;
+
+    if (newScheduleArray && newScheduleArray.length > 0) {
+      newScheduleArray.removeAt(0);
+    }
+
   }
 
   deleteObjectiveNewSchedule(objIndex: number, scheduleIndex: number) {
@@ -533,6 +561,64 @@ export class BcdrrequestComponent implements OnInit {
   prevTab() {
     if (this.activeTab > 1) this.activeTab--;
   }
+
+
+
+  selectRecoveryPlanFiles(event: any): void {
+    // const input = event.target as HTMLInputElement;
+
+    // if (input.files && input.files.length > 0) {
+    //   const files = Array.from(input.files);
+    //   console.log('Selected files:', files);
+    // }
+
+    for (let index = 0; index < event.target.files.length; index++) {
+      const fileName = event.target.files[index].name;
+      const dotCount = (fileName.match(/\./g) || []).length;
+      if (dotCount > 1) {
+        alert("Error: Double extension detected (e.g., 'image.html.png'). Please upload a valid file.");
+        event.target.value = '';
+        continue;
+      }
+      this.RecoveryPlanFile.push(event.target.files[index]);
+    }
+
+  }
+
+  selectReturnToResultFiles(event: any): void {
+    // const input = event.target as HTMLInputElement;
+
+    // if (input.files && input.files.length > 0) {
+    //   const files = Array.from(input.files);
+    //   console.log('Selected files:', files);
+    // }
+
+    for (let index = 0; index < event.target.files.length; index++) {
+      const fileName = event.target.files[index].name;
+      const dotCount = (fileName.match(/\./g) || []).length;
+      if (dotCount > 1) {
+        alert("Error: Double extension detected (e.g., 'image.html.png'). Please upload a valid file.");
+        event.target.value = '';
+        continue;
+      }
+      this.ReturnToResultFiles.push(event.target.files[index]);
+    }
+
+  }
+
+
+  removeFile(index: number): void {
+    this.RecoveryPlanFile.splice(index, 1);
+  }
+
+  removeReturnToResultFilesFile(index: number): void {
+    this.ReturnToResultFiles.splice(index, 1);
+  }
+
+  toggleObjectiveResultSection(): void {
+    this.isObjectiveResultCollapsed = !this.isObjectiveResultCollapsed;
+  }
+
 
 
 }

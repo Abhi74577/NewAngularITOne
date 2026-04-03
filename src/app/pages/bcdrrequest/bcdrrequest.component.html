@@ -391,12 +391,12 @@
 
             @if( this.activeTab == 2){
             <!-- Business Partner Details -->
-            <div class="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-gray-700 px-3 py-2">
+            <div class="bg-white dark:bg-slate-900 rounded-md border border-gray-200 dark:border-gray-700">
 
                 <!-- HEADER -->
 
                 <div
-                    class="flex items-center gap-3 mb-4 p-2 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                    class="flex items-center gap-3  p-2 bg-gray-100 dark:bg-gray-800 rounded-md border  px-3 py-4  border-t border-gray-200 dark:border-gray-700">
                     <h2 class="text-sm font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1">
                         Business Partner Details
                     </h2>
@@ -414,7 +414,7 @@
 
                 <!-- FORM SECTION -->
                 <div *ngIf="showPartnerDetails"
-                    class="grid grid-cols-1 md:grid-cols-2 gap-4 transition-all duration-300 mt-2">
+                    class="grid grid-cols-1 md:grid-cols-2 gap-4 transition-all duration-300 mt-2 p-4">
 
                     <!-- NAME -->
                     <div>
@@ -517,7 +517,7 @@
                     <!-- EMAIL -->
                     <div>
                         <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
-                             <span class="text-red-500">*</span> Email Address
+                            <span class="text-red-500">*</span> Email Address
                         </label>
                         <input type="email" placeholder="Email address of the production location"
                             formControlName="productLocationEmailAddress" class="input
@@ -592,7 +592,7 @@
                     <!-- EMAIL -->
                     <div>
                         <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
-                             <span class="text-red-500">*</span> Email Address
+                            <span class="text-red-500">*</span> Email Address
                         </label>
                         <input type="email" formControlName="recoveryLocationEmailAddress"
                             placeholder="Email address of the recovery location" maxlength="100" class="input
@@ -800,7 +800,7 @@
 
             }
             <!-- TAB 3 -->
-            <div *ngIf="activeTab == 3" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div *ngIf="activeTab == 3" class="grid grid-cols-1  gap-4">
 
 
                 <!-- Recovery Time Objective (RTO)  -->
@@ -816,7 +816,7 @@
                 <!-- Recovery Point Objective (RPO) -->
                 <div class="md:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                       <span class="text-red-500">*</span> Recovery Point Objective (RPO)
+                        <span class="text-red-500">*</span> Recovery Point Objective (RPO)
                     </label>
 
                     <textarea formControlName="recoveryPointObjective" rows="2"
@@ -828,6 +828,86 @@
                 <!-- ---  Recovery Team Objectives  --- -->
 
 
+                <div class="md:col-span-2 bg-white dark:bg-slate-900 border rounded-xl shadow-sm">
+
+                    <!-- HEADER -->
+                    <div class="flex justify-between items-center px-4 py-3 border-b rounded-t-xl
+                       bg-gray-50 dark:bg-slate-800 cursor-pointer" (click)="toggleRecoveryTeamSection()">
+                        <h2 class="text-sm font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-2">
+                            <span class="text-red-500">*</span> Recovery Team
+                        </h2>
+
+                        <i class="fas transition"
+                            [ngClass]="isRecoveryTeamCollapsed ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
+                    </div>
+
+
+                    <!-- BODY -->
+                    <div *ngIf="!isRecoveryTeamCollapsed" class="p-4 space-y-4">
+
+                        <ng-container formArrayName="lstbCDRRequestObjective">
+
+                            <!-- CARD -->
+                            <div *ngFor="let objectiveForm of objectives.controls; let o = index" [formGroupName]="o"
+                                class="bg-gray-50 dark:bg-slate-800 border rounded-xl p-4 space-y-4">
+
+                                <!-- TITLE ROW -->
+                                <div class="flex justify-between items-center">
+
+                                    <h3 class="text-sm font-semibold text-blue-600 dark:text-blue-400">
+                                        {{ objectiveForm.get('objectiveDetails')?.value || ('Objective ' + (o + 1)) }}
+                                    </h3>
+
+                                    <label class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                                        <input type="checkbox" class="w-4 h-4 text-blue-600 rounded"
+                                            (change)="toggleDetails()" />
+                                        Same as above
+                                    </label>
+
+                                </div>
+
+
+                                <!-- FORM GRID -->
+                                <div class="grid md:grid-cols-2 gap-4">
+
+                                    <!-- Name -->
+                                    <div> <label class="label"> <span class="text-red-500">*</span> Name</label> <input
+                                            type="text" placeholder="List down the factor that we are assuming."
+                                            maxlength="200" class="input" /> </div>
+                                    <div> <label class="label"> <span class="text-red-500">*</span> Designation</label>
+                                        <input type="text" placeholder="List down the factor that we are assuming."
+                                            maxlength="200" class="input" />
+                                    </div>
+                                    <div> <label class="label"> <span class="text-red-500">*</span> Supervisor</label>
+                                        <input type="text" placeholder="List down the factor that we are assuming."
+                                            maxlength="200" class="input" />
+                                    </div>
+                                    <div> <label class="label"> <span class="text-red-500">*</span> Contact
+                                            Number</label> <input type="text"
+                                            placeholder="List down the factor that we are assuming." maxlength="200"
+                                            class="input" /> </div>
+                                    <div> <label class="label"> <span class="text-red-500">*</span> Email
+                                            Address</label> <input type="email"
+                                            placeholder="List down the factor that we are assuming." maxlength="200"
+                                            class="input" /> </div>
+                                    <div> <app-multiselect
+                                            [config]="{ name: 'Division', label: 'Location', placeholder: 'Please Select Location', searchable: true, multi: false, options: teamOptions, required: true }"
+                                            [control]="$any(pageForm_bcdrRequest.get('recoveryLocations'))">
+                                        </app-multiselect> </div>
+                                </div>
+
+
+
+
+                            </div>
+
+                        </ng-container>
+
+                    </div>
+
+                </div>
+
+                <!-- Accountability & Approving Authorities -->
                 <div class="md:col-span-2 border
                                  border-gray-200 dark:border-gray-700 rounded-lg">
 
@@ -836,95 +916,251 @@
                       bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
 
                         <!-- Title -->
-                        <div class="flex items-center gap-2 cursor-pointer" (click)="toggleRecoveryTeamSection()">
+                        <div class="flex items-center gap-2 cursor-pointer">
 
 
                             <h2 class="text-sm font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1">
-                                <span class="text-red-500">*</span> Recovery Team
-                            </h2> <i class="fas text-gray-600"
-                                [ngClass]="isRecoveryTeamCollapsed ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
+                                <span class="text-red-500">*</span> Accountability & Approving
+                                Authorities
+                            </h2>
                         </div>
 
                     </div>
 
-                    <!-- Container -->
-                    <div *ngIf="!isRecoveryTeamCollapsed" class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 
-                         p-2 space-y-3 transition-all">
+
+                    <!-- FORM SECTION -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 transition-all duration-300  p-4">
+
+                        <!-- NAME -->
+                        <div>
+                            <app-multiselect
+                                [config]="{ name: 'Reviewer Name', label: 'Reviewer Name', placeholder: 'Please Select Reviewer', searchable: true, multi: false, options: teamOptions, required: true }"
+                                [control]="$any(pageForm_bcdrRequest.get('recoveryLocations'))">
+                            </app-multiselect>
+                        </div>
+
+                        <!-- CONTACT -->
+                        <div>
+                            <app-multiselect
+                                [config]="{ name: 'Approval Name', label: 'Approval Name', placeholder: 'Please Select Approval', searchable: true, multi: false, options: teamOptions, required: true }"
+                                [control]="$any(pageForm_bcdrRequest.get('recoveryLocations'))">
+                            </app-multiselect>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- Dependencies -->
+                <div class="md:col-span-2 border
+                                 border-gray-200 dark:border-gray-700 rounded-lg">
+
+                    <!-- Header -->
+                    <div class=" flex justify-between items-center px-2 py-2  rounded-t-lg
+                      bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+
+                        <!-- Title -->
+                        <div class="flex items-center gap-2 cursor-pointer">
+
+
+                            <h2 class="text-sm font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                                <span class="text-red-500">*</span> Dependencies
+                            </h2>
+                        </div>
+
+                    </div>
+
+
+                    <!-- FORM SECTION -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 transition-all duration-300  p-4">
+
+                        <!-- NAME -->
+                        <div class="md:col-span-2">
+
+                            <textarea
+                                placeholder="All the extenal and internal factors and other team's involvement. Other impact areas"
+                                formControlName="dependecies" class="form-control" rows="2" class="textbox">
+                            </textarea>
+                        </div>
+
+                        <div>
+                            <app-multiselect
+                                [config]="{ name: 'Dependencies of Team(s)', label: 'Dependencies of Team(s)', placeholder: 'Please Select Dependencies', searchable: true, multi: true, options: teamOptions, required: true }"
+                                [control]="$any(pageForm_bcdrRequest.get('recoveryLocations'))">
+                            </app-multiselect>
+                        </div>
+                        <div>
+                            <label class="label">
+                                <span class="text-red-500">*</span> Other Email Address</label>
+                            <input type="email" placeholder="Email address of the team involved" maxlength="100"
+                                class="input" />
+                        </div>
+
+
+
+
+                    </div>
+
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <span class="text-red-500">*</span> Expected Response Time
+                    </label>
+
+                    <textarea
+                        placeholder="If something goes wrong, defining the response time in case of actual scenario"
+                        formControlName="expectedResponseTime" rows="2" class="textbox">
+                    </textarea>
+                </div>
+
+
+            </div>
+
+            <!-- TAB 4 -->
+            <div *ngIf="activeTab === 4" class="space-y-6">
+
+                <!-- ================= OVERALL STRATEGY ================= -->
+                <div class=" ">
+                    <label class="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
+                        <span class="text-red-500">*</span> Overall Recovery Strategy
+                    </label>
+
+                    <textarea formControlName="overallRecoveryStrategy" rows="3"
+                        placeholder="Outline the recovery strategy..." class="textbox">
+                    </textarea>
+                </div>
+
+
+                <!-- ================= FILE UPLOAD ================= -->
+                <div class="bg-white dark:bg-slate-900 border rounded-xl p-4 shadow-sm">
+
+                    <label class="block text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300">
+                        <span class="text-red-500">*</span> Supported Artifacts
+                    </label>
+
+                    <!-- Upload Box -->
+                    <label class="flex flex-col items-center justify-center w-full p-6 border-2 border-dashed 
+                   border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer 
+                   hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-slate-800 transition">
+
+                        <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+
+                        <p class="text-sm font-medium text-gray-600 dark:text-gray-300">
+                            Drag & drop files or <span class="text-blue-600">browse</span>
+                        </p>
+
+                        <input type="file" multiple class="hidden" (change)="selectRecoveryPlanFiles($event)"
+                            accept="image/*,.pdf,.doc,.docx" />
+                    </label>
+
+                    <!-- File List -->
+                    <div *ngIf="RecoveryPlanFile.length > 0" class="mt-4 overflow-hidden border rounded-lg">
+
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
+                                <tr>
+                                    <th class="px-3 py-2 text-left">#</th>
+                                    <th class="px-3 py-2 text-left">File</th>
+                                    <th class="px-3 py-2">Size</th>
+                                    <th class="px-3 py-2 text-center">Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr *ngFor="let file of RecoveryPlanFile; let i = index"
+                                    class="border-t hover:bg-gray-50 dark:hover:bg-slate-800">
+
+                                    <td class="px-3 py-2">{{ i + 1 }}</td>
+
+                                    <td class="px-3 py-2 flex items-center gap-2">
+                                        <i class="fas fa-file text-gray-400"></i>
+                                        {{ file.name }}
+                                    </td>
+
+                                    <td class="px-3 py-2 text-center">
+                                        {{ (file.size / 1024) | number:'1.0-2' }} KB
+                                    </td>
+
+                                    <td class="px-3 py-2 text-center">
+                                        <button class="text-red-500 hover:text-red-700 text-sm" (click)="removeFile(i)">
+                                            Remove
+                                        </button>
+                                    </td>
+
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+
+                <!-- ================= RECOVERY OBJECTIVES ================= -->
+                <div class="bg-white dark:bg-slate-900 border rounded-xl shadow-sm">
+
+                    <!-- Header -->
+                    <div class="flex justify-between items-center px-4 py-3 border-b  rounded-t-xl cursor-pointer
+                         bg-gray-100 dark:bg-slate-800" (click)="toggleRecoveryObjSection()">
+
+                        <h2 class="text-sm font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-2">
+                            <span class="text-red-500">*</span> Recovery Objectives
+                        </h2>
+
+                        <i class="fas" [ngClass]="isRecoveryObjCollapsed ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
+                    </div>
+
+                    <!-- Body -->
+                    <div *ngIf="!isRecoveryObjCollapsed" class="p-4 space-y-4">
 
                         <ng-container formArrayName="lstbCDRRequestObjective">
 
-                            <!-- Row -->
                             <div *ngFor="let objectiveForm of objectives.controls; let o = index" [formGroupName]="o"
-                                class=" bg-white dark:bg-gray-800 border
-                                 border-gray-200 dark:border-gray-700 
-                                 rounded-lg p-4">
+                                class="border rounded-lg p-4 bg-gray-50 dark:bg-slate-800">
 
+                                <!-- Title -->
+                                <div class="flex items-center justify-between mb-3">
+                                    <h3 class="text-sm font-semibold text-blue-600 dark:text-blue-400">
+                                        {{ objectiveForm.get('objectiveDetails')?.value || ('Objective ' + (o + 1)) }}
+                                    </h3>
 
-                                <label class="flex items-center gap-2  justify-start">
-                                    <h2
-                                        class="text-sm font-medium text-blue-600 dark:text-blue-400 flex items-center gap-1">
-
-                                        {{objectiveForm.get('objectiveDetails')?.value || 'Objective ' + (o + 1) }}
-
-                                    </h2>
-                                    <input type="checkbox" name="showPartnerDetails" [value]="showPartnerDetails"
-                                        (change)="toggleDetails()" class="w-4 h-4 text-blue-600 rounded" />
-                                    <span class="text-sm text-gray-600 dark:text-gray-300 cursor-pointer">
+                                    <label class="flex items-center gap-2 text-sm">
+                                        <input type="checkbox" class="w-4 h-4 text-blue-600"
+                                            (change)="toggleDetails()" />
                                         Same as above
-                                    </span>
-                                </label>
+                                    </label>
+                                </div>
 
-                                <div class="grid md:grid-cols-2 items-start md:items-center gap-2">
-
-
-
-                                    <div>
-                                        <label class="label">
-                                            <span class="text-red-500">*</span> Name</label>
-                                        <input type="text" placeholder="List down the factor that we are assuming."
-                                            maxlength="200" class="input" />
-                                    </div>
+                                <!-- Form Grid -->
+                                <div class="grid md:grid-cols-2 gap-4">
 
                                     <div>
                                         <label class="label">
-                                            <span class="text-red-500">*</span> Designation</label>
-                                        <input type="text" placeholder="List down the factor that we are assuming."
-                                            maxlength="200" class="input" />
-                                    </div>
-
-                                    <div>
-                                        <label class="label">
-                                            <span class="text-red-500">*</span> Supervisor</label>
-                                        <input type="text" placeholder="List down the factor that we are assuming."
-                                            maxlength="200" class="input" />
+                                            <span class="text-red-500">*</span> Expected Result</label>
+                                        <input type="text" formControlName="recoveryStrategyExpectedResult"
+                                            placeholder="Expected Result" maxlength="100" class="input" />
                                     </div>
                                     <div>
                                         <label class="label">
-                                            <span class="text-red-500">*</span> Contact Number</label>
-                                        <input type="text" placeholder="List down the factor that we are assuming."
-                                            maxlength="200" class="input" />
+                                            <span class="text-red-500">*</span> Successor Team/Technician</label>
+                                        <input type="text" formControlName="recoveryStrategySuccessorTeam"
+                                            placeholder="Successor Team/Technician" maxlength="100" maxlength="100"
+                                            class="input" />
                                     </div>
-
                                     <div>
                                         <label class="label">
-                                            <span class="text-red-500">*</span> Email Address</label>
-                                        <input type="text" placeholder="List down the factor that we are assuming."
-                                            maxlength="200" class="input" />
+                                            <span class="text-red-500">*</span> Email</label>
+                                        <input type="email" formControlName="recoveryStrategyEmailAddress"
+                                            placeholder="Email" maxlength="200" class="input" />
                                     </div>
-                                    <div>
 
-                                        <app-multiselect
-                                            [config]="{ name: 'Division', label: 'Location', placeholder: 'Please Select Location', searchable: true, multi: false, options: teamOptions, required: true }"
-                                            [control]="$any(pageForm_bcdrRequest.get('recoveryLocations'))">
-                                        </app-multiselect>
-                                    </div>
+
+
+
 
                                 </div>
 
                             </div>
-
-
-
 
                         </ng-container>
 
@@ -932,41 +1168,496 @@
 
                 </div>
 
-
-
-                <div class="flex justify-between mb-3">
-                    <h3 class="font-semibold">Objectives</h3>
-                    <button type="button" (click)="addObjective()" class="btn-primary">+ Add</button>
-                </div>
-
-                <div *ngFor="let obj of objectives.controls; let i = index" [formGroup]="$any(obj)"
-                    class="border p-4 rounded-lg mb-3 space-y-2">
-
-                    <input formControlName="objectiveDetails" placeholder="Details" class="input" />
-                    <input formControlName="recoveryTeamName" placeholder="Team Name" class="input" />
-                    <input formControlName="recoveryTeamEmailAddress" placeholder="Email" class="input" />
-
-                    <button type="button" (click)="deleteObjective(i)" class="btn-danger">
-                        Delete
-                    </button>
-
-                </div>
-            </div>
-
-            <!-- TAB 4 -->
-            <div *ngIf="activeTab === 4" class="grid md:grid-cols-2 gap-4">
-                <input formControlName="recoveryTimeObjective" placeholder="RTO" class="input" />
-                <input formControlName="recoveryPointObjective" placeholder="RPO" class="input" />
-                <input formControlName="expectedResponseTime" placeholder="Response Time" class="input" />
-                <textarea formControlName="overallRecoveryStrategy" placeholder="Strategy" class="input"></textarea>
             </div>
 
             <!-- TAB 5 -->
             <div *ngIf="activeTab === 5" class="space-y-3">
-                <textarea formControlName="whatWorkedWell" placeholder="What worked well" class="input"></textarea>
-                <textarea formControlName="improvementsIdentified" placeholder="Improvements" class="input"></textarea>
-                <textarea formControlName="recommendationsForTeam" placeholder="Recommendations"
-                    class="input"></textarea>
+
+                <!-- Accountability & Approving Authorities -->
+                <div class="md:col-span-2 border
+                                 border-gray-200 dark:border-gray-700 rounded-lg">
+
+                    <!-- Header -->
+                    <div class=" flex justify-between items-center px-2 py-2  rounded-t-lg
+                      bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+
+                        <!-- Title -->
+                        <div class="flex items-center gap-2 cursor-pointer">
+
+
+                            <h2 class="text-sm font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                                <span class="text-red-500">*</span> Actual Activity Timing (CST)
+                            </h2>
+                        </div>
+
+                    </div>
+
+
+                    <!-- FORM SECTION -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 transition-all duration-300  p-4">
+
+
+
+
+                        <div class="space-y-1">
+                            <span class="text-red-500">*</span><label class="label"> Actual Start Date (CST)</label>
+
+                            <div class="relative group">
+                                <input [owlDateTime]="actualStartDate" formControlName="actualStartDate"
+                                    [owlDateTimeTrigger]="actualStartDate" placeholder="Actual Start Time" class="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 
+                                    bg-white dark:bg-gray-900 text-gray-900 dark:text-white
+                                    focus:ring-2 focus:ring-blue-500 outline-none pr-10" />
+
+                                <!-- Icon -->
+                                <i class="fas fa-calendar-alt absolute right-3 top-1/2 -translate-y-1/2 
+                                text-gray-400 group-hover:text-blue-500 transition cursor-pointer">
+                                </i>
+
+                                <owl-date-time #actualStartDate></owl-date-time>
+                            </div>
+                        </div>
+
+                        <!-- END DATE -->
+                        <div class="space-y-1">
+                            <span class="text-red-500">*</span><label class="label"> Actual End Date (CST)</label>
+
+                            <div class="relative group">
+                                <input [owlDateTime]="actualEndDate" formControlName="actualEndDate"
+                                    [owlDateTimeTrigger]="actualEndDate" placeholder="Actual End Time" class="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 
+                                    bg-white dark:bg-gray-900 text-gray-900 dark:text-white
+                                    focus:ring-2 focus:ring-blue-500 outline-none pr-10" />
+
+                                <!-- Icon -->
+                                <i class="fas fa-clock absolute right-3 top-1/2 -translate-y-1/2 
+                                text-gray-400 group-hover:text-blue-500 transition cursor-pointer">
+                                </i>
+
+                                <owl-date-time #actualEndDate></owl-date-time>
+                            </div>
+                        </div>
+
+
+
+                    </div>
+
+                </div>
+
+                <div class=" ">
+                    <label class="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
+                        <span class="text-red-500">*</span> Return To
+                        Operation
+                    </label>
+
+                    <textarea rows="3" placeholder="Return To Operation Details" formControlName="returnToOperation"
+                        class="textbox">
+                      </textarea>
+                </div>
+
+                <!-- ================= FILE UPLOAD ================= -->
+                <div class="bg-white dark:bg-slate-900 border rounded-xl p-4 shadow-sm">
+
+                    <label class="block text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300">
+                        <span class="text-red-500">*</span> Results
+                    </label>
+
+                    <!-- File List -->
+                    <div *ngIf="ReturnToResultFiles.length > 0" class="mt-4 overflow-hidden border rounded-lg  mb-3">
+
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
+                                <tr>
+                                    <th class="px-3 py-2 text-left">#</th>
+                                    <th class="px-3 py-2 text-left">File</th>
+
+                                    <th class="px-3 py-2 text-center">Download</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr *ngFor="let file of ReturnToResultFiles; let i = index"
+                                    class="border-t hover:bg-gray-50 dark:hover:bg-slate-800">
+
+                                    <td class="px-3 py-2">{{ i + 1 }}</td>
+
+                                    <td class="px-3 py-2 flex items-center gap-2">
+                                        <i class="fas fa-file text-gray-400"></i>
+                                        {{ file.name }}
+                                    </td>
+
+
+                                    <td class="px-3 py-2 text-center">
+                                        <a target="_blank" [href]="file.downloadPath">
+                                            Download</a>
+                                    </td>
+
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Upload Box -->
+                    <label class="flex flex-col items-center justify-center w-full p-6 border-2 border-dashed 
+                   border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer 
+                   hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-slate-800 transition">
+
+                        <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+
+                        <p class="text-sm font-medium text-gray-600 dark:text-gray-300">
+                            Drag & drop files or <span class="text-blue-600">browse</span>
+                        </p>
+
+                        <input type="file" multiple class="hidden" (change)="selectReturnToResultFiles($event)"
+                            accept="image/*,.pdf,.doc,.docx" />
+                    </label>
+
+                    <!-- File List -->
+                    <div *ngIf="ReturnToResultFiles.length > 0" class="mt-4 overflow-hidden border rounded-lg">
+
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
+                                <tr>
+                                    <th class="px-3 py-2 text-left">#</th>
+                                    <th class="px-3 py-2 text-left">File</th>
+                                    <th class="px-3 py-2">Size</th>
+                                    <th class="px-3 py-2 text-center">Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr *ngFor="let file of ReturnToResultFiles; let i = index"
+                                    class="border-t hover:bg-gray-50 dark:hover:bg-slate-800">
+
+                                    <td class="px-3 py-2">{{ i + 1 }}</td>
+
+                                    <td class="px-3 py-2 flex items-center gap-2">
+                                        <i class="fas fa-file text-gray-400"></i>
+                                        {{ file.name }}
+                                    </td>
+
+                                    <td class="px-3 py-2 text-center">
+                                        {{ (file.size / 1024) | number:'1.0-2' }} KB
+                                    </td>
+
+                                    <td class="px-3 py-2 text-center">
+                                        <button class="text-red-500 hover:text-red-700 text-sm"
+                                            (click)="removeReturnToResultFilesFile(i)">
+                                            Remove
+                                        </button>
+                                    </td>
+
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+                <!-- =================  OBJECTIVES Result ================= -->
+                <div class="bg-white dark:bg-slate-900 border rounded-xl shadow-sm">
+
+                    <!-- Header -->
+                    <div class="flex justify-between items-center px-4 py-3 border-b  rounded-t-xl cursor-pointer
+                         bg-gray-100 dark:bg-slate-800" (click)="toggleObjectiveResultSection()">
+
+                        <h2 class="text-sm font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-2">
+                            <span class="text-red-500">*</span> Objective Results
+                        </h2>
+
+                        <i class="fas" [ngClass]="isObjectiveResultCollapsed ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
+                    </div>
+
+                    <!-- Body -->
+                    <div *ngIf="!isObjectiveResultCollapsed" class="p-4 space-y-4">
+
+                        <ng-container formArrayName="lstbCDRRequestObjective">
+
+                            <div *ngFor="let objectiveForm of objectives.controls; let e = index" [formGroupName]="e"
+                                class="border rounded-lg p-4 bg-gray-50 dark:bg-slate-800">
+
+                                <!-- Title -->
+                                <div class="flex items-center justify-between mb-3">
+                                    <h3 class="text-sm font-semibold text-blue-600 dark:text-blue-400">
+                                        {{ objectiveForm.get('objectiveDetails')?.value || ('Objective ' + (e + 1)) }}
+                                    </h3>
+
+                                    @if(e !== 0){
+                                    <label class="flex items-center gap-2 text-sm">
+                                        <input type="checkbox" class="w-4 h-4 text-blue-600"
+                                            (change)="toggleDetails()" />
+                                        Same as above
+                                    </label>
+                                    }
+
+                                </div>
+
+                                <div class="grid md:grid-cols-2 gap-4 items-center">
+
+                                    <!-- LABEL -->
+                                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        Result Of
+                                    </label>
+
+                                    <!-- RADIO GROUP -->
+                                    <div class="flex items-center gap-6">
+
+                                        <!-- PASS -->
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input type="radio" value="Pass" formControlName="returnToOperationResult"
+                                                class="w-4 h-4 text-green-600 focus:ring-green-500"
+                                                (click)="checkobjNewSchedule(e)" />
+                                            <span class="text-sm text-gray-700 dark:text-gray-300">
+                                                Pass
+                                            </span>
+                                        </label>
+
+                                        <!-- FAIL -->
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input type="radio" value="Fail" formControlName="returnToOperationResult"
+                                                (change)="addObjectiveNewSchedule(e)"
+                                                class="w-4 h-4 text-red-600 focus:ring-red-500" />
+                                            <span class="text-sm text-gray-700 dark:text-gray-300">
+                                                Fail
+                                            </span>
+                                        </label>
+
+                                    </div>
+
+                                </div>
+
+                                <!-- Form Grid -->
+                                <div class="grid md:grid-cols-2 gap-4">
+
+                                    <div class="md:col-span-2">
+                                        <label
+                                            class="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
+                                            <span class="text-red-500">*</span> Comment
+                                        </label>
+
+                                        <textarea rows="3" formControlName="returnToOperationResultComment"
+                                            placeholder="Comment" class="textbox"></textarea>
+                                    </div>
+
+                                </div>
+                                <!-- {{objectiveForm.get('returnToOperationResult')?.value}} -->
+
+
+                                <!-- CONDITION -->
+                                <div *ngIf="objectiveForm.get('returnToOperationResult')?.value === 'Fail'"
+                                    formArrayName="lstbCDRRequestObjectiveNewScheduleModels">
+
+                                    <!-- LOOP -->
+                                    <div *ngFor="let objSchedule of getNewScheduleControls(objectiveForm).controls; let g = index"
+                                        [formGroupName]="g"
+                                        class="border rounded-lg p-4 bg-gray-50 dark:bg-slate-800 mb-3">
+
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                                            <!-- START TIME -->
+                                            <div>
+                                                <label class="label">
+                                                    <span class="text-red-500">*</span> Start Time (CST)
+                                                </label>
+
+                                                <div class="relative group">
+                                                    <input [owlDateTime]="startTime" formControlName="startTime"
+                                                        [owlDateTimeTrigger]="startTime" placeholder="Start Time" class="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 
+                   bg-white dark:bg-gray-900 text-gray-900 dark:text-white
+                   focus:ring-2 focus:ring-blue-500 outline-none pr-10" />
+
+                                                    <i class="fas fa-calendar-alt absolute right-3 top-1/2 -translate-y-1/2 
+                    text-gray-400 group-hover:text-blue-500 cursor-pointer"></i>
+
+                                                    <owl-date-time #startTime></owl-date-time>
+                                                </div>
+                                            </div>
+
+                                            <!-- END TIME -->
+                                            <div>
+                                                <label class="label">
+                                                    <span class="text-red-500">*</span> End Time (CST)
+                                                </label>
+
+                                                <div class="relative group">
+                                                    <input [owlDateTime]="endTime" formControlName="endTime"
+                                                        [owlDateTimeTrigger]="endTime" placeholder="End Time" class="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 
+                   bg-white dark:bg-gray-900 text-gray-900 dark:text-white
+                   focus:ring-2 focus:ring-blue-500 outline-none pr-10" />
+
+                                                    <i class="fas fa-clock absolute right-3 top-1/2 -translate-y-1/2 
+                    text-gray-400 group-hover:text-blue-500 cursor-pointer"></i>
+
+                                                    <owl-date-time #endTime></owl-date-time>
+                                                </div>
+                                            </div>
+
+                                            <!-- ESTIMATE TIME -->
+                                            <div>
+                                                <label class="label">
+                                                    <span class="text-red-500">*</span> Estimate Time
+                                                </label>
+
+                                                <input type="text" formControlName="estimatedTime"
+                                                    placeholder="Estimate Time" maxlength="100" class="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 
+                      bg-white dark:bg-gray-900 text-gray-900 dark:text-white
+                      focus:ring-2 focus:ring-blue-500 outline-none" />
+                                            </div>
+
+                                            <!-- RESULT -->
+                                            <div class="flex flex-col justify-center">
+                                                <label
+                                                    class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                    <span class="text-red-500">*</span> New Test Objective Result
+                                                </label>
+
+                                                <div class="flex items-center gap-6">
+
+                                                    <!-- PASS -->
+                                                    <label class="flex items-center gap-2 cursor-pointer">
+                                                        <input type="radio" value="Pass" formControlName="result"
+                                                            class="w-4 h-4 text-green-600 focus:ring-green-500" />
+                                                        <span
+                                                            class="text-sm text-gray-700 dark:text-gray-300">Pass</span>
+                                                    </label>
+
+                                                    <!-- FAIL -->
+                                                    <label class="flex items-center gap-2 cursor-pointer">
+                                                        <input type="radio" value="Fail" formControlName="result"
+                                                            class="w-4 h-4 text-red-600 focus:ring-red-500" />
+                                                        <span
+                                                            class="text-sm text-gray-700 dark:text-gray-300">Fail</span>
+                                                    </label>
+
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </ng-container>
+
+                    </div>
+
+
+
+
+                </div>
+
+                <div class=" ">
+                    <label class="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
+                        <span class="text-red-500">*</span>Describe what worked well?
+                    </label>
+
+                    <textarea rows="3" placeholder="Comment" formControlName="whatWorkedWell" class="textbox">
+                      </textarea>
+                </div>
+
+                <div class=" ">
+                    <label class="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
+                        <span class="text-red-500">*</span> What areas
+                        have been identified for improvements?
+                    </label>
+
+                    <textarea rows="3" placeholder="Comment" formControlName="improvementsIdentified" class="textbox">
+                      </textarea>
+                </div>
+
+                <div class="md:col-span-2 border
+                                 border-gray-200 dark:border-gray-700 rounded-lg">
+
+                    <!-- Header -->
+                    <div class=" flex justify-between items-center px-2 py-2  rounded-t-lg
+                      bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+
+                        <!-- Title -->
+                        <div class="flex items-center gap-2 cursor-pointer">
+
+
+                            <h2 class="text-sm font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                                <span class="text-red-500">*</span>Details of the lesson
+                                learned
+                            </h2>
+                        </div>
+
+                    </div>
+
+
+
+
+                    <!-- FORM SECTION -->
+                    <div class="grid grid-cols-1 gap-4 transition-all duration-300  p-4">
+
+
+
+
+                        <div class="grid md:grid-cols-2 gap-2 items-center">
+
+                            <!-- LABEL -->
+                            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                <span class="text-red-500">*</span> Were the
+                                defined objectives of the activity successfully achieved?
+                            </label>
+
+                            <!-- RADIO GROUP -->
+                            <div class="flex items-center gap-6">
+
+                                <!-- PASS -->
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" value="Pass" formControlName="testGoalWasAchieved"
+                                        class="w-4 h-4 text-green-600 focus:ring-green-500" />
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">
+                                        Pass
+                                    </span>
+                                </label>
+
+                                <!-- FAIL -->
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" value="Fail" formControlName="testGoalWasAchieved"
+                                        class="w-4 h-4 text-red-600 focus:ring-red-500" />
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">
+                                        Fail
+                                    </span>
+                                </label>
+
+                            </div>
+
+                        </div>
+
+                        <div class="">
+
+
+                            <label class="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
+                                <span class="text-red-500">*</span> Did you have
+                                adequate opportunity to participate during the activity?
+                            </label>
+
+                            <textarea rows="3" placeholder="Comment" formControlName="opportunityDuringTest"
+                                class="textbox">
+                            </textarea>
+
+                        </div>
+
+                         <div class="">
+
+
+                            <label class="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
+                                <span class="text-red-500">*</span> Recommendations for the Executive Team
+                            </label>
+
+                            <textarea rows="3" placeholder="Comment" formControlName="recommendationsForTeam"
+                                class="textbox">
+                            </textarea>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
             </div>
 
 
