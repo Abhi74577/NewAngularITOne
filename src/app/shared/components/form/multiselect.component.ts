@@ -24,7 +24,7 @@ export interface SelectOption {
 export interface MultiSelectFieldConfig extends FieldConfig {
   options: SelectOption[];
   searchable?: boolean;
-  multi?: boolean; // ✅ NEW (default false → single select)
+  multi?: boolean;
 }
 
 @Component({
@@ -33,22 +33,22 @@ export interface MultiSelectFieldConfig extends FieldConfig {
   imports: [CommonModule, ReactiveFormsModule],
   template: `
   <div class="flex flex-col">
-    
+
     <!-- LABEL -->
     <label class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-     
-      <span *ngIf="config.required" class="text-red-500">*</span> {{ config.label }}
+      <span *ngIf="config.required" class="text-red-500">*</span>
+      {{ config.label }}
     </label>
 
     <!-- FIELD -->
-    <div class="relative border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-  hover:border-blue-400">
+    <div class="relative border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 shadow-sm
+                focus-within:ring-2 focus-within:ring-blue-500 hover:border-blue-400">
 
       <!-- SELECT BOX -->
       <div (click)="toggleDropdown($event)"
-           class="flex justify-between items-center p-3 cursor-pointer hover:bg-gray-50 rounded-md  dark:hover:bg-gray-700 transition">
+           class="flex justify-between items-center p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition">
 
-        <!-- SELECTED ITEMS -->
+        <!-- SELECTED -->
         <div class="flex flex-wrap gap-2 flex-1">
 
           <ng-container *ngIf="selectedItems.length > 0; else placeholder">
@@ -73,16 +73,14 @@ export interface MultiSelectFieldConfig extends FieldConfig {
 
         </div>
 
-        <!-- RIGHT ICONS -->
+        <!-- ICONS -->
         <div class="flex items-center gap-2">
 
-          <!-- CLEAR -->
           <i *ngIf="selectedItems.length > 0"
              (click)="clearAll($event)"
              class="fas fa-times text-red-500 hover:text-red-700 cursor-pointer">
           </i>
 
-          <!-- DROPDOWN -->
           <i class="fas text-gray-500"
              [ngClass]="isOpen ? 'fa-chevron-up' : 'fa-chevron-down'">
           </i>
@@ -93,7 +91,8 @@ export interface MultiSelectFieldConfig extends FieldConfig {
       <!-- DROPDOWN -->
       <div *ngIf="isOpen"
            (click)="$event.stopPropagation()"
-           class="absolute w-full mt-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-64 overflow-auto z-50">
+           class="absolute w-full mt-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700
+                  rounded-xl shadow-lg max-h-64 overflow-auto z-50">
 
         <!-- SEARCH -->
         <div *ngIf="multiConfig.searchable"
@@ -103,13 +102,15 @@ export interface MultiSelectFieldConfig extends FieldConfig {
             type="text"
             [formControl]="searchControl"
             placeholder="Search..."
-            class="w-full px-2 py-1 text-sm rounded-md border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 outline-none"
+            class="w-full px-2 py-1 text-sm rounded-md border border-gray-200 dark:border-gray-600
+                   bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 outline-none"
           />
         </div>
 
-        <!-- ACTIONS (ONLY MULTI) -->
+        <!-- ACTIONS -->
         <div *ngIf="isMulti"
              class="flex gap-2 p-2 border-b border-gray-200 dark:border-gray-700">
+
           <button (click)="selectAll()"
                   class="flex-1 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded px-2 py-1">
             Select All
@@ -212,6 +213,8 @@ export class MultiselectComponent implements OnInit, OnDestroy {
   }
 
   toggleOption(option: SelectOption): void {
+    this.control.markAsTouched(); // ✅ FIX
+
     this.searchControl.setValue('');
 
     if (this.isMulti) {
@@ -225,7 +228,6 @@ export class MultiselectComponent implements OnInit, OnDestroy {
 
       this.control.setValue([...this.selectedValues]);
     } else {
-      // SINGLE SELECT
       this.selectedValues = [option.value];
       this.control.setValue(option.value);
       this.isOpen = false;
@@ -234,24 +236,33 @@ export class MultiselectComponent implements OnInit, OnDestroy {
 
   removeItem(value: any, event: Event): void {
     event.stopPropagation();
+    this.control.markAsTouched(); // ✅ FIX
+
     this.selectedValues = this.selectedValues.filter(v => v !== value);
     this.control.setValue([...this.selectedValues]);
   }
 
   clearAll(event?: Event): void {
     if (event) event.stopPropagation();
+    this.control.markAsTouched(); // ✅ FIX
+
     this.selectedValues = [];
     this.control.setValue(this.isMulti ? [] : null);
   }
 
   selectAll(): void {
     if (!this.isMulti) return;
+    this.control.markAsTouched(); // ✅ FIX
+
     this.selectedValues = this.multiConfig.options.map(opt => opt.value);
     this.control.setValue([...this.selectedValues]);
   }
 
   toggleDropdown(event?: Event): void {
     if (event) event.stopPropagation();
+
+    this.control.markAsTouched(); // ✅ FIX
+
     this.isOpen = !this.isOpen;
 
     if (this.isOpen) {
@@ -261,6 +272,9 @@ export class MultiselectComponent implements OnInit, OnDestroy {
 
   @HostListener('document:click')
   closeDropdown() {
+    if (this.isOpen) {
+      this.control.markAsTouched(); // ✅ BEST UX FIX
+    }
     this.isOpen = false;
   }
 

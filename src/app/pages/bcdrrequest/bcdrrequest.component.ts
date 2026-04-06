@@ -1,5 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, FormArray, Validators } from "@angular/forms";
+import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, FormArray, Validators, AbstractControl, ValidationErrors, FormControl } from "@angular/forms";
 import { CommonModule } from "@angular/common";
 import { SelectComponent, MultiselectComponent } from "../../shared/components/form";
 import { ɵEmptyOutletComponent } from "@angular/router";
@@ -15,6 +15,35 @@ interface BcdrRequest {
   assignedTeams?: number[];
   createdDate: Date;
   description: string;
+}
+
+export class FormErrorStateMatcher {
+  static isErrorState(control: any | null, form: FormGroup ) {
+    const value = 'value';
+    const required = 'required';
+    let error = ((form.controls[control].dirty || form.controls[control].touched)
+      && form.controls[control].invalid) ? form.controls[control].errors : null;
+    if (((form.controls[control].dirty || form.controls[control].touched)
+      && form.controls[control].valid)) {
+
+      if (typeof (form.controls[control][value]) === 'string' && form.controls[control].validator) {
+        const validator = form.controls[control].validator({} as AbstractControl);
+        if (validator && validator['required']) {
+          if ((form.controls[control][value] || '').trim().length === 0) {
+            if (error === null || error === undefined) {
+              error = { required: true };
+            } else {
+              error[required] = true;
+            }
+          }
+        }
+      }
+    }
+    return error;
+  }
+  static noWhitespace(control: AbstractControl): ValidationErrors | null {
+    return (control.value || '').trim().length !== 0 ? null : { required: true };
+  }
 }
 
 @Component({
@@ -113,9 +142,11 @@ export class BcdrrequestComponent implements OnInit {
   searchQuery: string = "";
   filterStatus: string = "All";
   selectedRequest: BcdrRequest | null = null;
+  isDraftMode: boolean = true;  // Controls validation behavior - when true, skips strict validation
 
   // Form
   form!: FormGroup;
+    matcher = FormErrorStateMatcher;
 
   // Filter options
   statusOptions = ["All", "Pending", "In Progress", "Completed", "On Hold"];
@@ -155,7 +186,7 @@ export class BcdrrequestComponent implements OnInit {
     { label: "Architecture Team", value: 5 },
     { label: "DevOps Team", value: 6 }
   ];
-  activeTab: any = 5;
+  activeTab: any = 1;
   isCollapsed = false;
   rowCollapsed: boolean[] = [];
   collapsed: any;
@@ -167,7 +198,7 @@ export class BcdrrequestComponent implements OnInit {
   isRecoveryObjCollapsed: boolean = false;
   ReturnToResultFiles: any = [];
   isObjectiveResultCollapsed: boolean = false;
-
+lstTeamNames = new FormControl(null);
   constructor(private fb: FormBuilder) {
     this.createPageForm();
   }
@@ -198,7 +229,7 @@ export class BcdrrequestComponent implements OnInit {
     this.pageForm_bcdrRequest = this.fb.group({
       requestId: [0],
       requestName: ['', Validators.required],
-      technologyId: [[], Validators.required],
+      technologyId: [null, Validators.required],
       subScenarioHeading: [null, Validators.required],
       subScenarioDetails: [null, Validators.required],
       lstbCDRRequestObjective: this.fb.array([]),
@@ -213,16 +244,16 @@ export class BcdrrequestComponent implements OnInit {
       bussinessPartnerEmailAddress: [null, [Validators.pattern(this.vHelper.email_RegEx)]],
       productLocationName: [null, Validators.required],
       productLocationEmailAddress: [null, [Validators.required, Validators.pattern(this.vHelper.email_RegEx)]],
-      productLocationContactNumber: [null, [Validators.pattern(this.vHelper.phoneNb_RegEx)]],
+      productLocationContactNumber: [null, [Validators.required, Validators.pattern(this.vHelper.phoneNb_RegEx)]],
       productLocations: [null, Validators.required],
       recoveryLocationName: [null, Validators.required],
       recoveryLocationEmailAddress: [null, [Validators.required, Validators.pattern(this.vHelper.email_RegEx)]],
-      recoveryLocationContactNumber: [null, [Validators.pattern(this.vHelper.phoneNb_RegEx)]],
+      recoveryLocationContactNumber: [null, [Validators.required, Validators.pattern(this.vHelper.phoneNb_RegEx)]],
       recoveryLocations: [null, Validators.required],
       conferanceBridge: [null, [Validators.required, Validators.pattern(this.vHelper.checkUrl_RegEx)]],
       helpdeskTicketNumber: [null, Validators.required],
       helpdeskTicketDetails: [null, Validators.required],
-      emergencyContactNumber: [null, [Validators.pattern(this.vHelper.phoneNb_RegEx)]],
+      emergencyContactNumber: [null, [Validators.required, Validators.pattern(this.vHelper.phoneNb_RegEx)]],
       emergencyContactEmailAddress: [null, [Validators.required, Validators.pattern(this.vHelper.email_RegEx)]],
       helpdeskContactNumber: ['+91-9365592206', [Validators.pattern(this.vHelper.phoneNb_RegEx)]],
       helpdeskContactEmailAddress: ['Helpdesk@etsnetwork.com', [Validators.required, Validators.pattern(this.vHelper.email_RegEx)]],
@@ -505,13 +536,92 @@ export class BcdrrequestComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.pageForm_bcdrRequest.valid) {
-      console.log('Form Value:', this.pageForm_bcdrRequest.value);
-      alert('BCDR Request Submitted Successfully!');
-      this.closeModal();
+    if (this.isDraftMode) {
+      // Draft mode: Only validate current tab
+      if (this.activeTab === 1) {
+        const tab1Controls = ['requestName', 'technologyId', 'subScenarioHeading', 'subScenarioDetails'];
+        const isTab1Valid = tab1Controls.every(ctrl => this.pageForm_bcdrRequest.get(ctrl)?.valid);
+        if (isTab1Valid) {
+          console.log('Draft Saved (Tab 1):', this.pageForm_bcdrRequest.value);
+          alert('BCDR Request Draft Saved!');
+        } else {
+          this.markTabControlsAsTouched(this.activeTab);
+          alert('Please fill all required fields in the current tab');
+        }
+      }
     } else {
-      alert('Please fill all required fields');
+      // Validation mode: Validate all tabs
+      if (this.validateAllTabs()) {
+        console.log('Form Value:', this.pageForm_bcdrRequest.value);
+        alert('BCDR Request Submitted Successfully!');
+        this.closeModal();
+      } else {
+        alert('Please fix validation errors in all tabs');
+      }
     }
+  }
+
+  /**
+   * Mark all form controls in a specific tab as touched
+   * This triggers error messages to show
+   */
+  markTabControlsAsTouched(tabIndex: number): void {
+    const tabControlMap: { [key: number]: string[] } = {
+      1: ['requestName', 'technologyId', 'subScenarioHeading', 'subScenarioDetails', 'lstbCDRRequestObjective', 'lstbCDRRequestRisk', 'lstbCDRRequestAssumption'],
+      2: ['bussinessPartnerName', 'bussinessPartnerContactNumber', 'bussinessPartnerAddress', 'bussinessPartnerEmailAddress', 'productLocationName', 'productLocationEmailAddress', 'productLocationContactNumber', 'productLocations', 'recoveryLocationName', 'recoveryLocationEmailAddress', 'recoveryLocationContactNumber', 'recoveryLocations', 'conferanceBridge', 'helpdeskTicketNumber', 'helpdeskTicketDetails', 'emergencyContactNumber', 'emergencyContactEmailAddress', 'helpdeskContactNumber', 'helpdeskContactEmailAddress', 'isCommunicatedWithCustomer', 'isExternalClientNotified'],
+      3: ['recoveryTimeObjective', 'recoveryPointObjective', 'dependecies'],
+      4: ['lstbCDRRequestTeamInvolvement', 'expectedResponseTime', 'overallRecoveryStrategy', 'supportedArtifacts'],
+      5: ['actualStartDate', 'actualEndDate', 'returnToOperation', 'whatWorkedWell', 'improvementsIdentified', 'testGoalWasAchieved', 'opportunityDuringTest', 'recommendationsForTeam']
+    };
+
+    const controlsToMark = tabControlMap[tabIndex] || [];
+    
+    controlsToMark.forEach(controlName => {
+      const control = this.pageForm_bcdrRequest.get(controlName);
+      if (control) {
+        control.markAsTouched();
+        // Also mark nested form arrays as touched
+        if (control instanceof FormArray) {
+          control.controls.forEach((formGroup: any) => {
+            Object.keys(formGroup.controls).forEach(key => {
+              formGroup.get(key)?.markAsTouched();
+            });
+          });
+        }
+      }
+    });
+  }
+
+  /**
+   * Validate all tabs and return validation status
+   * Returns true if all required fields are valid, false otherwise
+   */
+  validateAllTabs(): boolean {
+    // Mark all controls as touched to show validation errors
+    Object.keys(this.pageForm_bcdrRequest.controls).forEach(key => {
+      const control = this.pageForm_bcdrRequest.get(key);
+      control?.markAsTouched();
+      
+      // Mark nested controls in FormArray
+      if (control instanceof FormArray) {
+        control.controls.forEach((formGroup: any) => {
+          Object.keys(formGroup.controls).forEach(nestedKey => {
+            formGroup.get(nestedKey)?.markAsTouched();
+          });
+        });
+      }
+    });
+
+    // Return overall form validity
+    return this.pageForm_bcdrRequest.valid;
+  }
+
+  /**
+   * Toggle draft mode - when enabled, allows saving without full validation
+   */
+  toggleDraftMode(): void {
+    this.isDraftMode = !this.isDraftMode;
+    console.log(`Draft Mode: ${this.isDraftMode ? 'Enabled' : 'Disabled'}`);
   }
 
 
@@ -619,7 +729,103 @@ export class BcdrrequestComponent implements OnInit {
     this.isObjectiveResultCollapsed = !this.isObjectiveResultCollapsed;
   }
 
+  /**
+   * Handle multiselect field changes and mark as touched
+   * This ensures validation errors show up properly
+   */
+  onMultiselectChange(controlName: string): void {
+    const control = this.pageForm_bcdrRequest.get(controlName);
+    if (control) {
+      control.markAsTouched();
+      control.updateValueAndValidity();
+    }
+  }
 
+  /**
+   * Check if multiselect field is empty (validation check)
+   */
+  isMultiselectEmpty(controlName: string): boolean {
+    const control = this.pageForm_bcdrRequest.get(controlName);
+    if (!control) return true;
+    
+    const value = control.value;
+    return !value || (Array.isArray(value) && value.length === 0) || value === null || value === undefined;
+  }
+
+  /**
+   * Get validation status for multiselect field
+   */
+  isMultiselectInvalid(controlName: string): boolean {
+    const control = this.pageForm_bcdrRequest.get(controlName);
+    if (!control) return false;
+    
+    const isEmpty = this.isMultiselectEmpty(controlName);
+    const isTouched = control.touched || control.dirty;
+    
+    return isEmpty && isTouched && control.hasError('required');
+  }
+
+  /**
+   * Check if a form control has a specific validation error
+   */
+  hasError(controlName: string, errorType: string): boolean {
+    const control = this.pageForm_bcdrRequest.get(controlName);
+    return !!(control && control.hasError(errorType) && (control.dirty || control.touched));
+  }
+
+  /**
+   * Check if a form control is invalid and has been touched/modified
+   */
+  isFieldInvalid(controlName: string): boolean {
+    const control = this.pageForm_bcdrRequest.get(controlName);
+    return !!(control && control.invalid && (control.dirty || control.touched));
+  }
+
+  /**
+   * Get error message for a form control
+   */
+  getErrorMessage(controlName: string): string {
+    const control = this.pageForm_bcdrRequest.get(controlName);
+    if (!control || !control.errors) return '';
+
+    if (control.hasError('required')) return 'This field is required';
+    if (control.hasError('email')) return 'Please enter a valid email address';
+    if (control.hasError('pattern')) return 'This field has an invalid format';
+    if (control.hasError('minlength')) {
+      const minLength = control.errors['minlength']?.requiredLength;
+      return `Minimum length is ${minLength} characters`;
+    }
+    if (control.hasError('maxlength')) {
+      const maxLength = control.errors['maxlength']?.requiredLength;
+      return `Maximum length is ${maxLength} characters`;
+    }
+
+    return 'This field has a validation error';
+  }
+
+  /**
+   * Get all validation errors in current tab
+   */
+  getTabErrors(tabIndex: number): { [key: string]: string } {
+    const errors: { [key: string]: string } = {};
+    const tabControlMap: { [key: number]: string[] } = {
+      1: ['requestName', 'technologyId', 'subScenarioHeading', 'subScenarioDetails'],
+      2: ['bussinessPartnerContactNumber', 'bussinessPartnerEmailAddress', 'productLocationEmailAddress'],
+      3: ['recoveryTimeObjective', 'recoveryPointObjective'],
+      4: ['expectedResponseTime', 'overallRecoveryStrategy'],
+      5: ['returnToOperation', 'whatWorkedWell']
+    };
+
+    const controls = tabControlMap[tabIndex] || [];
+    controls.forEach(controlName => {
+      const control = this.pageForm_bcdrRequest.get(controlName);
+      if (control && control.invalid && control.touched) {
+        errors[controlName] = this.getErrorMessage(controlName);
+      }
+    });
+
+    return errors;
+  }
 
 }
 
