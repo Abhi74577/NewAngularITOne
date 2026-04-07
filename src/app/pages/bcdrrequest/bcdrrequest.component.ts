@@ -18,7 +18,7 @@ interface BcdrRequest {
 }
 
 export class FormErrorStateMatcher {
-  static isErrorState(control: any | null, form: FormGroup ) {
+  static isErrorState(control: any | null, form: FormGroup) {
     const value = 'value';
     const required = 'required';
     let error = ((form.controls[control].dirty || form.controls[control].touched)
@@ -146,7 +146,7 @@ export class BcdrrequestComponent implements OnInit {
 
   // Form
   form!: FormGroup;
-    matcher = FormErrorStateMatcher;
+  matcher = FormErrorStateMatcher;
 
   // Filter options
   statusOptions = ["All", "Pending", "In Progress", "Completed", "On Hold"];
@@ -198,7 +198,7 @@ export class BcdrrequestComponent implements OnInit {
   isRecoveryObjCollapsed: boolean = false;
   ReturnToResultFiles: any = [];
   isObjectiveResultCollapsed: boolean = false;
-lstTeamNames = new FormControl(null);
+  lstTeamNames = new FormControl(null);
   constructor(private fb: FormBuilder) {
     this.createPageForm();
   }
@@ -469,8 +469,8 @@ lstTeamNames = new FormControl(null);
 
   // ============= OBJECTIVE NEW SCHEDULE =============
   getNewScheduleControls(objectiveForm: any): FormArray {
-  return objectiveForm.get('lstbCDRRequestObjectiveNewScheduleModels') as FormArray;
-}
+    return objectiveForm.get('lstbCDRRequestObjectiveNewScheduleModels') as FormArray;
+  }
 
   getObjectiveNewScheduleFormArr(index: number): FormArray {
     return (this.pageForm_bcdrRequest.get('lstbCDRRequestObjective') as FormArray).at(index).get('lstbCDRRequestObjectiveNewScheduleModels') as FormArray;
@@ -495,7 +495,7 @@ lstTeamNames = new FormControl(null);
     });
 
     if (this.getObjectiveNewScheduleFormArr(index).value.length == 0) {
-    this.getObjectiveNewScheduleFormArr(index).push(objectiveNewScheduleForm);
+      this.getObjectiveNewScheduleFormArr(index).push(objectiveNewScheduleForm);
     }
   }
   checkobjNewSchedule(index: number) {
@@ -575,7 +575,7 @@ lstTeamNames = new FormControl(null);
     };
 
     const controlsToMark = tabControlMap[tabIndex] || [];
-    
+
     controlsToMark.forEach(controlName => {
       const control = this.pageForm_bcdrRequest.get(controlName);
       if (control) {
@@ -601,7 +601,7 @@ lstTeamNames = new FormControl(null);
     Object.keys(this.pageForm_bcdrRequest.controls).forEach(key => {
       const control = this.pageForm_bcdrRequest.get(key);
       control?.markAsTouched();
-      
+
       // Mark nested controls in FormArray
       if (control instanceof FormArray) {
         control.controls.forEach((formGroup: any) => {
@@ -747,7 +747,7 @@ lstTeamNames = new FormControl(null);
   isMultiselectEmpty(controlName: string): boolean {
     const control = this.pageForm_bcdrRequest.get(controlName);
     if (!control) return true;
-    
+
     const value = control.value;
     return !value || (Array.isArray(value) && value.length === 0) || value === null || value === undefined;
   }
@@ -758,10 +758,10 @@ lstTeamNames = new FormControl(null);
   isMultiselectInvalid(controlName: string): boolean {
     const control = this.pageForm_bcdrRequest.get(controlName);
     if (!control) return false;
-    
+
     const isEmpty = this.isMultiselectEmpty(controlName);
     const isTouched = control.touched || control.dirty;
-    
+
     return isEmpty && isTouched && control.hasError('required');
   }
 
@@ -825,6 +825,12 @@ lstTeamNames = new FormControl(null);
     });
 
     return errors;
+  }
+
+  onToggle(event: any, controllerName: string): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    this.pageForm_bcdrRequest.get(controllerName)
+      ?.setValue(checked ? 'Yes' : 'No');
   }
 
 }
