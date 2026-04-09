@@ -25,9 +25,13 @@
 
   <div class="p-6" *ngIf="!isFormVisible">
     <!-- Dynamic Table Component -->
-    <app-dynamic-table [columns]="columns" [data]="users" [itemsPerPage]="itemsPerPage()" [isLoading]="isLoading()"
-      [expandableConfig]="expandableConfig" (editClick)="onEdit($event)" (deleteClick)="onDelete($event)"
-      (downloadClick)="onDownload($event)"></app-dynamic-table>
+
+    <app-dynamic-table [dtUserOptions]="dtUserOptions" [isLoading]="isLoading()" (editClick)="onEdit($event)"
+      (deleteClick)="onDelete($event)" (downloadClick)="onDownload($event)"
+      (pageSizeChange)="changeItemsPerPage($event)" (onSearch)="onSerchChange($event)"
+      (pageChange)="onPageChange($event)">
+    </app-dynamic-table>
+
   </div>
 
 
@@ -130,7 +134,7 @@
                     label: 'Role',
                     placeholder: 'Select Role',
                     searchable: true,
-                    options: teamOptions,
+                    options: roleList,
                     required: true,
                     multi: true
                     }" [control]="$any(pageFormUser.get('roleId'))">
@@ -146,7 +150,7 @@
                     label: 'Division',
                     placeholder: 'Select Division',
                     searchable: true,
-                    options: teamOptions,
+                    options: LstTechnology,
                     required: true,
                     multi: true
                     }" [control]="$any(pageFormUser.get('lstTechnologies'))">
@@ -154,19 +158,19 @@
         </div>
       </div>
 
- <div class="flex gap-3 justify-end" >
-      <!-- Submit -->
-      <div >
-        <button type="submit" (click)="submit()" class="btn-success">
-          Submit ✔
-        </button>
+      <div class="flex gap-3 justify-end">
+        <!-- Submit -->
+        <div>
+          <button type="submit" (click)="submit()" class="btn-success">
+            Submit ✔
+          </button>
+        </div>
+        <div>
+          <button type="submit" (click)="isFormVisible = false" class="btn-primary">
+            Cancel ✖
+          </button>
+        </div>
       </div>
-      <div >
-        <button type="submit" (click)="isFormVisible = false" class="btn-primary">
-          Cancel ✖
-        </button>
-      </div>
-</div>
     </form>
   </div>
 </div>

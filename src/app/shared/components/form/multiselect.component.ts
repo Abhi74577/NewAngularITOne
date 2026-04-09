@@ -154,7 +154,7 @@ export class MultiselectComponent implements OnInit, OnDestroy {
   @Input() config!: MultiSelectFieldConfig;
   @Input() control!: AbstractControl;
 
-  constructor(public themeService: ThemeService) {}
+  constructor(public themeService: ThemeService) { }
 
   searchControl = new FormControl('');
   isOpen = false;
@@ -171,10 +171,14 @@ export class MultiselectComponent implements OnInit, OnDestroy {
   }
 
   get filteredOptions() {
-    const search = this.searchControl.value?.toLowerCase() || '';
+
+    const search = (this.searchControl.value ?? '').toString().toLowerCase();
+
     return this.multiConfig.options.filter(opt =>
-      opt.label.toLowerCase().includes(search)
+      opt.label != null &&
+      opt.label.toString().toLowerCase().includes(search)
     );
+
   }
 
   get selectedItems() {

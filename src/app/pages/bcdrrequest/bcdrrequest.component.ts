@@ -1,9 +1,13 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, signal } from "@angular/core";
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, FormArray, Validators, AbstractControl, ValidationErrors, FormControl } from "@angular/forms";
 import { CommonModule } from "@angular/common";
 import { SelectComponent, MultiselectComponent } from "../../shared/components/form";
-import { ɵEmptyOutletComponent } from "@angular/router";
+import { ActivatedRoute, ɵEmptyOutletComponent } from "@angular/router";
 import { OwlDateTimeModule, OwlNativeDateTimeModule } from "@danielmoncada/angular-datetime-picker";
+import { ColumnConfig, DynamicTableComponent, ExpandableTableConfig } from "@app/shared/components/DynamicTable";
+import { BaseService } from "@app/shared/services/baseService.service";
+import { LookupType, LookupValue } from "@app/shared/models/LookUP";
+import { storageConst } from "@app/shared/common";
 
 interface BcdrRequest {
   id: number;
@@ -15,6 +19,12 @@ interface BcdrRequest {
   assignedTeams?: number[];
   createdDate: Date;
   description: string;
+}
+
+export class BCDRFilterModel {
+  dateFilter: any;
+  technology: any;
+  status: any;
 }
 
 export class FormErrorStateMatcher {
@@ -54,17 +64,15 @@ export class FormErrorStateMatcher {
     ReactiveFormsModule,
     FormsModule,
     CommonModule,
-    SelectComponent,
-    MultiselectComponent,
-    ɵEmptyOutletComponent, OwlDateTimeModule, OwlNativeDateTimeModule
+    MultiselectComponent, OwlDateTimeModule, OwlNativeDateTimeModule, DynamicTableComponent
   ],
   templateUrl: './bcdrrequest.component.html',
-  styleUrls: ['./bcdrrequest.component.css'],
+  styleUrls: ['./bcdrrequest.component.scss'],
 })
 
 export class BcdrrequestComponent implements OnInit {
 
-  // Form
+
   pageForm_bcdrRequest!: FormGroup;
   currentCSTDateTime = new Date();
   showClientLOB = false;
@@ -76,64 +84,7 @@ export class BcdrrequestComponent implements OnInit {
     checkUrl_RegEx: /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/
   };
 
-  // Mock Data
-  requests: BcdrRequest[] = [
-    {
-      id: 1,
-      name: "System Recovery Plan",
-      division: "IT Infrastructure",
-      status: "Completed",
-      priority: "Critical",
-      recoveryStrategy: "Hot Standby",
-      assignedTeams: [1, 3],
-      createdDate: new Date("2025-03-15"),
-      description: "Complete recovery plan for main servers"
-    },
-    {
-      id: 2,
-      name: "Database Backup",
-      division: "Database Team",
-      status: "In Progress",
-      priority: "High",
-      recoveryStrategy: "Warm Standby",
-      assignedTeams: [2],
-      createdDate: new Date("2025-03-20"),
-      description: "Automated backup configuration"
-    },
-    {
-      id: 3,
-      name: "Disaster Recovery Test",
-      division: "Operations",
-      status: "Pending",
-      priority: "Medium",
-      recoveryStrategy: "Cold Standby",
-      assignedTeams: [4, 5],
-      createdDate: new Date("2025-03-22"),
-      description: "Quarterly DR testing cycle"
-    },
-    {
-      id: 4,
-      name: "Network Redundancy",
-      division: "Network Team",
-      status: "On Hold",
-      priority: "High",
-      recoveryStrategy: "Hybrid",
-      assignedTeams: [1, 6],
-      createdDate: new Date("2025-03-10"),
-      description: "Implement failover network infrastructure"
-    },
-    {
-      id: 5,
-      name: "Cloud Migration Plan",
-      division: "Architecture",
-      status: "Pending",
-      priority: "Medium",
-      recoveryStrategy: "Hot Standby",
-      assignedTeams: [5, 6],
-      createdDate: new Date("2025-03-25"),
-      description: "Migrate critical systems to cloud"
-    }
-  ];
+
 
   // UI State
   darkMode: boolean = false;
@@ -199,9 +150,143 @@ export class BcdrrequestComponent implements OnInit {
   ReturnToResultFiles: any = [];
   isObjectiveResultCollapsed: boolean = false;
   lstTeamNames = new FormControl(null);
-  constructor(private fb: FormBuilder) {
-    this.createPageForm();
+
+  itemsPerPage = signal<number>(5);
+
+
+  expandableConfig: ExpandableTableConfig = {
+    enabled: false,
+    columns: [
+
+    ]
+  };
+
+  isLoading = signal<boolean>(false);
+  tableData = signal<any>([]);
+  lstRequests: any[] = [];
+
+  objFilter = new BCDRFilterModel();
+  search: any = 'requestId';
+  LstLookup: any = [];
+  Lstlocation: any = [];
+  LstObjective: any = [];
+  LstLKUPTechnology: any = [];
+  LstLKUPRequestStatus: any = [];
+  userProfile = this.baseService.getJSONData(storageConst.userProfile);
+  menuPermission = this.baseService.getJSONData(storageConst.menuPermission);
+  showFilters: boolean = false;
+  LstTechnology: any = [];
+  LstRequestStatus: any = [];
+  LstReviewRequestStatus: any = [];
+  objPermission: any;
+  LstReviewRequestStatus2: any = [];
+  lstRS: any = [];
+  lstRRS2: any = [];
+  lstRRS: any = [];
+  pagenation = { pageNo: 1, pageSize: 10, sort: 'requestid desc', search: '', totalPages: 0, totalRecords: 0 };
+  showList: boolean = false;
+  dataSource: any = [];
+  dtOptions: any = []
+  isoneclickdisable: boolean = false;
+  lstReviewer: any= [];
+  lstApprover: any= [];
+  constructor(private fb: FormBuilder, private baseService: BaseService, private route: ActivatedRoute) {
+
   }
+  ngOnInit(): void {
+    this.route.url.subscribe(url => {
+      this.route.url.subscribe(url => {
+        this.objPermission = this.menuPermission.find((x: any) => x.routePath == `/${url[0].path}`);
+      });
+
+      if (url[0].path === 'bcdrrequest' && (this.objPermission.isAdd == true || this.objPermission.isEdit == true)) {
+
+        this.showList = false;
+        this.isoneclickdisable = false;
+      }
+      // if (url[0].path === 'bcdrdashboard') {
+      //   this.showList = true;
+      // }
+      else {
+        this.showList = true;
+      }
+    });
+
+    this.createPageForm();
+    this.refreshTable();
+    this.getLookup();
+    this.getRequestList();
+  }
+
+  loadTableData(): void {
+    this.isLoading.set(true);
+
+    // Simulate API call delay
+    setTimeout(() => {
+      this.tableData.set(this.lstRequests);
+      this.isLoading.set(false);
+    }, 500);
+  }
+
+  refreshTable() {
+    const columnList = [
+      { key: 'requestName', value: 'Request Id', type: '', sortable: true, width: '20%' },
+      { key: 'technology', value: 'Division', type: '', sortable: true, width: '15%' },
+      { key: 'raisedOn', value: 'Raised On', type: 'datetime', sortable: true, width: '25%' },
+      { key: 'raisedBy', value: 'Raised By', type: '', sortable: true, width: '20%' },
+      { key: 'requestStatus', value: 'Status', type: '', sortable: true, width: '30%' },
+      { key: 'requestId', isShow: 'requestStatus', value: 'Action', type: 'Edit_info_conditional', sortable: false, width: '15%' },
+      { key: 'requestId', value: 'Download', type: 'download', isShow: 'requestStatus', sortable: false, width: '10%' }
+    ];
+
+    this.dtOptions = {
+      data: this.dataSource,
+      pageNo: this.pagenation.pageNo,
+      pageSize: this.pagenation.pageSize,
+      serverSidePaging: true,
+      totalRecord: this.pagenation.totalRecords,
+      search: this.pagenation.search,
+      sort: this.pagenation.sort,
+      columnList,
+      expandableConfig: this.expandableConfig
+    };
+
+  }
+
+
+  getRequestList() {
+
+    let tickCnvrtr: any = [];
+    if (this.objFilter.dateFilter != undefined) {
+      const epochOffset = 621355968000000000;
+      const ticksPerMillisecond = 10000;
+      this.objFilter.dateFilter.forEach((element: any) => {
+        tickCnvrtr.push((element.getFullYear() + '-' + (element.getMonth() + 1) + '-' + element.getDate()).toString());
+      });
+    }
+    let body = {
+      "dateFilter": tickCnvrtr,
+      "technology": this.objFilter.technology,
+      "status": this.objFilter.status,
+      "requestId": "string",
+      "requestorName": "string"
+    };
+
+    this.baseService.callAPI('POST',
+      `/BCDR/GetAll?pageNo=${this.pagenation.pageNo}&pageSize=${this.pagenation.pageSize}&sortBy=${this.pagenation.sort}&searchBy=${this.pagenation.search}`
+      , body)
+      .subscribe((data) => {
+        const res = this.baseService.GetResponse(data, false);
+        if (res) {
+          this.dataSource = res.pageData;
+          this.lstRequests = this.dataSource;
+          this.pagenation.totalRecords = res.totalCount;
+          this.dtOptions.totalfilteredRecord = res.filteredCount;
+          this.refreshTable();
+        }
+      });
+  }
+
 
   toggleSection() {
     this.isCollapsed = !this.isCollapsed;
@@ -291,7 +376,7 @@ export class BcdrrequestComponent implements OnInit {
     });
 
     this.addObjective();
-    this.addObjective();
+    // this.addObjective();
     this.addRisks();
     this.addAssumptions();
     this.addTeamInvolvements();
@@ -516,9 +601,7 @@ export class BcdrrequestComponent implements OnInit {
     this.getObjectiveNewScheduleFormArr(objIndex).removeAt(scheduleIndex);
   }
 
-  ngOnInit(): void {
-    this.darkMode = localStorage.getItem('bcdr-dark-mode') === 'true';
-  }
+
 
   // Theme Toggle
   toggleTheme(): void {
@@ -629,40 +712,9 @@ export class BcdrrequestComponent implements OnInit {
     this.showModal = true;
   }
 
-  // Filtered requests (for display)
-  get filteredRequests(): BcdrRequest[] {
-    return this.requests.filter(req => {
-      const matchesSearch = req.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        req.division.toLowerCase().includes(this.searchQuery.toLowerCase());
-      const matchesStatus = this.filterStatus === "All" || req.status === this.filterStatus;
-      return matchesSearch && matchesStatus;
-    });
-  }
 
-  // Helper methods
-  getStatusColor(status: string): string {
-    switch (status) {
-      case 'Pending': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-      case 'In Progress': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-      case 'Completed': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'On Hold': return 'bg-gray-100 text-gray-800 dark:bg-gray-600 dark:text-gray-200';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  }
 
-  formatDate(date: Date): string {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  }
 
-  deleteRequest(id: number): void {
-    if (confirm('Are you sure you want to delete this request?')) {
-      this.requests = this.requests.filter(r => r.id !== id);
-    }
-  }
 
   nextTab() {
     if (this.activeTab < 5) this.activeTab++;
@@ -742,30 +794,6 @@ export class BcdrrequestComponent implements OnInit {
   }
 
   /**
-   * Check if multiselect field is empty (validation check)
-   */
-  isMultiselectEmpty(controlName: string): boolean {
-    const control = this.pageForm_bcdrRequest.get(controlName);
-    if (!control) return true;
-
-    const value = control.value;
-    return !value || (Array.isArray(value) && value.length === 0) || value === null || value === undefined;
-  }
-
-  /**
-   * Get validation status for multiselect field
-   */
-  isMultiselectInvalid(controlName: string): boolean {
-    const control = this.pageForm_bcdrRequest.get(controlName);
-    if (!control) return false;
-
-    const isEmpty = this.isMultiselectEmpty(controlName);
-    const isTouched = control.touched || control.dirty;
-
-    return isEmpty && isTouched && control.hasError('required');
-  }
-
-  /**
    * Check if a form control has a specific validation error
    */
   hasError(controlName: string, errorType: string): boolean {
@@ -832,6 +860,264 @@ export class BcdrrequestComponent implements OnInit {
     this.pageForm_bcdrRequest.get(controllerName)
       ?.setValue(checked ? 'Yes' : 'No');
   }
+
+
+
+  // ---- Main DATA API Call-- -----------------------------------
+
+  getLookup() {
+    this.baseService.callAPI('GET', `/LookupTypeValue/GetLookupValues`, null)
+      .subscribe((data) => {
+        const res = this.baseService.GetResponse(data, true);
+        if (res) {
+          this.LstLookup = res;
+          this.Lstlocation = (res.filter((x: any) => x.lookupTypeId === LookupType.Location).map((e: any) => (
+            { value: e.lookupValueId, label: e.lookupValue })));
+
+          this.LstObjective = (res.filter((x: any) => x.lookupTypeId === LookupType.Objective).map((e: any) => (
+            { value: e.lookupValueId, label: e.lookupValue })));
+
+          this.LstLKUPTechnology = (res.filter((x: any) => x.lookupTypeId === LookupType.Technology).map((e: any) => (
+            { value: e.lookupValueId, label: e.lookupValue })));
+
+          this.LstLKUPRequestStatus = (res.filter((x: any) => x.lookupTypeId === LookupType.RequestStatus).filter((x: any) => x.lookupValueId != LookupValue.Draft).
+            map((e: any) => (
+              { value: e.lookupValueId, label: e.lookupValue })));
+
+          this.getStatusByRole();
+          this.getTechnologies();
+
+
+        }
+      });
+  }
+
+  getTechnologies() {
+
+    this.baseService.callAPI('GET', `/ITOneRoles/GetTechnologies?systemuserId=${this.userProfile.systemUserId}`, null)
+      .subscribe((data) => {
+        const res = this.baseService.GetResponse(data, true);
+        if (res) {
+          let temp: any = [];
+          res.forEach((element: any) => {
+            temp.push(this.LstLKUPTechnology.find((x: any) => x.value == element));
+          });
+          this.showFilters = true;
+          this.LstTechnology = temp;
+        }
+      });
+  }
+
+  getStatusByRole() {
+    if (this.userProfile.roleId == 1) {
+      this.LstRequestStatus = this.LstLKUPRequestStatus;
+      this.LstReviewRequestStatus = this.LstLKUPRequestStatus;
+    }
+    if (this.objPermission.isEdit || this.objPermission.isAdd) {
+      this.LstLKUPRequestStatus.forEach((element: any) => {
+        if (element.value == LookupValue.Draft || element.value == LookupValue.Revise || element.value == LookupValue.Completed ||
+          element.value == LookupValue.CompletedWithFail || element.value == LookupValue.DeclinedbyReviewer ||
+          element.value == LookupValue.DeclinedbyApprover || element.value == LookupValue.ReexecuteFailedObjective ||
+          element.value == LookupValue.ApprovedbyApprover) {
+          this.LstRequestStatus.push(this.LstLKUPRequestStatus.find((x: any) => x.value == element.value));
+        }
+      });
+    }
+    if (this.objPermission.isReView == true && this.objPermission.isApprove == false) {
+      this.LstLKUPRequestStatus.forEach((element: any) => {
+        if (element.value == LookupValue.ApprovalPendingatReviewer || element.value == LookupValue.Completed || element.value == LookupValue.DeclinedbyReviewer || element.value == LookupValue.ReviewPendingatReviewer || element.value == LookupValue.CompletedWithFail) {
+          this.LstRequestStatus.push(this.LstLKUPRequestStatus.find((x: any) => x.value == element.value));
+        }
+
+        if (element.value == LookupValue.DeclinedbyReviewer || element.value == LookupValue.ApprovedbyReviewer || element.value == LookupValue.Revise) {
+          this.LstReviewRequestStatus.push(this.LstLKUPRequestStatus.find((x: any) => x.value == element.value));
+
+        }
+
+        if (element.value == LookupValue.ReexecuteFailedObjective || element.value == LookupValue.ReviewedbyReviewer) {
+          this.LstReviewRequestStatus2.push(this.LstLKUPRequestStatus.find((x: any) => x.value == element.value));
+        }
+      });
+    }
+    if (this.objPermission.isApprove == true && this.objPermission.isReView == false) {
+      this.LstLKUPRequestStatus.forEach((element: any) => {
+        if (element.value == LookupValue.ApprovalPendingatApprover || element.value == LookupValue.ReviewPendingatApprover || element.value == LookupValue.Completed || element.value == LookupValue.CompletedWithFail) {
+          this.LstRequestStatus.push(this.LstLKUPRequestStatus.find((x: any) => x.value == element.value));
+        }
+        if (element.value == LookupValue.Revise || element.value == LookupValue.DeclinedbyApprover || element.value == LookupValue.ApprovedbyApprover) {
+          this.LstReviewRequestStatus.push(this.LstLKUPRequestStatus.find((x: any) => x.value == element.value));
+
+        }
+        if (element.value == LookupValue.CompletedWithFail || element.value == LookupValue.Completed) {
+          this.LstReviewRequestStatus2.push(this.LstLKUPRequestStatus.find((x: any) => x.value == element.value));
+        }
+      });
+    }
+
+    if (this.objPermission.isApprove == true && this.objPermission.isReView == true) {
+      this.LstLKUPRequestStatus.forEach((element: any) => {
+        //   isReView = true
+        if (element.value == LookupValue.ApprovalPendingatReviewer || element.value == LookupValue.Completed || element.value == LookupValue.DeclinedbyReviewer || element.value == LookupValue.ReviewPendingatReviewer || element.value == LookupValue.CompletedWithFail) {
+          this.LstRequestStatus.push(this.LstLKUPRequestStatus.find((x: any) => x.value == element.value));
+        }
+
+        if (element.value == LookupValue.DeclinedbyReviewer || element.value == LookupValue.ApprovedbyReviewer || element.value == LookupValue.Revise) {
+          this.LstReviewRequestStatus.push(this.LstLKUPRequestStatus.find((x: any) => x.value == element.value));
+
+        }
+
+        if (element.value == LookupValue.ReexecuteFailedObjective || element.value == LookupValue.ReviewedbyReviewer) {
+          this.LstReviewRequestStatus2.push(this.LstLKUPRequestStatus.find((x: any) => x.value == element.value));
+        }
+
+        //   isApprove = true
+        if (element.value == LookupValue.ApprovalPendingatApprover || element.value == LookupValue.ReviewPendingatApprover ||
+          element.value == LookupValue.Completed || element.value == LookupValue.CompletedWithFail) {
+          this.LstRequestStatus.push(this.LstLKUPRequestStatus.find((x: any) => x.value == element.value));
+        }
+        if (element.value == LookupValue.DeclinedbyApprover || element.value == LookupValue.ApprovedbyApprover) {
+          this.LstReviewRequestStatus.push(this.LstLKUPRequestStatus.find((x: any) => x.value == element.value));
+
+        }
+        if (element.value == LookupValue.CompletedWithFail || element.value == LookupValue.Completed) {
+          this.LstReviewRequestStatus2.push(this.LstLKUPRequestStatus.find((x: any) => x.value == element.value));
+        }
+      });
+    }
+    this.LstRequestStatus.forEach((e: any) => {
+      if (this.lstRS.length == 0) {
+        this.lstRS.push(this.LstRequestStatus.find((x: any) => x.value == e.value));
+      } else {
+        let index = this.lstRS.findIndex((x: any) => x.value == e.value);
+        if (index == -1) {
+          this.lstRS.push(this.LstRequestStatus.find((x: any) => x.value == e.value));
+        }
+      }
+    });
+
+    this.LstReviewRequestStatus2.forEach((e: any) => {
+      if (this.lstRRS2.length == 0) {
+        this.lstRRS2.push(this.LstReviewRequestStatus2.find((x: any) => x.value == e.value));
+      } else {
+        let index = this.lstRRS2.findIndex((x: any) => x.value == e.value);
+        if (index == -1) {
+          this.lstRRS2.push(this.LstReviewRequestStatus2.find((x: any) => x.value == e.value));
+        }
+      }
+    });
+
+    this.LstReviewRequestStatus.forEach((e: any) => {
+      if (this.lstRRS.length == 0) {
+        this.lstRRS.push(this.LstReviewRequestStatus.find((x: any) => x.value == e.value));
+      } else {
+        let index = this.lstRRS.findIndex((x: any) => x.value == e.value);
+        if (index == -1) {
+          this.lstRRS.push(this.LstReviewRequestStatus.find((x: any) => x.value == e.value));
+        }
+      }
+    });
+
+
+  }
+
+
+ getUsersByRoleIdAndTechnology(techId = null) {
+
+    let technologyId = techId == null ? this.pageForm_bcdrRequest.controls['technologyId'].value : techId;
+    this.baseService.callAPI('GET', `/ITOneUsers/GetUserByRoleandTech?roleId=4&technologyId=${technologyId}`, null)
+      .subscribe((data) => {
+        const res = this.baseService.GetResponse(data, true);
+        if (res) {
+          this.lstReviewer = res;
+        }
+      });
+
+    this.baseService.callAPI('GET', `/ITOneUsers/GetUserByRoleandTech?roleId=5&technologyId=${technologyId}`, null)
+      .subscribe((data) => {
+        const res = this.baseService.GetResponse(data, true);
+        if (res) {
+          this.lstApprover = res;
+        }
+      });
+  }
+  onTableAction(event: any): void {
+  
+
+
+  }
+
+
+
+
+
+
+  // ---- tabe actions ----
+
+  /**
+  * Handle edit action - called when Edit button is clicked
+  */
+  onEdit(row: any): void {
+    console.log('Edit action triggered for:', row);
+
+
+
+    // alert(`Edit user: ${row.name} (ID: ${row.id})`);
+
+    // In a real application, you would:
+    // - Open an edit modal
+    // - Navigate to an edit page
+    // - Trigger an API call
+  }
+
+  /**
+   * Handle delete action - called when Delete button is clicked
+   */
+  onDelete(row: any): void {
+    console.log('Delete action triggered for:', row);
+
+    const confirmed = confirm(`Are you sure you want to delete ${row.name}?`);
+
+  }
+
+  /**
+   * Handle download action - called when Download button is clicked
+   */
+  onDownload(row: any): void {
+    console.log('Download action triggered for:', row);
+    alert(`Downloading data for user: ${row.name}`);
+
+    // In a real application, you would:
+    // - Generate a PDF/Excel file
+    // - Trigger a file download
+    // - Show download progress
+  }
+
+  /**
+   * Reload table data
+   */
+  reloadData(): void {
+    this.loadTableData();
+  }
+
+  /**
+   * Change items per page
+   */
+  changeItemsPerPage(newValue: any): void {
+    this.itemsPerPage.set(newValue);
+  }
+
+  onSerchChange(newVal: string): void {
+    this.search = newVal.trim();
+    this.getRequestList();
+  }
+
+  onPageChange(newPage: number): void {
+    this.pagenation.pageNo = newPage;
+    // this.getUsers()
+    console.log('Page changed to:', newPage);
+  }
+
+
 
 }
 

@@ -4,322 +4,281 @@ import {
   Output,
   EventEmitter,
   signal,
-  computed,
-  OnInit,
+
   OnChanges,
-  SimpleChanges,
+  SimpleChanges
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
+/* ==================== INTERFACES ==================== */
+
 export interface ColumnConfig {
   key: string;
-  label: string;
+  value?: string;   // header text
+  label?: string;   // backward compatibility
   type?: string;
   sortable?: boolean;
   width?: string;
-  // Support both old and new property names for backward compatibility
-  header?: string;
-  accessor?: string;
 }
 
 export interface ExpandableTableConfig {
-  columns: ColumnConfig[];
   enabled?: boolean;
+  columns: ColumnConfig[];
 }
 
-export interface TableActionsConfig {
-  onEdit?: (row: any) => void;
-  onDelete?: (row: any) => void;
-  onDownload?: (row: any) => void;
+export interface DtUserOptions {
+  data: any[];
+  pageNo: number;
+  pageSize: number;
+  totalRecord: number;
+  serverSidePaging: boolean;
+  search?: string;
+  sort?: string;
+  columnList: ColumnConfig[];
+  expandableConfig?: ExpandableTableConfig;
 }
+
+/* ==================== COMPONENT ==================== */
 
 @Component({
   selector: 'app-dynamic-table',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './dynamic-table.component.html',
+  templateUrl: './dynamic-table.component.html'
 })
-export class DynamicTableComponent implements OnInit, OnChanges {
-  @Input() columns: ColumnConfig[] = [];
-  @Input() data: any[] = [];
-  @Input() actions?: TableActionsConfig;
-  @Input() itemsPerPage = 10;
+export class DynamicTableComponent implements OnChanges {
+
+  /* ==================== INPUTS ==================== */
+
+  @Input() dtUserOptions!: DtUserOptions;
   @Input() isLoading = false;
-  @Input() expandableConfig?: ExpandableTableConfig;
+
+  /* ==================== OUTPUTS ==================== */
 
   @Output() editClick = new EventEmitter<any>();
   @Output() deleteClick = new EventEmitter<any>();
   @Output() downloadClick = new EventEmitter<any>();
+  @Output() pageSizeChange = new EventEmitter<number>();
+  @Output() onSearch = new EventEmitter<string>();
+  @Output() onSort = new EventEmitter<string>();
+  @Output() pageChange = new EventEmitter<number>();
+  @Output() onTableAction = new EventEmitter<any>();
+  /* ==================== SIGNAL STATE ==================== */
 
-  // Signals for state management
-  searchQuery = signal<string>('');
+  searchQuery = signal('');
+  currentPage = signal(1);
+  pageSize = signal(10);
+
   sortConfig = signal<{ column: string; direction: 'asc' | 'desc' } | null>(null);
-  currentPage = signal<number>(1);
-  pageSize = signal<number>(10);
-  pageSizeOptions = [10, 20, 50, 100];
-  expandedRowId = signal<string | number | null>(null);
+  expandedRowId = signal<number | string | null>(null);
 
-  // Computed signals for filtered and sorted data
-  filteredData = computed(() => {
-    let result = [...this.data];
+  pageSizeOptions = [5, 10, 20, 50, 100];
 
-    // Apply search filter
-    const query = this.searchQuery().toLowerCase();
-    if (query) {
-      result = result.filter((row) =>
-        this.columns.some((col) => {
-          const accessor = this.getColumnAccessor(col);
-          const value = this.getNestedValue(row, accessor);
-          return value?.toString().toLowerCase().includes(query);
-        })
-      );
-    }
+  /* ==================== HELPERS ==================== */
 
-    return result;
-  });
+  get isServerSide(): boolean {
+    return !!this.dtUserOptions?.serverSidePaging;
+  }
 
-  sortedData = computed(() => {
-    let result = [...this.filteredData()];
+  columns = (() => this.dtUserOptions?.columnList ?? []);
+  expandableConfig = (() => this.dtUserOptions?.expandableConfig);
+
+  /* ==================== DATA PIPELINE ==================== */
+
+  /** STEP 1: SORTED DATA */
+  sortedData = (() => {
+    const data = [...(this.dtUserOptions?.data ?? [])];
     const sort = this.sortConfig();
 
-    if (sort) {
-      result.sort((a, b) => {
-        const valueA = this.getNestedValue(a, sort.column);
-        const valueB = this.getNestedValue(b, sort.column);
+    if (!sort || this.isServerSide) return data;
 
-        if (valueA === valueB) return 0;
-        if (valueA === null || valueA === undefined) return 1;
-        if (valueB === null || valueB === undefined) return -1;
+    return data.sort((a, b) => {
+      const valA = this.getNestedValue(a, sort.column);
+      const valB = this.getNestedValue(b, sort.column);
 
-        // Handle numeric comparison
-        if (typeof valueA === 'number' && typeof valueB === 'number') {
-          return sort.direction === 'asc' ? valueA - valueB : valueB - valueA;
-        }
+      if (valA == null) return 1;
+      if (valB == null) return -1;
 
-        const comparison = valueA < valueB ? -1 : 1;
-        return sort.direction === 'asc' ? comparison : -comparison;
-      });
+      if (typeof valA === 'number' && typeof valB === 'number') {
+        return sort.direction === 'asc' ? valA - valB : valB - valA;
+      }
+
+      return sort.direction === 'asc'
+        ? String(valA).localeCompare(String(valB))
+        : String(valB).localeCompare(String(valA));
+    });
+  });
+
+  /** STEP 2: PAGINATED DATA (FINAL TABLE SOURCE) */
+  paginatedData = (() => {
+    const data = this.sortedData();
+
+    if (this.isServerSide) {
+      return data;
     }
 
-    return result;
+    const start = (this.currentPage() - 1) * this.pageSize();
+    const end = start + this.pageSize();
+    return data.slice(start, end);
   });
 
-  paginatedData = computed(() => {
-    const sorted = this.sortedData();
-    const pageSize = this.pageSize();
-    const pageIndex = this.currentPage() - 1;
-    const start = pageIndex * pageSize;
-    const end = start + pageSize;
+  /* ==================== TOTALS ==================== */
 
-    return sorted.slice(start, end);
+  totalRecords = (() => {
+    return this.isServerSide
+      ? this.dtUserOptions?.totalRecord ?? 0
+      : this.sortedData().length;
   });
 
-  totalPages = computed(() => {
-    const total = this.sortedData().length;
-    return Math.ceil(total / this.pageSize());
-  });
+  totalPages = (() =>
+    Math.ceil(this.totalRecords() / this.pageSize())
+  );
 
-  totalRecords = computed(() => this.sortedData().length);
-
-  ngOnInit(): void {
-    this.currentPage.set(1);
-    const initialPageSize = this.itemsPerPage || 10;
-    this.pageSize.set(initialPageSize);
-    
-    // Ensure pageSizeOptions includes the initial page size
-    if (!this.pageSizeOptions.includes(initialPageSize)) {
-      this.pageSizeOptions = [...this.pageSizeOptions, initialPageSize].sort((a, b) => a - b);
-    }
-  }
+  /* ==================== LIFECYCLE ==================== */
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['data'] && !changes['data'].firstChange) {
-      this.currentPage.set(1);
+    if (changes['dtUserOptions'] && this.dtUserOptions) {
+      this.currentPage.set(this.dtUserOptions.pageNo);
+      this.pageSize.set(this.dtUserOptions.pageSize);
+      this.searchQuery.set(this.dtUserOptions.search ?? '');
     }
   }
 
-  /**
-   * Get accessor name from column config (supports both new and old property names)
-   */
-  getColumnAccessor(column: ColumnConfig): string {
-    return column.key || column.accessor || '';
+  /* ==================== SEARCH ==================== */
+
+  filterData(): void {
+    this.currentPage.set(1);
+    this.onSearch.emit(this.searchQuery());
   }
 
-  /**
-   * Get nested value from object using dot notation (e.g., "user.name")
-   */
-  getNestedValue(obj: any, path: string): any {
-    return path.split('.').reduce((current, prop) => current?.[prop], obj);
+  resetSearch(): void {
+    this.searchQuery.set('');
+    this.onSearch.emit('');
   }
 
-  /**
-   * Handle column header click for sorting
-   */
+  /* ==================== SORT ==================== */
+
   onColumnClick(column: ColumnConfig): void {
     if (!column.sortable) return;
 
-    const accessor = this.getColumnAccessor(column);
-    const currentSort = this.sortConfig();
-    let newDirection: 'asc' | 'desc' = 'asc';
+    const current = this.sortConfig();
+    let direction: 'asc' | 'desc' = 'asc';
 
-    if (currentSort?.column === accessor) {
-      newDirection = currentSort.direction === 'asc' ? 'desc' : 'asc';
+    if (current?.column === column.key) {
+      direction = current.direction === 'asc' ? 'desc' : 'asc';
     }
 
-    this.sortConfig.set({
-      column: accessor,
-      direction: newDirection,
-    });
+    this.sortConfig.set({ column: column.key, direction });
     this.currentPage.set(1);
+
+    if (this.isServerSide) {
+      this.onSort.emit(`${column.key} ${direction}`);
+    }
   }
 
-  /**
-   * Check if column is currently sorted
-   */
   isSortedColumn(column: ColumnConfig): boolean {
-    const accessor = this.getColumnAccessor(column);
-    return this.sortConfig()?.column === accessor;
+    return this.sortConfig()?.column === column.key;
   }
 
-  /**
-   * Get sort direction for a column
-   */
   getSortDirection(column: ColumnConfig): 'asc' | 'desc' | null {
-    const sort = this.sortConfig();
-    const accessor = this.getColumnAccessor(column);
-    if (sort && sort.column === accessor) {
-      return sort.direction;
-    }
-    return null;
+    return this.sortConfig()?.column === column.key
+      ? this.sortConfig()?.direction ?? null
+      : null;
   }
 
-  /**
-   * Handle pagination
-   */
+  /* ==================== PAGINATION ==================== */
+
   goToPage(page: number): void {
-    if (page >= 1 && page <= this.totalPages()) {
-      this.currentPage.set(page);
+    if (page < 1 || page > this.totalPages()) return;
+
+    this.currentPage.set(page);
+
+    if (this.isServerSide) {
+      this.pageChange.emit(page);
     }
   }
 
-  /**
-   * Get page numbers for pagination
-   */
-  getPageNumbers(): number[] {
-    const totalPages = this.totalPages();
-    const currentPage = this.currentPage();
-    const pages: number[] = [];
-    const delta = 2;
+  onPageSizeChange(size: number): void {
+    this.pageSize.set(size);
+    this.currentPage.set(1);
 
-    // Always show first page
+    if (this.isServerSide) {
+      this.pageSizeChange.emit(size);
+    }
+  }
+
+  getPageNumbers(): number[] {
+    const total = this.totalPages();
+    const current = this.currentPage();
+    const delta = 2;
+    const pages: number[] = [];
+
     pages.push(1);
 
-    // Show pages around current page
-    const start = Math.max(2, currentPage - delta);
-    const end = Math.min(totalPages - 1, currentPage + delta);
+    const start = Math.max(2, current - delta);
+    const end = Math.min(total - 1, current + delta);
 
-    if (start > 2) {
-      pages.push(-1); // Represents "..."
-    }
+    if (start > 2) pages.push(-1);
+    for (let i = start; i <= end; i++) pages.push(i);
+    if (end < total - 1) pages.push(-1);
 
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
-    }
-
-    if (end < totalPages - 1) {
-      pages.push(-1); // Represents "..."
-    }
-
-    // Always show last page (if more than 1 page)
-    if (totalPages > 1) {
-      pages.push(totalPages);
-    }
+    if (total > 1) pages.push(total);
 
     return pages;
   }
 
-  /**
-   * Handle edit action
-   */
-  onEdit(row: any): void {
-    if (this.actions?.onEdit) {
-      this.actions.onEdit(row);
+  /* ==================== ACTIONS ==================== */
+
+  onAction(row: any, actiontype:any): void {
+    let data = {
+      type:actiontype,
+      row
     }
+    this.onTableAction.emit(data);
+  }
+
+  onEdit(row: any): void {
     this.editClick.emit(row);
   }
 
-  /**
-   * Handle delete action
-   */
   onDelete(row: any): void {
-    if (this.actions?.onDelete) {
-      this.actions.onDelete(row);
-    }
     this.deleteClick.emit(row);
   }
 
-  /**
-   * Handle download action
-   */
   onDownload(row: any): void {
-    if (this.actions?.onDownload) {
-      this.actions.onDownload(row);
-    }
     this.downloadClick.emit(row);
   }
 
-  /**
-   * Handle page size change
-   */
-  onPageSizeChange(newSize: number | string): void {
-    const size = typeof newSize === 'string' ? parseInt(newSize, 10) : newSize;
-    this.pageSize.set(size);
-    this.currentPage.set(1);
+  /* ==================== EXPAND ==================== */
+
+  toggleRowExpand(row: any): void {
+    this.expandedRowId.set(
+      this.expandedRowId() === row.systemUserId ? null : row.systemUserId
+    );
   }
 
-  /**
-   * Reset search and pagination
-   */
-  resetSearch(): void {
-    this.searchQuery.set('');
-    this.currentPage.set(1);
+  isRowExpanded(row: any): boolean {
+    return this.expandedRowId() === row.systemUserId;
   }
 
-  /**
-   * Check if there is any data to display
-   */
+  getColspanCount(): number {
+    let count = this.columns().length + 1;
+    if (this.expandableConfig()?.enabled) count += 1;
+    return count;
+  }
+
+  /* ==================== UTILS ==================== */
+
+  getColumnAccessor(column: ColumnConfig): string {
+    return column.key;
+  }
+
+  getNestedValue(obj: any, path: string): any {
+    return path.split('.').reduce((o, k) => o?.[k], obj);
+  }
+
   hasData(): boolean {
     return this.paginatedData().length > 0;
-  }
-
-  /**
-   * Toggle row expansion
-   */
-  toggleRowExpand(row: any): void {
-    const rowId = row.id;
-    if (this.expandedRowId() === rowId) {
-      this.expandedRowId.set(null);
-    } else {
-      this.expandedRowId.set(rowId);
-    }
-  }
-
-  /**
-   * Check if a row is expanded
-   */
-  isRowExpanded(row: any): boolean {
-    return this.expandedRowId() === row.id;
-  }
-
-  /**
-   * Get the number of columns including actions and expand icon
-   */
-  getColspanCount(): number {
-    let count = this.columns.length + 1; // +1 for actions
-    if (this.expandableConfig?.enabled) {
-      count += 1; // +1 for expand icon
-    }
-    return count;
   }
 }

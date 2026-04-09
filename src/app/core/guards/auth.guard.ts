@@ -1,34 +1,28 @@
 import { Injectable, inject } from '@angular/core';
 import { Router, CanActivateFn, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { storageConst } from '@app/shared/common';
+import { BaseService } from '@app/shared/services/baseService.service';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthGuard {
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(private authService: AuthService, private router: Router, private baseService: BaseService) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
-    if (this.authService.isAuthenticated()) {
+    const userProfile = this.baseService.getJSONData(storageConst.userProfile);
+    
+    // If user is authenticated, allow access
+    if (userProfile && userProfile.systemUserId !== undefined && userProfile.systemUserId > 0) {
       return true;
-    } else {
-      this.router.navigate(['/login']);
-      return false;
     }
+    
+    // If not authenticated, redirect to login
+    this.router.navigate(['/login']);
+    return false;
   }
 }
 
-/**
- * Functional Route Guard
- */
-export const authGuard: CanActivateFn = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-  const authService = inject(AuthService);
-  const router = inject(Router);
-  
-  if (authService.isAuthenticated()) {
-    return true;
-  }
-  
-  router.navigate(['/login']);
-  return false;
-};
+

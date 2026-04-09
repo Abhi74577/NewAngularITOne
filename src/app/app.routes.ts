@@ -6,6 +6,7 @@ import { UsersComponent } from './pages/users/users.component';
 import { DemoTableComponent } from './layout/demo-table/demo-table.component';
 import { LoginComponent } from './auth/login/login.component';
 import { BcdrrequestComponent } from './pages/bcdrrequest/bcdrrequest.component';
+import { TestLoaderComponent } from './pages/test-loader/test-loader.component';
 import { AuthGuard } from './core/guards/auth.guard';
 
 
@@ -33,7 +34,7 @@ export const APP_ROUTES: Routes = [
         component: DemoTableComponent,
       },
       {
-        path: 'products',
+        path: 'bcdrdashboard',
         component: BcdrrequestComponent,
       },
       {
@@ -47,6 +48,10 @@ export const APP_ROUTES: Routes = [
       {
         path: 'help',
         component: LoginComponent,
+      },
+      {
+        path: 'test-loader',
+        component: TestLoaderComponent,
       },
     ],
   },

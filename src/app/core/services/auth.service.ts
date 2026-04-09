@@ -61,10 +61,9 @@ export class AuthService {
    * Logout the current user
    */
   logout(): void {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('current_user');
-    this.isAuthenticatedSubject.next(false);
-    this.currentUserSubject.next(null);
+  localStorage.clear();
+    // this.isAuthenticatedSubject.next(false);
+    // this.currentUserSubject.next(null);
     this.router.navigate(['/login']);
   }
 

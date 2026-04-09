@@ -49,7 +49,7 @@ export class MenuService {
           label: 'BCDR Request',
           icon: '🔔',
           iconClass: 'fa-solid fa-bell',
-          route: '/products',
+          route: '/bcdrdashboard',
         },
         {
           id: 'security',
@@ -57,6 +57,13 @@ export class MenuService {
           icon: '🔒',
           iconClass: 'fa-solid fa-shield',
           route: '/settings',
+        },
+        {
+          id: 'test-loader',
+          label: 'Test Loader',
+          icon: '🧪',
+          iconClass: 'fa-solid fa-vial',
+          route: '/test-loader',
         },
       ],
     },

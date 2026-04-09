@@ -21,12 +21,12 @@ interface DemoUser {
 })
 export class DemoTableComponent implements OnInit {
   // Column configuration
-  columns: ColumnConfig[] = [
-    { key: 'id', label: 'Id', type: 'ID', sortable: true, width: '80px' },
-    { key: 'name', label: 'Name', type: 'text', sortable: true, width: '180px' },
-    { key: 'email', label: 'Email', type: 'text', sortable: true, width: '220px' },
-    { key: 'department', label: 'Department', type: 'text', sortable: true, width: '150px' },
-  ];
+  // columns: ColumnConfig[] = [
+  //   { key: 'id', label: 'Id', type: 'ID', sortable: true, width: '80px' },
+  //   { key: 'name', label: 'Name', type: 'text', sortable: true, width: '180px' },
+  //   { key: 'email', label: 'Email', type: 'text', sortable: true, width: '220px' },
+  //   { key: 'department', label: 'Department', type: 'text', sortable: true, width: '150px' },
+  // ];
 
   // 🔹 Expanded table columns (for nested table)
   expandableConfig: ExpandableTableConfig = {
