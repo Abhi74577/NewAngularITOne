@@ -36,7 +36,7 @@
         /> -->
 
         <span class="hidden md:block text-sm font-medium text-on-surface dark:text-slate-200">
-          John Doe
+          {{userProfile.fullName}}
         </span>
 
         <span class="hidden md:block text-xs text-on-surface-variant dark:text-slate-400">
@@ -54,10 +54,10 @@
           
           <div class="min-w-0">
             <p class="text-sm font-semibold text-on-surface dark:text-slate-200 truncate">
-              John Doe
+             {{userProfile.fullName}}
             </p>
             <p class="text-xs text-on-surface-variant dark:text-slate-400 truncate">
-              john.doeemail.com
+             {{userProfile.email}}
             </p>
           </div>
         </div>

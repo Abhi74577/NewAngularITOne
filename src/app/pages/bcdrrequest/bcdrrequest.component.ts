@@ -7,7 +7,7 @@ import { OwlDateTimeModule, OwlNativeDateTimeModule } from "@danielmoncada/angul
 import { ColumnConfig, DynamicTableComponent, ExpandableTableConfig } from "@app/shared/components/DynamicTable";
 import { BaseService } from "@app/shared/services/baseService.service";
 import { LookupType, LookupValue } from "@app/shared/models/LookUP";
-import { storageConst } from "@app/shared/common";
+import { appUrl, storageConst } from "@app/shared/common";
 
 interface BcdrRequest {
   id: number;
@@ -149,7 +149,7 @@ export class BcdrrequestComponent implements OnInit {
   isRecoveryObjCollapsed: boolean = false;
   ReturnToResultFiles: any = [];
   isObjectiveResultCollapsed: boolean = false;
-  lstTeamNames = new FormControl(null);
+  lstTeamNames = new FormControl([]);
 
   itemsPerPage = signal<number>(5);
 
@@ -188,8 +188,30 @@ export class BcdrrequestComponent implements OnInit {
   dataSource: any = [];
   dtOptions: any = []
   isoneclickdisable: boolean = false;
-  lstReviewer: any= [];
-  lstApprover: any= [];
+  lstReviewer: any = [];
+  lstApprover: any = [];
+  Val_ReviewerComment: any = null;
+  Val_ApproverComment: any = null;
+  Val_ReviewRequestStatus: any = new FormControl(0);
+  attachmentList: any = [];
+  attachmentList_recoplan: any = [];
+  attachmentList_result: any = [];
+  IsEdit: boolean = false;
+  IsInfo: boolean = false;
+  // displayTabList: { id: number; name: string; }[];
+  isShowApprovebtn: boolean = false;
+  IsdtTimeActivity: boolean = false;
+  str: any = '';
+  showLOB: boolean = false;
+  btnhideSubmitReview: any = false;
+  btnhideSubmitApproval: any = false;
+  isbCDRRequestObjective: boolean = false;
+  tempactualEndDate: any = this.currentCSTDateTime;
+  temactualstartDate: any = this.currentCSTDateTime;
+  tempStartDate: any = this.currentCSTDateTime;
+  tempEndDate: any = this.currentCSTDateTime;
+  tempobjnewSchedularstart: any = this.currentCSTDateTime;
+  tempobjnewSchedularend: any = this.currentCSTDateTime;
   constructor(private fb: FormBuilder, private baseService: BaseService, private route: ActivatedRoute) {
 
   }
@@ -301,6 +323,10 @@ export class BcdrrequestComponent implements OnInit {
   }
   toggleAssumptionConstraintsSection() {
     this.showAssumptionConstraints = !this.showAssumptionConstraints;
+  }
+
+  toggleLOBSection() {
+    this.showLOB = !this.showLOB;
   }
 
   toggleRecoveryTeamSection() {
@@ -486,6 +512,7 @@ export class BcdrrequestComponent implements OnInit {
   }
 
   addclient() {
+    this.showLOB = true;
     const clientLOBForm = this.fb.group({
       requestClientMappingId: [0],
       requestId: [0],
@@ -498,9 +525,13 @@ export class BcdrrequestComponent implements OnInit {
       updatedOn: [new Date()]
     });
     this.client.push(clientLOBForm);
-    if (this.showClientLOB) {
+    if (this.client.length != 0) {
       this.addclientLOB(this.client.length - 1);
     }
+    else {
+      this.addclientLOB(0);
+    }
+
   }
 
   deleteclient(index: number) {
@@ -509,6 +540,20 @@ export class BcdrrequestComponent implements OnInit {
       this.showClientLOB = false;
     }
   }
+
+
+  ShowClientAndLOB() {
+    if (!this.showClientLOB) {
+      this.addclient();
+      this.addclientLOB(0);
+      this.showClientLOB = true;
+    }
+  }
+
+  getLOBControls(clientGroup: AbstractControl): FormArray {
+    return clientGroup.get('lstLOB') as FormArray;
+  }
+
 
   clientLOB(index: number) {
     return (this.pageForm_bcdrRequest.get("lstbCDRRequestClient") as FormArray).at(index).get("lstLOB") as FormArray;
@@ -529,6 +574,10 @@ export class BcdrrequestComponent implements OnInit {
   }
 
   // ============= TEAM INVOLVEMENT =============
+
+  getLookupValueFromId(lookupValueId: any) {
+    return this.LstLookup.find((x: any) => x.lookupValueId === lookupValueId).lookupValue;
+  }
   get TeamInvolvement() {
     return this.pageForm_bcdrRequest.controls["lstbCDRRequestTeamInvolvement"] as FormArray;
   }
@@ -618,31 +667,7 @@ export class BcdrrequestComponent implements OnInit {
     this.showModal = false;
   }
 
-  onSubmit(): void {
-    if (this.isDraftMode) {
-      // Draft mode: Only validate current tab
-      if (this.activeTab === 1) {
-        const tab1Controls = ['requestName', 'technologyId', 'subScenarioHeading', 'subScenarioDetails'];
-        const isTab1Valid = tab1Controls.every(ctrl => this.pageForm_bcdrRequest.get(ctrl)?.valid);
-        if (isTab1Valid) {
-          console.log('Draft Saved (Tab 1):', this.pageForm_bcdrRequest.value);
-          alert('BCDR Request Draft Saved!');
-        } else {
-          this.markTabControlsAsTouched(this.activeTab);
-          alert('Please fill all required fields in the current tab');
-        }
-      }
-    } else {
-      // Validation mode: Validate all tabs
-      if (this.validateAllTabs()) {
-        console.log('Form Value:', this.pageForm_bcdrRequest.value);
-        alert('BCDR Request Submitted Successfully!');
-        this.closeModal();
-      } else {
-        alert('Please fix validation errors in all tabs');
-      }
-    }
-  }
+
 
   /**
    * Mark all form controls in a specific tab as touched
@@ -865,6 +890,122 @@ export class BcdrrequestComponent implements OnInit {
 
   // ---- Main DATA API Call-- -----------------------------------
 
+  fillSameAsAbove(event: any, referanceOf: any, index = 0) {
+
+    switch (referanceOf) {
+      case "productionlocation":
+        if (event.target.checked) {
+          this.pageForm_bcdrRequest.patchValue({
+            recoveryLocationName: this.pageForm_bcdrRequest.controls['productLocationName'].value,
+            recoveryLocationEmailAddress: this.pageForm_bcdrRequest.controls['productLocationEmailAddress'].value,
+            recoveryLocationContactNumber: this.pageForm_bcdrRequest.controls['productLocationContactNumber'].value,
+            recoveryLocations: this.pageForm_bcdrRequest.controls['productLocations'].value
+          });
+        }
+        else {
+          this.pageForm_bcdrRequest.patchValue({
+            recoveryLocationName: null,
+            recoveryLocationEmailAddress: null,
+            recoveryLocationContactNumber: null,
+            recoveryLocations: null,
+          });
+        }
+
+        break;
+      case "recoveryobjectiveteam":
+
+        if (event.target.checked) {
+          const objectivesFA = this.pageForm_bcdrRequest.get(
+            'lstbCDRRequestObjective'
+          ) as FormArray;
+
+          // ✅ Guard: avoid index underflow
+          if (index === 0) {
+            return;
+          }
+
+          const prevGroup = objectivesFA.at(index - 1);
+          const currGroup = objectivesFA.at(index);
+
+          if (!prevGroup || !currGroup) {
+            return;
+          }
+
+          currGroup.patchValue({
+            recoveryTeamName: prevGroup.get('recoveryTeamName')?.value,
+            recoveryTeamDesignation: prevGroup.get('recoveryTeamDesignation')?.value,
+            recoveryTeamSupervisor: prevGroup.get('recoveryTeamSupervisor')?.value,
+            recoveryTeamContactNumber: prevGroup.get('recoveryTeamContactNumber')?.value,
+            recoveryTeamEmailAddress: prevGroup.get('recoveryTeamEmailAddress')?.value,
+            recoveryTeamLocationId: prevGroup.get('recoveryTeamLocationId')?.value
+          });
+        }
+
+        else {
+          let obj: FormArray = this.pageForm_bcdrRequest.get('lstbCDRRequestObjective') as FormArray
+          obj.at(index).patchValue({
+            recoveryTeamName: null,
+            recoveryTeamDesignation: null,
+            recoveryTeamSupervisor: null,
+            recoveryTeamContactNumber: null,
+            recoveryTeamEmailAddress: null,
+            recoveryTeamLocationId: null
+          });
+        }
+
+        break;
+
+      case "recoveryobjective":
+        if (event.target.checked) {
+          const objectivesFA = this.pageForm_bcdrRequest.get(
+            'lstbCDRRequestObjective'
+          ) as FormArray;
+
+          // ✅ Guard against invalid index
+          if (index === 0) {
+            return;
+          }
+
+          const previousGroup = objectivesFA.at(index - 1);
+          const currentGroup = objectivesFA.at(index);
+
+          if (!previousGroup || !currentGroup) {
+            return;
+          }
+
+          currentGroup.patchValue({
+            recoveryStrategyStartTime:
+              previousGroup.get('recoveryStrategyStartTime')?.value,
+            recoveryStrategyEndTime:
+              previousGroup.get('recoveryStrategyEndTime')?.value,
+            recoveryStrategyEstimatedTime:
+              previousGroup.get('recoveryStrategyEstimatedTime')?.value,
+            recoveryStrategyExpectedResult:
+              previousGroup.get('recoveryStrategyExpectedResult')?.value,
+            recoveryStrategySuccessorTeam:
+              previousGroup.get('recoveryStrategySuccessorTeam')?.value,
+            recoveryStrategyContactNumber:
+              previousGroup.get('recoveryStrategyContactNumber')?.value,
+            recoveryStrategyEmailAddress:
+              previousGroup.get('recoveryStrategyEmailAddress')?.value
+          });
+        }
+        else {
+          let obj: FormArray = this.pageForm_bcdrRequest.get('lstbCDRRequestObjective') as FormArray
+          obj.at(index).patchValue({
+            recoveryStrategyStartTime: null,
+            recoveryStrategyEndTime: null,
+            recoveryStrategyEstimatedTime: null,
+            recoveryStrategyExpectedResult: null,
+            recoveryStrategySuccessorTeam: null,
+            recoveryStrategyContactNumber: null,
+            recoveryStrategyEmailAddress: null
+          });
+        }
+        break;
+    }
+  }
+
   getLookup() {
     this.baseService.callAPI('GET', `/LookupTypeValue/GetLookupValues`, null)
       .subscribe((data) => {
@@ -1018,17 +1159,21 @@ export class BcdrrequestComponent implements OnInit {
     });
 
 
+    console.log(this.lstRRS)
+
+
   }
 
 
- getUsersByRoleIdAndTechnology(techId = null) {
+  getUsersByRoleIdAndTechnology(techId = null) {
 
     let technologyId = techId == null ? this.pageForm_bcdrRequest.controls['technologyId'].value : techId;
     this.baseService.callAPI('GET', `/ITOneUsers/GetUserByRoleandTech?roleId=4&technologyId=${technologyId}`, null)
       .subscribe((data) => {
         const res = this.baseService.GetResponse(data, true);
         if (res) {
-          this.lstReviewer = res;
+          this.lstReviewer = (res.map((e: any) => (
+            { value: e.id, label: e.name })));
         }
       });
 
@@ -1036,17 +1181,1070 @@ export class BcdrrequestComponent implements OnInit {
       .subscribe((data) => {
         const res = this.baseService.GetResponse(data, true);
         if (res) {
-          this.lstApprover = res;
+
+          this.lstApprover = (res.map((e: any) => (
+            { value: e.id, label: e.name })));
+
+          console.log("lstap", this.lstApprover)
         }
       });
   }
+
+
+  convertStringtoArray(string: any) {
+    if (string == null) {
+      return null;
+    }
+
+    let array = string.split(',');
+    let numberArray: any = [];
+    array.forEach((element: any) => {
+      numberArray.push(parseInt(element));
+    });
+    return numberArray;
+  }
+
   onTableAction(event: any): void {
-  
+    if (event.type === 'download') {
+      this.baseService.Export('GET', `/BCDR/GetById?requestId=${event.element}&isExport=true`, null)
+        .subscribe((data: any) => {
+          if (data.body.byteLength > 0) {
+            let blob = new Blob([data.body], { type: "application/pdf" });
+
+            //var headers = data.headers;
+            //console.log(headers); //<--- Check log for content disposition
+            //var contentDisposition = headers.get('content-disposition');
+            const a = document.createElement('a');
+            const url = window.URL.createObjectURL(blob);
+            a.href = url;
+            //a.download = this.ListReportBy.find((x:any) => x.id == 1).name;
+            a.download = data.headers.get('content-disposition').split(';')[1].split('filename')[1].split('=')[1].trim();
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+          }
+          else {
+
+          }
+          // this.progressBarService = true;
+        });
+    }
+
+    if (event.type === 'edit' || event.type === 'info') {
+
+
+      this.pageForm_bcdrRequest.reset();
+      this.Val_ReviewerComment = null;
+      this.Val_ApproverComment = null;
+      // this.Val_ReviewRequestStatus = 0;
+      this.activeTab = 1;
+      this.attachmentList = [];
+      this.attachmentList_recoplan = [];
+      this.attachmentList_result = [];
+      // this.setDefaultTab();
+
+      this.baseService.callAPI('GET', `/BCDR/GetById?requestId=${event.element.requestId}`, null)
+        .subscribe((data) => {
+          const res = this.baseService.GetResponse(data, true);
+          if (res) {
+            console.log(res);
+
+            this.getUsersByRoleIdAndTechnology(res.technologyId);
+
+            this.pageForm_bcdrRequest.patchValue({
+              requestId: res.requestId,
+              requestName: res.requestName,
+              technologyId: res.technologyId,
+              subScenarioHeading: res.subScenarioHeading,
+              subScenarioDetails: res.subScenarioDetails,
+              //    lstbCDRRequestObjective: res.lstbCDRRequestObjective,
+              //    lstbCDRRequestRisk: res.lstbCDRRequestRisk as FormArray,
+              //   lstbCDRRequestAssumption: res.lstbCDRRequestAssumption,
+              //    lstbCDRRequestClient: res.lstbCDRRequestClient,
+              activityStartDate: res.activityStartDate,
+              activityEndDate: res.activityEndDate,
+              bussinessPartnerName: res.bussinessPartnerName,
+              bussinessPartnerContactNumber: res.bussinessPartnerContactNumber,
+              bussinessPartnerAddress: res.bussinessPartnerAddress,
+              bussinessPartnerEmailAddress: res.bussinessPartnerEmailAddress,
+              productLocationName: res.productLocationName,
+              productLocationEmailAddress: res.productLocationEmailAddress,
+              productLocationContactNumber: res.productLocationContactNumber,
+              productLocations: this.convertStringtoArray(res.productLocations),
+              recoveryLocationName: res.recoveryLocationName,
+              recoveryLocationEmailAddress: res.recoveryLocationEmailAddress,
+              recoveryLocationContactNumber: res.recoveryLocationContactNumber,
+              recoveryLocations: this.convertStringtoArray(res.recoveryLocations),
+              conferanceBridge: res.conferanceBridge,
+              helpdeskTicketNumber: res.helpdeskTicketNumber,
+              helpdeskTicketDetails: res.helpdeskTicketDetails,
+              emergencyContactNumber: res.emergencyContactNumber,
+              emergencyContactEmailAddress: res.emergencyContactEmailAddress,
+              helpdeskContactNumber: res.helpdeskContactNumber,
+              helpdeskContactEmailAddress: res.helpdeskContactEmailAddress,
+              isCommunicatedWithCustomer: res.isCommunicatedWithCustomer,
+              isExternalClientNotified: res.isExternalClientNotified,
+              recoveryTimeObjective: res.recoveryTimeObjective,
+              recoveryPointObjective: res.recoveryPointObjective,
+              //    lstbCDRRequestAccountability: res.lstbCDRRequestAccountability,
+              //     lstbCDRRequestApproving: res.lstbCDRRequestApproving,
+              dependecies: res.dependecies,
+              //    lstbCDRRequestTeamInvolvement: res.lstbCDRRequestTeamInvolvement,
+              expectedResponseTime: res.expectedResponseTime,
+              overallRecoveryStrategy: res.overallRecoveryStrategy,
+              supportedArtifacts: res.supportedArtifacts,
+              reviewerId: res.reviewerId,
+              approverId: res.approverId,
+              requestStatus: res.requestStatus,
+              reviewerComment: res.reviewerComment,
+              approverComment: res.approverComment,
+              returnToOperation: res.returnToOperation,
+              whatWorkedWell: res.whatWorkedWell,
+              improvementsIdentified: res.improvementsIdentified,
+              testGoalWasAchieved: res.testGoalWasAchieved,
+              testGoalWasAchievedRetest: res.testGoalWasAchievedRetest,
+              learnOutOfThisActivity: res.learnOutOfThisActivity,
+              opportunityDuringTest: res.opportunityDuringTest,
+              recommendationsForTeam: res.recommendationsForTeam,
+              isActive: res.isActive,
+              createdBy: res.createdBy,
+              updatedBy: res.updatedBy,
+              createdOn: res.createdOn,
+              updatedOn: res.updatedOn,
+              actualStartDate: res.actualStartDate,
+              actualEndDate: res.actualEndDate,
+              isUsesAI: res.isUsesAI,
+            });
+
+            this.attachmentList = res.lstAttachments;
+            if (this.attachmentList.length > 0) {
+              this.attachmentList.forEach((element: any) => {
+                console.log("data", element);
+
+                element.downloadPath = appUrl + element.path + '/' + element.fileName;
+              });
+
+              this.attachmentList_recoplan = this.attachmentList.filter((x: any) => x.attachmentTypeId == 45);
+              this.attachmentList_result = this.attachmentList.filter((x: any) => x.attachmentTypeId == 46);
+              console.log(this.attachmentList_recoplan, this.attachmentList_result)
+            }
+
+
+
+            //  this.tempArray = [];
+            // let arr_objective = <FormArray>this.pageForm_bcdrRequest.controls.lstbCDRRequestObjective;
+            // arr_objective.removeAt(0);
+            this.objectives.removeAt(0);
+            res.lstbCDRRequestObjective.forEach((x: any, index: any) => {
+              this.addObjective();
+              if (x.lstbCDRRequestObjectiveNewScheduleModels.length == 0) {
+                //  this.tempArray.push(x.lstbCDRRequestObjectiveNewScheduleModels);
+                x.lstbCDRRequestObjectiveNewScheduleModels = this.fb.array([]);
+              } else {
+                this.addObjectiveNewSchedule(index);
+                this.pageForm_bcdrRequest.get('lstbCDRRequestObjective')?.value["controls"][index].controls['lstbCDRRequestObjectiveNewScheduleModels'].controls[0].patchValue({
+                  requestObjectiveNewScheduleId: x.lstbCDRRequestObjectiveNewScheduleModels[0].requestObjectiveNewScheduleId,
+                  requestObjectiveMappingId: x.lstbCDRRequestObjectiveNewScheduleModels[0].requestObjectiveMappingId,
+
+                  result: x.lstbCDRRequestObjectiveNewScheduleModels[0].result,
+                  startTime: x.lstbCDRRequestObjectiveNewScheduleModels[0].startTime,
+                  endDtime: x.lstbCDRRequestObjectiveNewScheduleModels[0].endDtime,
+                  estimatedTime: x.lstbCDRRequestObjectiveNewScheduleModels[0].estimatedTime,
+                  comment: x.lstbCDRRequestObjectiveNewScheduleModels[0].comment,
+                  isActive: x.lstbCDRRequestObjectiveNewScheduleModels[0].isActive,
+                  createdBy: x.lstbCDRRequestObjectiveNewScheduleModels[0].createdBy,
+                  updatedBy: x.lstbCDRRequestObjectiveNewScheduleModels[0].updatedBy,
+                  createdOn: x.lstbCDRRequestObjectiveNewScheduleModels[0].createdOn,
+                  updatedOn: x.lstbCDRRequestObjectiveNewScheduleModels[0].updatedOn,
+                });
+              }
+              console.log(this.objectives.value);
+
+              this.objectives.at(index).patchValue({
+                requestObjectiveMappingId: x.requestObjectiveMappingId,
+                requestId: x.requestId,
+                objectiveTypeId: x.objectiveTypeId,
+                objectiveDetails: x.objectiveDetails,
+                recoveryTeamName: x.recoveryTeamName,
+                recoveryTeamDesignation: x.recoveryTeamDesignation,
+                recoveryTeamSupervisor: x.recoveryTeamSupervisor,
+                recoveryTeamContactNumber: x.recoveryTeamContactNumber,
+                recoveryTeamEmailAddress: x.recoveryTeamEmailAddress,
+                recoveryTeamLocationId: x.recoveryTeamLocationId,
+                recoveryStrategyStartTime: x.recoveryStrategyStartTime,
+                recoveryStrategyEndTime: x.recoveryStrategyEndTime,
+                recoveryStrategyEstimatedTime: x.recoveryStrategyEstimatedTime,
+                recoveryStrategyExpectedResult: x.recoveryStrategyExpectedResult,
+                recoveryStrategySuccessorTeam: x.recoveryStrategySuccessorTeam,
+                recoveryStrategyContactNumber: x.recoveryStrategyContactNumber,
+                recoveryStrategyEmailAddress: x.recoveryStrategyEmailAddress,
+                returnToOperationResult: x.returnToOperationResult,
+                returnToOperationResultComment: x.returnToOperationResultComment,
+                isActive: x.isActive,
+                createdBy: x.createdBy,
+                updatedBy: x.updatedBy,
+                createdOn: x.createdOn,
+                updatedOn: x.updatedOn
+              });
+              // arr_objective.push(this.fb.group(x));
+              console.log(this.objectives.value);
+            })
+
+            //this.setActivityDates(res.activityStartDate, res.activityEndDate);
+            this.setRecoveryObjectiveDates();
+            //this.setactualDate(res.actualStartDate, res.actualEndDate);
+
+
+            // let arr_risk = <FormArray>this.pageForm_bcdrRequest.controls.lstbCDRRequestRisk;
+            // arr_risk.removeAt(0);
+            this.Risks.removeAt(0);
+            res.lstbCDRRequestRisk.forEach((x: any, index: any) => {
+              console.log(this.Risks.value);
+              this.addRisks();
+              // this.items.at(index).patchValue(...)
+              this.Risks.at(index).patchValue({
+                requestRiskMappingId: x.requestRiskMappingId,
+                requestId: x.requestId,
+                details: x.details,
+                isActive: x.isActive,
+                createdBy: x.createdBy,
+                updatedBy: x.updatedBy,
+                createdOn: x.createdOn,
+                updatedOn: x.updatedOn
+              })
+
+            })
+
+
+            // let arr_assumption = <FormArray>this.pageForm_bcdrRequest.controls.lstbCDRRequestAssumption;
+            // arr_assumption.removeAt(0);
+            this.Assumptions.removeAt(0);
+            res.lstbCDRRequestAssumption.forEach((x: any, index: any) => {
+              this.addAssumptions();
+              this.Assumptions.at(index).patchValue({
+                requestAssumptionMappingId: x.requestAssumptionMappingId,
+                requestId: x.requestId,
+                details: x.details,
+                isActive: x.isActive,
+                createdBy: x.createdBy,
+                updatedBy: x.updatedBy,
+                createdOn: x.createdOn,
+                updatedOn: x.updatedOn
+              });
+            })
+
+            // let arr_client = <FormArray>this.pageForm_bcdrRequest.controls.lstbCDRRequestClient;
+            this.client.removeAt(0);
+            this.showClientLOB = res.lstbCDRRequestClient.length;
+            res.lstbCDRRequestClient.forEach((x: any, index: any) => {
+              this.addclient();
+
+              if (x.lstLOB.length > 0) {
+                x.lstLOB.forEach((element: any, i: any) => {
+                  if (i > 0) {
+                    this.addclientLOB(index);
+                  }
+                  this.clientLOB(index).at(i).patchValue({
+                    lOBName: element.lOBName,
+                    contactNumber: element.contactNumber,
+                    location: element.location,
+                    emailAddress: element.emailAddress
+                  })
+                });
+              }
+              this.client.at(index).patchValue({
+                requestClientMappingId: x.requestClientMappingId,
+                requestId: x.requestId,
+                clientName: x.clientName,
+                isActive: x.isActive,
+                createdBy: x.createdBy,
+                updatedBy: x.updatedBy,
+                createdOn: x.createdOn,
+                updatedOn: x.updatedOn
+              });
+              // arr_client.push(this.fb.group(x));
+            })
+
+            // if (res.requestStatus != LookupValue.Draft) {
+            // let arr_team = <FormArray>this.pageForm_bcdrRequest.controls.lstbCDRRequestTeamInvolvement;
+            // arr_team.removeAt(0);
+            if (res.lstbCDRRequestTeamInvolvement.length > 0) {
+              console.log(this.TeamInvolvement.value);
+              this.TeamInvolvement.removeAt(0);
+              console.log(this.TeamInvolvement.value);
+              res.lstbCDRRequestTeamInvolvement.forEach((x: any, index: any) => {
+                this.addTeamInvolvements();
+                this.TeamInvolvement.at(index).patchValue({
+                  RequestTeamInvolvementMappingId: x.requestTeamInvolvementMappingId,
+                  requestId: x.requestId,
+                  name: x.name,
+                  emailAddress: x.emailAddress,
+                  isActive: x.isActive,
+                  createdBy: x.createdBy,
+                  updatedBy: x.updatedBy,
+                  createdOn: x.createdOn,
+                  updatedOn: x.updatedOn
+                });
+                console.log(this.TeamInvolvement.value);
+              })
+            } else {
+              this.TeamInvolvement.removeAt(0);
+              this.addTeamInvolvements();
+            }
+
+
+
+            this.lstTeamNames.setValue(this.convertStringtoArray(res.involvedTeam));
+
+
+            this.Val_ReviewerComment = res.reviewerComment ?? null;
+            this.Val_ApproverComment = res.approverComment ?? null;
+
+            //  this.Val_ReviewRequestStatus = res.requestStatus;
+            this.showList = !this.showList;
+            this.IsEdit = event.type === 'edit';
+            this.IsInfo = event.type === 'info';
+            // this.conditionalControlDisabled=true;
+
+            if (res.requestStatus >= LookupValue.ApprovedbyApprover) {
+              // this.displayTabList = this.tabList;
+              if (res.actualStartDate == null)
+                this.pageForm_bcdrRequest.patchValue({
+                  actualStartDate: this.currentCSTDateTime,
+                  actualEndDate: this.currentCSTDateTime
+                });
+
+              if (res.requestStatus == LookupValue.ApprovedbyApprover) {
+                this.isShowApprovebtn = true;
+              }
+
+              //if (this.tabList.length == 5) { this.tabList.splice(this.tabList.length - 1, 1) };
+            }
+
+            if ((this.objPermission.isAdd || this.objPermission.isEdit) && res.requestStatus == LookupValue.Revise) {
+              this.pageForm_bcdrRequest.enable();
+              this.IsEdit = false;
+              this.IsdtTimeActivity = true;
+            }
+            else if ((this.objPermission.isReView || this.objPermission.isApprove) && res.requestStatus != LookupValue.Draft) {
+              this.pageForm_bcdrRequest.disable();
+            }
+            else if (res.requestStatus === LookupValue.Draft) {
+              this.IsEdit = false;
+              this.IsdtTimeActivity = true;
+              this.pageForm_bcdrRequest.enable();
+              if (this.pageForm_bcdrRequest.controls['lstbCDRRequestObjective'].value.length === 0) {
+                this.addObjective();
+              }
+              if (this.pageForm_bcdrRequest.controls['lstbCDRRequestRisk'].value.length === 0) {
+                this.addRisks();
+              }
+              if (this.pageForm_bcdrRequest.controls['lstbCDRRequestAssumption'].value.length === 0) {
+                this.addAssumptions();
+              }
+
+            }
+            else {
+              this.pageForm_bcdrRequest.disable();
+            }
+          }
+        });
+
+    }
 
 
   }
 
+  setRecoveryObjectiveDates() {
+    if (this.pageForm_bcdrRequest.controls['lstbCDRRequestObjective'].value != undefined) {
+      let lstObjectives: any = [];
+      this.pageForm_bcdrRequest.controls['lstbCDRRequestObjective'].value.forEach((element: any) => {
+        if (element.recoveryStrategyStartTime != null && element.recoveryStrategyEndTime != null) {
+          let array: any = [];
+          array.push(new Date(element.recoveryStrategyStartTime));
+          array.push(new Date(element.recoveryStrategyEndTime));
+          element.recoveryStrategyStartTime = array;
+          lstObjectives.push(element);
+        }
+      });
+      this.pageForm_bcdrRequest.patchValue({
+        lstbCDRRequestObjective: lstObjectives
+      });
+    }
+  }
 
+  get f() {
+    return this.pageForm_bcdrRequest.controls;
+  }
+
+  getFormArray(name: string) {
+    return this.pageForm_bcdrRequest.get(name) as FormArray;
+  }
+
+
+  checkValidation(btnclickName: string): boolean {
+
+    const errors: string[] = [];
+
+    /* ------------ TAB 1 ------------ */
+    if (this.f['technologyId']?.invalid) errors.push('Division (Tab 1)');
+    if (this.f['subScenarioHeading']?.invalid) errors.push('Scenario Title (Tab 1)');
+    if (this.f['subScenarioDetails']?.invalid) errors.push('Scenario Overview (Tab 1)');
+
+
+    /* ------------ OBJECTIVES ------------ */
+    const objectives = this.getFormArray('lstbCDRRequestObjective');
+    objectives?.controls.forEach((obj: any, idx: number) => {
+
+      if (obj.get('objectiveTypeId')?.invalid) errors.push('Objective (Tab 1)');
+      if (obj.get('objectiveDetails')?.invalid) errors.push('Details Of The Objective (Tab 1)');
+
+      if (obj.get('recoveryTeamEmailAddress')?.invalid)
+        errors.push('Recovery Team Email Address (Tab 3)');
+
+      if (obj.get('recoveryTeamName')?.invalid)
+        errors.push('Recovery Team Name (Tab 3)');
+
+      if (obj.get('recoveryTeamSupervisor')?.invalid)
+        errors.push('Recovery Team Supervisor (Tab 3)');
+
+      if (obj.get('recoveryTeamDesignation')?.invalid)
+        errors.push('Recovery Team Designation (Tab 3)');
+
+      if (obj.get('recoveryTeamContactNumber')?.invalid)
+        errors.push('Recovery Team Contact Number (Tab 3)');
+
+      if (obj.get('recoveryTeamLocationId')?.invalid)
+        errors.push('Recovery Team Location (Tab 3)');
+
+
+      /* ------------ TAB 4 ------------ */
+      if (obj.get('recoveryStrategySuccessorTeam')?.invalid)
+        errors.push('Recovery Team Successor Team/Technician (Tab 4)');
+
+      if (obj.get('recoveryStrategyExpectedResult')?.invalid)
+        errors.push('Recovery Team Expected Result (Tab 4)');
+
+      if (obj.get('recoveryStrategyEmailAddress')?.invalid)
+        errors.push('Recovery Team Email Address (Tab 4)');
+
+
+      /* ------------ TAB 5 (Conditional) ------------ */
+      if (btnclickName === 'SubmitReturnToOperation') {
+
+        if (!obj.get('returnToOperationResultComment')?.value)
+          errors.push('Return To Operation Result Comment (Tab 5)');
+
+        const schedules = obj.get('lstbCDRRequestObjectiveNewScheduleModels') as FormArray;
+
+        schedules?.controls.forEach((sch: any) => {
+
+          if (sch.get('result')?.invalid)
+            errors.push('New Test Objective Result (Tab 5)');
+
+          if (sch.get('estimatedTime')?.invalid)
+            errors.push('Estimated Time (Tab 5)');
+
+          if (sch.get('comment')?.invalid)
+            errors.push('Comment (Tab 5)');
+        });
+      }
+    });
+
+
+    /* ------------ RISK ------------ */
+    this.getFormArray('lstbCDRRequestRisk')?.controls.forEach(risk => {
+      if (risk.get('details')?.invalid)
+        errors.push('Risk - Details (Tab 1)');
+    });
+
+
+    /* ------------ ASSUMPTION ------------ */
+    this.getFormArray('lstbCDRRequestAssumption')?.controls.forEach(assumption => {
+      if (assumption.get('details')?.invalid)
+        errors.push('Assumption/Constraints (Tab 1)');
+    });
+
+
+    /* ------------ TAB 2 ------------ */
+    if (this.f['productLocationName']?.invalid) errors.push('Product Location Name (Tab 2)');
+    if (this.f['productLocationEmailAddress']?.invalid) errors.push('Product Location Email Address (Tab 2)');
+    if (this.f['productLocationContactNumber']?.invalid) errors.push('Product Location Contact Number (Tab 2)');
+    if (this.f['recoveryLocationName']?.invalid) errors.push('Recovery Location Name (Tab 2)');
+    if (this.f['recoveryLocationEmailAddress']?.invalid) errors.push('Recovery Location Email Address (Tab 2)');
+    if (this.f['recoveryLocationContactNumber']?.invalid) errors.push('Recovery Location Contact Number (Tab 2)');
+    if (this.f['conferanceBridge']?.invalid) errors.push('Conference Bridge (Tab 2)');
+
+
+    /* ------------ TAB 3 ------------ */
+    if (this.f['recoveryTimeObjective']?.invalid) errors.push('Recovery Time Objective (Tab 3)');
+    if (this.f['recoveryPointObjective']?.invalid) errors.push('Recovery Point Objective (Tab 3)');
+    if (this.f['dependecies']?.invalid) errors.push('Dependencies (Tab 3)');
+    if (this.f['reviewerId']?.invalid) errors.push('Reviewer Name (Tab 3)');
+    if (this.f['approverId']?.invalid) errors.push('Approver Name (Tab 3)');
+
+
+    /* ------------ TAB 5 FINAL ------------ */
+    if (btnclickName === 'SubmitReturnToOperation') {
+      if (this.f['returnToOperation']?.invalid) errors.push('Return To Operation (Tab 5)');
+      if (this.f['whatWorkedWell']?.invalid) errors.push('What Worked Well? (Tab 5)');
+      if (this.f['recommendationsForTeam']?.invalid) errors.push('Recommendations (Tab 5)');
+      if (this.f['opportunityDuringTest']?.invalid) errors.push('Opportunity During Test (Tab 5)');
+      if (this.f['improvementsIdentified']?.invalid) errors.push('Improvements Identified (Tab 5)');
+      if (this.f['testGoalWasAchieved']?.invalid) errors.push('Objectives Achieved? (Tab 5)');
+    }
+
+    /* ------------ RESULT ------------ */
+    this.str = errors;
+
+    return errors.length === 0;
+  }
+
+  checkSubmitValidation(isDraft: boolean) {
+
+
+
+    if (isDraft == false && (this.pageForm_bcdrRequest.controls['reviewerId'].value == null || this.pageForm_bcdrRequest.controls['approverId'].value == null)) {
+      alert("Please Fill Reviewer Name & Approver Name These Field are Required!!");
+    } else {
+      if (isDraft == false && this.pageForm_bcdrRequest.controls['reviewerId'].value != null && this.pageForm_bcdrRequest.controls['approverId'].value != null) {
+        let isValidate = this.checkValidation("SubmitcreateRequest");
+        if (isValidate == true) {
+          this.submitRequest(isDraft);
+        }
+
+      }
+
+      if (isDraft && (this.pageForm_bcdrRequest.controls['technologyId'].value == null)) {
+        alert("Please select Division in tab 1!!");
+        //this.checkValidation("Draft");
+      } else {
+        if (isDraft && (this.pageForm_bcdrRequest.controls['technologyId'].value != null)) {
+          this.submitRequest(isDraft);
+        }
+      }
+    }
+  }
+
+
+  submitRequest(isDraft: any) {
+    if (isDraft) {
+      //checking null lstbCDRRequestObjective in edit
+      if (this.pageForm_bcdrRequest.controls['lstbCDRRequestObjective'].value.find((x: any) => x.objectiveTypeId == null)) {
+        while (this.pageForm_bcdrRequest.controls['lstbCDRRequestObjective'].value.length !== 0) {
+          (this.pageForm_bcdrRequest.get('lstbCDRRequestObjective') as FormArray).removeAt(0)
+
+        }
+      }
+
+      //checking null lstbCDRRequestRisk in edit
+      if (this.pageForm_bcdrRequest.controls['lstbCDRRequestRisk'].value.find((x: any) => x.details == null)) {
+        while (this.pageForm_bcdrRequest.controls['lstbCDRRequestRisk'].value.length !== 0) {
+          (this.pageForm_bcdrRequest.get('lstbCDRRequestRisk') as FormArray).removeAt(0)
+        }
+      }
+      //checking null lstbCDRRequestAssumption in edit
+      if (this.pageForm_bcdrRequest.controls['lstbCDRRequestAssumption'].value.find((x: any) => x.details == null)) {
+        while (this.pageForm_bcdrRequest.controls['lstbCDRRequestAssumption'].value.length !== 0) {
+          (this.pageForm_bcdrRequest.get('lstbCDRRequestAssumption') as FormArray).removeAt(0)
+        }
+      }
+      //checking null lstbCDRRequestTeamInvolvement  in edit
+      if (this.pageForm_bcdrRequest.controls['lstbCDRRequestTeamInvolvement'].value.find((x: any) => x.emailAddress == null)) {
+        while (this.pageForm_bcdrRequest.controls['lstbCDRRequestTeamInvolvement'].value.length !== 0) {
+          (this.pageForm_bcdrRequest.get('lstbCDRRequestTeamInvolvement') as FormArray).removeAt(0)
+        }
+      }
+    }
+    this.isoneclickdisable = true;
+    let lstproductlocations = (this.pageForm_bcdrRequest.controls['productLocations'].value != null &&
+      typeof (this.pageForm_bcdrRequest.controls['productLocations'].value) != 'string')
+      ? this.pageForm_bcdrRequest.controls['productLocations'].value.join(",") : this.pageForm_bcdrRequest.controls['productLocations'].value;
+
+    let lstrecoverylocations = (this.pageForm_bcdrRequest.controls['recoveryLocations'].value != null
+      &&
+      typeof (this.pageForm_bcdrRequest.controls['recoveryLocations'].value) != 'string')
+      ? this.pageForm_bcdrRequest.controls['recoveryLocations'].value.join(",") : this.pageForm_bcdrRequest.controls['recoveryLocations'].value;
+
+
+
+
+
+    this.pageForm_bcdrRequest.patchValue({
+      productLocations: lstproductlocations,
+      recoveryLocations: lstrecoverylocations,
+      bussinessPartnerContactNumber: this.pageForm_bcdrRequest.controls['bussinessPartnerContactNumber'].value,
+      productLocationContactNumber: this.pageForm_bcdrRequest.controls['productLocationContactNumber'].value,
+      recoveryLocationContactNumber: this.pageForm_bcdrRequest.controls['recoveryLocationContactNumber'].value,
+      emergencyContactNumber: this.pageForm_bcdrRequest.controls['emergencyContactNumber'].value,
+      requestStatus: isDraft ? 6 : null
+    });
+
+    //checking Null/Undefined value in involvedTeam in edit 
+    if (this.lstTeamNames != null || this.lstTeamNames != undefined) {
+      this.pageForm_bcdrRequest.patchValue({
+        involvedTeam: (typeof (this.lstTeamNames) != 'string' && typeof (this.lstTeamNames) != 'undefined') ? this.lstTeamNames.toString() : this.lstTeamNames
+      });
+    }
+
+    //this.getActivityDates();
+    this.getRecoveryObjectiveDates();
+
+    this.baseService.callAPI('POST', `/BCDR/Request`, JSON.parse(JSON.stringify(this.pageForm_bcdrRequest.getRawValue())))
+      .subscribe((data) => {
+        const res = this.baseService.GetResponse(data, true);
+        if (res) {
+          if (res > 0) {
+            this.uploadRecoveryPlanFiles(res);
+          }
+          this.cancel();
+          // this.getRequestList();
+          this.showList = true;
+          this.createPageForm();
+        }
+      });
+  }
+
+  checkValidationcANDSubmitReturnToOperation() {
+    let isvalid = this.checkValidation("SubmitReturnToOperation");
+    if (isvalid == true) {
+      this.SubmitReturnToOperation();
+    }
+  }
+
+  SubmitReturnToOperation() {
+    if (this.pageForm_bcdrRequest.get('lstbCDRRequestObjective')?.value.filter((x: any) => x.value.returnToOperationResultComment == null).length != 0
+      || this.pageForm_bcdrRequest.get('lstbCDRRequestObjective')?.value.filter((x: any) => x.value.returnToOperationResultComment == "").length != 0 ||
+      this.pageForm_bcdrRequest.get('lstbCDRRequestObjective')?.value.filter((x: any) => x.value.returnToOperationResult == null).length != 0
+    ) {
+      this.isbCDRRequestObjective = true;
+      alert("Please fill all required fields in Return to Operation (Tab)");
+    } else {
+
+      this.isbCDRRequestObjective = false;
+      //checking Null/Undefined value in involvedTeam in edit 
+      if (this.lstTeamNames != null || this.lstTeamNames != undefined) {
+        this.pageForm_bcdrRequest.patchValue({
+          involvedTeam: (typeof (this.lstTeamNames) != 'string' && typeof (this.lstTeamNames) != 'undefined') ? this.lstTeamNames.toString() : this.lstTeamNames
+        });
+      }
+      let ArrayObjectiveModels: any = [];
+      if (this.pageForm_bcdrRequest.controls['lstbCDRRequestObjective'].value != undefined) {
+        let lstObjectives: any;
+        this.pageForm_bcdrRequest.controls['lstbCDRRequestObjective'].value.forEach((element: any) => {
+          // if (element.recoveryStrategyStartTime != null && element.recoveryStrategyStartTime.length) {
+          // lstObjectives.requestObjectiveMappingId = element.requestObjectiveMappingId;
+          // lstObjectives.returnToOperationResult = element.returnToOperationResult;
+          // lstObjectives.returnToOperationResultComment = element.returnToOperationResultComment;
+          // lstObjectives.lstbCDRRequestObjectiveNewScheduleModels = element.lstbCDRRequestObjectiveNewScheduleModels;
+          ArrayObjectiveModels.push(element);
+          // }
+        });
+      }
+
+      // this.setNewScheduleDates();
+
+      let body = {
+        RequestId: this.pageForm_bcdrRequest.controls['requestId'].value,
+        TechnologyId: this.pageForm_bcdrRequest.controls['technologyId'].value,
+        ReviewerId: this.pageForm_bcdrRequest.controls['reviewerId'].value,
+        ApproverId: this.pageForm_bcdrRequest.controls['approverId'].value,
+        CreatedBy: this.pageForm_bcdrRequest.controls['createdBy'].value,
+        InvolvedTeam: this.pageForm_bcdrRequest.controls['involvedTeam'].value,
+        ActualStartDate: this.pageForm_bcdrRequest.controls['actualStartDate'].value,
+        ActualEndDate: this.pageForm_bcdrRequest.controls['actualEndDate'].value,
+        ReturnToOperation: this.pageForm_bcdrRequest.controls['returnToOperation'].value,
+        WhatWorkedWell: this.pageForm_bcdrRequest.controls['whatWorkedWell'].value,
+        ImprovementsIdentified: this.pageForm_bcdrRequest.controls['improvementsIdentified'].value,
+        TestGoalWasAchieved: this.pageForm_bcdrRequest.controls['testGoalWasAchieved'].value,
+        TestGoalWasAchievedRetest: this.pageForm_bcdrRequest.controls['testGoalWasAchievedRetest'].value,
+        LearnOutOfThisActivity: this.pageForm_bcdrRequest.controls['learnOutOfThisActivity'].value,
+        OpportunityDuringTest: this.pageForm_bcdrRequest.controls['opportunityDuringTest'].value,
+        RecommendationsForTeam: this.pageForm_bcdrRequest.controls['recommendationsForTeam'].value,
+        lstObjectiveModels: ArrayObjectiveModels,
+      }
+
+      this.baseService.callAPI('POST', `/BCDR/SubmitReturnToOperation`, body)
+        .subscribe((data) => {
+          const res = this.baseService.GetResponse(data, true);
+          if (res) {
+            this.uploadReturnToResultFiles(this.pageForm_bcdrRequest.controls['requestId'].value);
+            // this.getRequestList();
+            this.pageForm_bcdrRequest.reset();
+            this.showList = true;
+            // this.ReturnToResultFile = [];
+
+            this.cancel();
+          }
+        });
+    }
+  }
+
+  updatestatus() {
+    let TeamName = null;
+    if (this.lstTeamNames != null) {
+      TeamName = typeof (this.lstTeamNames) != 'string' ? this.lstTeamNames.toString() : this.lstTeamNames
+    }
+    let body =
+    {
+      "BCDRRequestId": this.pageForm_bcdrRequest.controls['requestId'].value,
+      "TechnologyId": this.pageForm_bcdrRequest.controls['technologyId'].value,
+      "ReviewerId": this.pageForm_bcdrRequest.controls['reviewerId'].value,
+      "ApproverId": this.pageForm_bcdrRequest.controls['approverId'].value,
+      "CreatedBy": this.pageForm_bcdrRequest.controls['createdBy'].value,
+      "InvolvedTeam": TeamName,
+      "recordStatus": this.Val_ReviewRequestStatus,
+      "Comment": this.objPermission.isReView ? this.Val_ReviewerComment : this.Val_ApproverComment
+    };
+
+    this.baseService.callAPI('PUT', `/BCDR/UpdateStatus`, body)
+      .subscribe((data) => {
+        const res = this.baseService.GetResponse(data, true);
+        if (res) {
+          this.IsEdit = false;
+          this.showList = true;
+          // this.getRequestList();
+          this.pageForm_bcdrRequest.reset();
+          this.cancel();
+        }
+      });
+  }
+
+
+  uploadRecoveryPlanFiles(requestId: any) {
+    if (this.RecoveryPlanFile != null || this.RecoveryPlanFile != undefined) {
+      var formData: any = new FormData();
+      // formData.append('avatar', this.form.get('avatar').value);
+      for (let index = 0; index < this.RecoveryPlanFile.length; index++) {
+        //const element = array[index];
+        formData.append(`lstAttachmentModel[${index}].attachmentId`, 0);
+        formData.append(`lstAttachmentModel[${index}].requestId`, requestId);
+        formData.append(`lstAttachmentModel[${index}].attachmentTypeId`, 45);
+        formData.append(`lstAttachmentModel[${index}].file`, this.RecoveryPlanFile[index]);
+      }
+
+
+      this.baseService.callFormAPI('POST', `/Attachment/Add`, formData)
+        .subscribe((data) => {
+          const res = this.baseService.GetResponse(data, true);
+          if (res) {
+            // this.getRequestList();
+            // this.uploadReturnFiles(this.pageForm_bcdrRequest.controls['requestId'].value);
+            // this.pageForm_bcdrRequest.reset();
+            // this.showList = true;
+            this.RecoveryPlanFile = [];
+          }
+        });
+    }
+  }
+
+  uploadReturnToResultFiles(requestId: any) {
+
+    if (this.ReturnToResultFiles != null || this.ReturnToResultFiles != undefined) {
+      var formData: any = new FormData();
+      // formData.append('avatar', this.form.get('avatar').value);
+      for (let index = 0; index < this.ReturnToResultFiles.length; index++) {
+        //const element = array[index];
+        formData.append(`lstAttachmentModel[${index}].attachmentId`, 0);
+        formData.append(`lstAttachmentModel[${index}].requestId`, requestId);
+        formData.append(`lstAttachmentModel[${index}].attachmentTypeId`, 46);
+        formData.append(`lstAttachmentModel[${index}].file`, this.ReturnToResultFiles[index]);
+      }
+
+
+      this.baseService.callFormAPI('POST', `/Attachment/Add`, formData)
+        .subscribe((data) => {
+          const res = this.baseService.GetResponse(data, true);
+          if (res) {
+            // this.getRequestList();
+            // this.uploadReturnFiles(this.pageForm_bcdrRequest.controls['requestId'].value);
+            // this.pageForm_bcdrRequest.reset();
+            // this.showList = true;
+          }
+        });
+    }
+  }
+
+  getRecoveryObjectiveDates() {
+
+    if (this.pageForm_bcdrRequest.controls['lstbCDRRequestObjective'].value != undefined) {
+      let lstObjectives: any = [];
+      this.pageForm_bcdrRequest.controls['lstbCDRRequestObjective'].value.forEach((element: any) => {
+        if (element.recoveryStrategyStartTime != null && element.recoveryStrategyStartTime.length) {
+          let temp = element.recoveryStrategyStartTime;
+          element.recoveryStrategyStartTime = null;
+          element.recoveryStrategyEndTime = temp[1];
+          element.recoveryStrategyStartTime = temp[0];
+
+          element.recoveryTeamContactNumber = element.recoveryTeamContactNumber;
+          element.recoveryStrategyContactNumber = element.recoveryStrategyContactNumber;
+          lstObjectives.push(element);
+        }
+        else {
+          element.recoveryTeamContactNumber = element.recoveryTeamContactNumber;
+          element.recoveryStrategyContactNumber = element.recoveryStrategyContactNumber;
+          lstObjectives.push(element);
+        }
+      });
+
+      this.pageForm_bcdrRequest.patchValue({
+        lstbCDRRequestObjective: lstObjectives
+      });
+    }
+
+  }
+  cancel() {
+    this.IsEdit = false;
+    this.IsInfo = false;
+    this.showClientLOB = false;
+    this.isoneclickdisable = false;
+    this.IsdtTimeActivity = false;
+    this.lstTeamNames.setValue([]);
+    this.attachmentList_recoplan = [];
+    this.LstReviewRequestStatus = [];
+    this.RecoveryPlanFile = [];
+    this.isShowApprovebtn = false;
+    this.client.removeAt(0);
+    this.Risks.removeAt(0);
+    this.objectives.removeAt(0);
+    this.Assumptions.removeAt(0);
+    this.getRequestList();
+    this.activeTab = 1
+    // this.setDefaultTab();
+    this.createPageForm();
+  }
+
+  // Utility: normalize any input (Date, Moment-like, or string) to a real Date in local time
+  private normalizeToLocalDate(value: any): Date | null {
+    if (!value) return null;
+
+    // If it's a native Date
+    if (value instanceof Date) return value;
+
+    // If it's a Moment instance (safer check than ._d)
+    if (value && value._isAMomentObject && typeof value.toDate === 'function') {
+      return value.toDate();
+    }
+
+    // Some date pickers store moment-like object as {_d: Date}
+    if (value && value._d instanceof Date) {
+      return value._d as Date;
+    }
+
+    // If it's a string, handle both ISO and "datetime-local" formats
+    if (typeof value === 'string') {
+      const s = value.trim();
+
+      // Handle input[type="datetime-local"] without timezone (e.g., "2026-01-06T21:30" or with seconds)
+      const m = s.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?$/);
+      if (m) {
+        const [, y, mo, d, h, mi, se] = m;
+        return new Date(
+          Number(y),
+          Number(mo) - 1,
+          Number(d),
+          Number(h),
+          Number(mi),
+          se ? Number(se) : 0
+        ); // Local time
+      }
+
+      // Otherwise let Date try to parse (handles "GMT"/"UTC" strings)
+      const parsed = new Date(s);
+      if (!isNaN(parsed.getTime())) return parsed;
+    }
+
+    // Unknown type
+    return null;
+  }
+
+  // Utility: format as local ISO-like string WITHOUT timezone (so it won't shift)
+  private formatLocalISO(d: any): string {
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` +
+      `T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  }
+
+
+  // Example usage inside your component method
+  checkActualDate(compname: string) {
+    const startRaw = this.pageForm_bcdrRequest.controls['actualStartDate'].value;
+    const endRaw = this.pageForm_bcdrRequest.controls['actualEndDate'].value;
+
+    const result = this.validateFullDateTime(startRaw, endRaw /*, { allowEqual: false } */);
+
+    if (!result.valid) {
+      alert(result.message || 'Invalid date-time selection.');
+      this.patchDateValue(compname);
+      return;
+    }
+
+    // Keep local Date objects; do NOT convert to ISO
+    this.temactualstartDate = this.formatLocalISO(result?.start);
+    this.tempactualEndDate = this.formatLocalISO(result?.end);
+
+    this.getActualDates();
+  }
+
+  getActualDates() {
+    this.pageForm_bcdrRequest.patchValue({
+      actualEndDate: this.tempactualEndDate,
+      actualStartDate: this.temactualstartDate
+    });
+  }
+
+
+  patchDateValue(compname: any) {
+    if (compname == 'activityEndDate') {
+      this.pageForm_bcdrRequest.patchValue({
+        activityEndDate: this.tempEndDate,
+      });
+    }
+    if (compname == 'activityStartDate') {
+      this.pageForm_bcdrRequest.patchValue({
+        activityStartDate: this.tempStartDate,
+      });
+    }
+    if (compname == 'actualEndDate') {
+      this.pageForm_bcdrRequest.patchValue({
+        actualEndDate: this.tempactualEndDate,
+      });
+    }
+    if (compname == 'actualStartDate') {
+      this.pageForm_bcdrRequest.patchValue({
+        actualStartDate: this.temactualstartDate,
+      });
+    }
+  }
+
+
+  // Normalize any input (Date | Moment | string) to a local Date, without using toISOString()
+  normalizeToDate(value: any): Date | null {
+    if (!value) return null;
+
+    // Already a Date
+    if (value instanceof Date) return value;
+
+    // Moment.js object (without touching private _d)
+    if (value?._isAMomentObject && typeof value.toDate === 'function') {
+      return value.toDate(); // local Date representation
+    }
+
+    // String or other — let native Date parse (works for ISO strings or "YYYY-MM-DD HH:mm")
+    const d = new Date(String(value));
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  validateFullDateTime(
+    startRaw: any,
+    endRaw: any,
+    { allowEqual = false } = {}
+  ): { valid: boolean; message?: string; start?: Date; end?: Date } {
+    const start = this.normalizeToDate(startRaw);
+    const end = this.normalizeToDate(endRaw);
+
+    if (!start || !end) {
+      //  this.patchDateValue(compname)
+      return { valid: false, message: 'Please provide both Start and End date-time.' };
+    }
+
+    const startMs = start.getTime();
+    const endMs = end.getTime();
+
+    if (allowEqual ? startMs > endMs : startMs >= endMs) {
+      // this.patchDateValue(compname)
+      return { valid: false, message: 'StartDate must be greater then EndDate!!' };
+    }
+
+    return { valid: true, start, end };
+  }
+
+
+
+  checkObjectiveNewScheduleDate(compname: any) {
+    const objectives = this.pageForm_bcdrRequest.controls['lstbCDRRequestObjective']?.value ?? [];
+
+    objectives.forEach((obj: any, index: number) => {
+      const sched = obj?.lstbCDRRequestObjectiveNewScheduleModels?.[0];
+      if (!sched) return; // nothing to validate for this objective
+
+      const { valid, message, start, end } = this.validateFullDateTime(
+        sched.startTime,
+        sched.endDtime,
+        { allowEqual: false } // change to true if you want to allow identical start/end
+      );
+
+      if (!valid) {
+        alert(message ?? 'Invalid date-time selection.');
+        this.patchDateValueObjectiveNewScheduleDate(index, compname);
+        return;
+      }
+
+      // ✅ Keep local Date (no toISOString). If you prefer to store strings:
+      // this.tempobjnewSchedularstart = formatLocal(start!);
+      // this.tempobjnewSchedularend   = formatLocal(end!);
+
+      this.tempobjnewSchedularstart = this.formatLocalISO(start!);
+      this.tempobjnewSchedularend = this.formatLocalISO(end!);
+
+      this.getObjectiveNewScheduleActualDates(index);
+    });
+  }
+
+  getObjectiveNewScheduleActualDates(i: any) {
+    this.pageForm_bcdrRequest.get('lstbCDRRequestObjective')?.value[i].controls['lstbCDRRequestObjectiveNewScheduleModels'].controls[0].patchValue({
+      startTime: this.tempobjnewSchedularstart,
+      endDtime: this.tempobjnewSchedularend
+    });
+  }
+
+
+  patchDateValueObjectiveNewScheduleDate(i: any, compname: any) {
+    if (compname == 'startTime') {
+      this.pageForm_bcdrRequest.get('lstbCDRRequestObjective')?.value[i].controls['lstbCDRRequestObjectiveNewScheduleModels'].controls[0].patchValue({
+        startTime: this.tempobjnewSchedularstart
+      });
+    } else {
+      this.pageForm_bcdrRequest.get('lstbCDRRequestObjective')?.value[i].controls['lstbCDRRequestObjectiveNewScheduleModels'].controls[0].patchValue({
+        endDtime: this.tempobjnewSchedularend
+      });
+    }
+
+  }
+
+  // Main check function
+  checkDate(nb: any, compname: any) {
+    const startRaw = this.pageForm_bcdrRequest.controls['activityStartDate'].value;
+    const endRaw = this.pageForm_bcdrRequest.controls['activityEndDate'].value;
+
+    const start = this.normalizeToLocalDate(startRaw);
+    const end = this.normalizeToLocalDate(endRaw);
+
+    // If either date is missing/invalid, do nothing (or handle as needed)
+    if (!start || !end) {
+      return;
+    }
+
+    // Compare using numeric timestamps (local)
+    if (start.getTime() > end.getTime()) {
+      alert('Start Date must be less than End Date!');
+      this.patchDateValue(compname);
+      return;
+    }
+
+    // Preserve local date/time without timezone shift
+    this.tempStartDate = this.formatLocalISO(start); // or keep as Date: this.tempStartDate = start;
+    this.tempEndDate = this.formatLocalISO(end);   // or keep as Date: this.tempEndDate   = end;
+
+    this.getActivityDates();
+  }
+
+  getActivityDates() {
+    this.pageForm_bcdrRequest.patchValue({
+      activityEndDate: this.tempEndDate,
+      activityStartDate: this.tempStartDate
+    });
+  }
 
 
 

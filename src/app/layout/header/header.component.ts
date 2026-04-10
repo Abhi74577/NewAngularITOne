@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ThemeService } from '../../core/services/theme.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ClickOutsideDirective } from '../../shared/directives/click-outside.directive';
+import { storageConst } from '@app/shared/common';
+import { BaseService } from '@app/shared/services/baseService.service';
 
 @Component({
   selector: 'app-header',
@@ -13,6 +15,7 @@ import { ClickOutsideDirective } from '../../shared/directives/click-outside.dir
 export class HeaderComponent {
   @Input() isSidebarExpanded = signal(true);
   @Output() sidebarToggled = new EventEmitter<void>();
+  userProfile = this.baseService.getJSONData(storageConst.userProfile);
 
   isProfileDropdownOpen = signal(false);
   themeIcon = computed(() => {
@@ -26,7 +29,7 @@ export class HeaderComponent {
 
   constructor(
     public themeService: ThemeService,
-    private authService: AuthService
+    private authService: AuthService, private baseService: BaseService
   ) {}
 
   toggleSidebar(): void {

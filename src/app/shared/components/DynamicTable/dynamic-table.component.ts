@@ -233,7 +233,7 @@ export class DynamicTableComponent implements OnChanges {
   onAction(row: any, actiontype:any): void {
     let data = {
       type:actiontype,
-      row
+      element:row
     }
     this.onTableAction.emit(data);
   }
