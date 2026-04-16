@@ -8,7 +8,7 @@ import { ColumnConfig, DynamicTableComponent, ExpandableTableConfig } from "@app
 import { BaseService } from "@app/shared/services/baseService.service";
 import { LookupType, LookupValue } from "@app/shared/models/LookUP";
 import { appUrl, storageConst } from "@app/shared/common";
-
+import {ValidationHelper} from '../../shared/models/inputValidation'
 interface BcdrRequest {
   id: number;
   name: string;
@@ -21,11 +21,15 @@ interface BcdrRequest {
   description: string;
 }
 
-export class BCDRFilterModel {
-  dateFilter: any;
-  technology: any;
-  status: any;
-}
+// export class BCDRFilterModel {
+
+// this.filterForm = new FormGroup({
+//   dateFilter: new FormControl(null),
+//   technology: new FormControl(null),
+//   status: new FormControl(null)
+// });
+
+// }
 
 export class FormErrorStateMatcher {
   static isErrorState(control: any | null, form: FormGroup) {
@@ -71,18 +75,25 @@ export class FormErrorStateMatcher {
 })
 
 export class BcdrrequestComponent implements OnInit {
-
+  objFilter = new FormGroup({
+    dateFilter: new FormControl([]),
+    technology: new FormControl(null),
+    status: new FormControl(null)
+  });
 
   pageForm_bcdrRequest!: FormGroup;
-  currentCSTDateTime = new Date();
+  currentCSTDateTime = new Date().toLocaleString('en-US', {
+    timeZone: 'America/Chicago'
+  });
+  ;
   showClientLOB = false;
 
   // Validators helper (mock)
-  vHelper = {
-    phoneNb_RegEx: /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/,
-    email_RegEx: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-    checkUrl_RegEx: /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/
-  };
+  // vHelper = {
+  //   phoneNb_RegEx: /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/,
+  //   email_RegEx: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+  //   checkUrl_RegEx: /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/
+  // };
 
 
 
@@ -108,6 +119,7 @@ export class BcdrrequestComponent implements OnInit {
   { id: 4, name: 'Recovery Strategy' },
   { id: 5, name: 'Return to Operation' }
   ];
+  displayTabList: any = []
   // Pre-computed options for dynamic components
   divisionOptions = this.divisions.map(d => ({ label: d, value: d }));
   statusFilterOptions = this.statusOptions
@@ -138,17 +150,17 @@ export class BcdrrequestComponent implements OnInit {
     { label: "DevOps Team", value: 6 }
   ];
   activeTab: any = 1;
-  isCollapsed = false;
+  isCollapsed = true;
   rowCollapsed: boolean[] = [];
   collapsed: any;
   showPartnerDetails: boolean = false;
-  isRiskCollapsed: boolean = false;
-  showAssumptionConstraints: boolean = false;
-  isRecoveryTeamCollapsed: boolean = false;
+  isRiskCollapsed: boolean = true;
+  showAssumptionConstraints: boolean = true;
+  isRecoveryTeamCollapsed: boolean = true;
   RecoveryPlanFile: any = [];
-  isRecoveryObjCollapsed: boolean = false;
+  isRecoveryObjCollapsed: boolean = true;
   ReturnToResultFiles: any = [];
-  isObjectiveResultCollapsed: boolean = false;
+  isObjectiveResultCollapsed: boolean = true;
   lstTeamNames = new FormControl([]);
 
   itemsPerPage = signal<number>(5);
@@ -165,7 +177,7 @@ export class BcdrrequestComponent implements OnInit {
   tableData = signal<any>([]);
   lstRequests: any[] = [];
 
-  objFilter = new BCDRFilterModel();
+  // objFilter = new BCDRFilterModel();
   search: any = 'requestId';
   LstLookup: any = [];
   Lstlocation: any = [];
@@ -190,8 +202,8 @@ export class BcdrrequestComponent implements OnInit {
   isoneclickdisable: boolean = false;
   lstReviewer: any = [];
   lstApprover: any = [];
-  Val_ReviewerComment: any = null;
-  Val_ApproverComment: any = null;
+  Val_ReviewerComment: any = new FormControl(null);
+  Val_ApproverComment: any = new FormControl(null);
   Val_ReviewRequestStatus: any = new FormControl(0);
   attachmentList: any = [];
   attachmentList_recoplan: any = [];
@@ -212,7 +224,7 @@ export class BcdrrequestComponent implements OnInit {
   tempEndDate: any = this.currentCSTDateTime;
   tempobjnewSchedularstart: any = this.currentCSTDateTime;
   tempobjnewSchedularend: any = this.currentCSTDateTime;
-  constructor(private fb: FormBuilder, private baseService: BaseService, private route: ActivatedRoute) {
+  constructor(private fb: FormBuilder, private baseService: BaseService, private route: ActivatedRoute, private vHelper: ValidationHelper) {
 
   }
   ngOnInit(): void {
@@ -233,11 +245,13 @@ export class BcdrrequestComponent implements OnInit {
         this.showList = true;
       }
     });
-
-    this.createPageForm();
-    this.refreshTable();
-    this.getLookup();
-    this.getRequestList();
+    if (this.objPermission.isView) {
+      this.setDefaultTab();
+      this.createPageForm();
+      this.refreshTable();
+      this.getLookup();
+      this.getRequestList();
+    }
   }
 
   loadTableData(): void {
@@ -275,21 +289,42 @@ export class BcdrrequestComponent implements OnInit {
 
   }
 
+  filterClear() {
+
+    this.pagenation.search = '';
+    this.pagenation.sort = 'requestid desc';
+    this.objFilter.reset({
+      dateFilter: [],
+      technology: null,
+      status: null
+    });
+
+
+    this.getRequestList();
+
+  }
 
   getRequestList() {
 
-    let tickCnvrtr: any = [];
-    if (this.objFilter.dateFilter != undefined) {
-      const epochOffset = 621355968000000000;
-      const ticksPerMillisecond = 10000;
-      this.objFilter.dateFilter.forEach((element: any) => {
-        tickCnvrtr.push((element.getFullYear() + '-' + (element.getMonth() + 1) + '-' + element.getDate()).toString());
+
+    const dateFilterValue = this.objFilter.get('dateFilter')?.value as Date[] | null;
+    const tickCnvrtr: string[] = [];
+
+    if (dateFilterValue && dateFilterValue.length > 0) {
+
+      dateFilterValue.forEach((date: Date) => {
+        const formattedDate =
+          `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+        tickCnvrtr.push(formattedDate);
       });
+
+      console.log(tickCnvrtr);
     }
+
     let body = {
       "dateFilter": tickCnvrtr,
-      "technology": this.objFilter.technology,
-      "status": this.objFilter.status,
+      "technology": this.objFilter.get('technology')?.value,
+      "status": this.objFilter.get('status')?.value,
       "requestId": "string",
       "requestorName": "string"
     };
@@ -307,6 +342,22 @@ export class BcdrrequestComponent implements OnInit {
           this.refreshTable();
         }
       });
+  }
+
+  fnTabClick(id: any) {
+    this.activeTab = id;
+    if (this.activeTab == 5 && this.IsEdit && (this.objPermission.isEdit)
+      && (this.pageForm_bcdrRequest.get('requestStatus')?.value == LookupValue.ApprovedbyApprover ||
+        this.pageForm_bcdrRequest.get('requestStatus')?.value == LookupValue.ReexecuteFailedObjective)) { this.pageForm_bcdrRequest.enable(); }
+    else if (this.objPermission.isEdit && this.pageForm_bcdrRequest.get('requestStatus')?.value == LookupValue.Revise) {
+      this.pageForm_bcdrRequest.enable();
+    }
+    else if (this.pageForm_bcdrRequest.get('requestStatus')?.value === LookupValue.Draft) {
+      this.pageForm_bcdrRequest.enable();
+    }
+    else if (this.IsEdit) { this.pageForm_bcdrRequest.disable(); }
+
+
   }
 
 
@@ -347,27 +398,27 @@ export class BcdrrequestComponent implements OnInit {
       lstbCDRRequestRisk: this.fb.array([]),
       lstbCDRRequestAssumption: this.fb.array([]),
       lstbCDRRequestClient: this.fb.array([]),
-      activityStartDate: [null, Validators.required],
-      activityEndDate: [null, Validators.required],
+      activityStartDate: [this.currentCSTDateTime, Validators.required],
+      activityEndDate: [this.currentCSTDateTime, Validators.required],
       bussinessPartnerName: [null],
       bussinessPartnerContactNumber: [null, [Validators.pattern(this.vHelper.phoneNb_RegEx)]],
       bussinessPartnerAddress: [null],
-      bussinessPartnerEmailAddress: [null, [Validators.pattern(this.vHelper.email_RegEx)]],
+      bussinessPartnerEmailAddress: [null, [Validators.email]],
       productLocationName: [null, Validators.required],
-      productLocationEmailAddress: [null, [Validators.required, Validators.pattern(this.vHelper.email_RegEx)]],
+      productLocationEmailAddress: [null, [Validators.required, Validators.email]],
       productLocationContactNumber: [null, [Validators.required, Validators.pattern(this.vHelper.phoneNb_RegEx)]],
       productLocations: [null, Validators.required],
       recoveryLocationName: [null, Validators.required],
-      recoveryLocationEmailAddress: [null, [Validators.required, Validators.pattern(this.vHelper.email_RegEx)]],
+      recoveryLocationEmailAddress: [null, [Validators.required, Validators.email]],
       recoveryLocationContactNumber: [null, [Validators.required, Validators.pattern(this.vHelper.phoneNb_RegEx)]],
       recoveryLocations: [null, Validators.required],
       conferanceBridge: [null, [Validators.required, Validators.pattern(this.vHelper.checkUrl_RegEx)]],
       helpdeskTicketNumber: [null, Validators.required],
       helpdeskTicketDetails: [null, Validators.required],
       emergencyContactNumber: [null, [Validators.required, Validators.pattern(this.vHelper.phoneNb_RegEx)]],
-      emergencyContactEmailAddress: [null, [Validators.required, Validators.pattern(this.vHelper.email_RegEx)]],
+      emergencyContactEmailAddress: [null, [Validators.required, Validators.email ]],
       helpdeskContactNumber: ['+91-9365592206', [Validators.pattern(this.vHelper.phoneNb_RegEx)]],
-      helpdeskContactEmailAddress: ['Helpdesk@etsnetwork.com', [Validators.required, Validators.pattern(this.vHelper.email_RegEx)]],
+      helpdeskContactEmailAddress: ['Helpdesk@etsnetwork.com', [Validators.required, Validators.email ]],
       isCommunicatedWithCustomer: ['No', Validators.required],
       isExternalClientNotified: ['No', Validators.required],
       recoveryTimeObjective: [null, Validators.required],
@@ -430,15 +481,15 @@ export class BcdrrequestComponent implements OnInit {
       recoveryTeamDesignation: [null, Validators.required],
       recoveryTeamSupervisor: [null, Validators.required],
       recoveryTeamContactNumber: [null, [Validators.required, Validators.pattern(this.vHelper.phoneNb_RegEx)]],
-      recoveryTeamEmailAddress: [null, [Validators.required, Validators.pattern(this.vHelper.email_RegEx)]],
+      recoveryTeamEmailAddress: [null, [Validators.required, Validators.email, Validators.pattern(this.vHelper.email_RegEx)]],
       recoveryTeamLocationId: [null, Validators.required],
       recoveryStrategyStartTime: [null],
       recoveryStrategyEndTime: [null],
       recoveryStrategyEstimatedTime: [null],
       recoveryStrategyExpectedResult: [null, Validators.required],
       recoveryStrategySuccessorTeam: [null, Validators.required],
-      recoveryStrategyContactNumber: [null, [Validators.pattern(this.vHelper.phoneNb_RegEx)]],
-      recoveryStrategyEmailAddress: [null, [Validators.required, Validators.pattern(this.vHelper.email_RegEx)]],
+      recoveryStrategyContactNumber: [null],
+      recoveryStrategyEmailAddress: [null, [Validators.required, Validators.email, Validators.pattern(this.vHelper.email_RegEx)]],
       returnToOperationResult: [null],
       returnToOperationResultComment: [null],
       lstbCDRRequestObjectiveNewScheduleModels: this.fb.array([]),
@@ -564,7 +615,7 @@ export class BcdrrequestComponent implements OnInit {
       lOBName: [null],
       contactNumber: [null, [Validators.pattern(this.vHelper.phoneNb_RegEx)]],
       location: [null],
-      emailAddress: [null, [Validators.pattern(this.vHelper.email_RegEx)]],
+      emailAddress: [null, [Validators.email, Validators.pattern(this.vHelper.email_RegEx)]],
     });
     this.clientLOB(index).push(clientLOBForm);
   }
@@ -587,7 +638,7 @@ export class BcdrrequestComponent implements OnInit {
       RequestTeamInvolvementMappingId: [0],
       requestId: [0],
       name: [null, Validators.required],
-      emailAddress: [null, [Validators.required, Validators.pattern(this.vHelper.email_RegEx)]],
+      emailAddress: [null, [Validators.required, Validators.email, Validators.pattern(this.vHelper.email_RegEx)]],
       isActive: true,
       createdBy: [0],
       updatedBy: [0],
@@ -842,7 +893,7 @@ export class BcdrrequestComponent implements OnInit {
     if (!control || !control.errors) return '';
 
     if (control.hasError('required')) return 'This field is required';
-    if (control.hasError('email')) return 'Please enter a valid email address';
+    if (control.hasError('email')) return ' Invalid email address.';
     if (control.hasError('pattern')) return 'This field has an invalid format';
     if (control.hasError('minlength')) {
       const minLength = control.errors['minlength']?.requiredLength;
@@ -1204,9 +1255,22 @@ export class BcdrrequestComponent implements OnInit {
     return numberArray;
   }
 
+  get objectivesInvalid(): boolean {
+    return this.pageForm_bcdrRequest.get('lstbCDRRequestObjective')?.invalid ?? true;
+  }
+
+  setDefaultTab() {
+    this.displayTabList = [];
+    for (let index = 0; index < this.tabList.length - 1; index++) {
+      const element = this.tabList[index];
+      this.displayTabList.push(element)
+    }
+  }
+
+
   onTableAction(event: any): void {
     if (event.type === 'download') {
-      this.baseService.Export('GET', `/BCDR/GetById?requestId=${event.element}&isExport=true`, null)
+      this.baseService.Export('GET', `/BCDR/GetById?requestId=${event.element.requestId}&isExport=true`, null)
         .subscribe((data: any) => {
           if (data.body.byteLength > 0) {
             let blob = new Blob([data.body], { type: "application/pdf" });
@@ -1241,7 +1305,7 @@ export class BcdrrequestComponent implements OnInit {
       this.attachmentList = [];
       this.attachmentList_recoplan = [];
       this.attachmentList_result = [];
-      // this.setDefaultTab();
+      this.setDefaultTab();
 
       this.baseService.callAPI('GET', `/BCDR/GetById?requestId=${event.element.requestId}`, null)
         .subscribe((data) => {
@@ -1335,30 +1399,8 @@ export class BcdrrequestComponent implements OnInit {
             // let arr_objective = <FormArray>this.pageForm_bcdrRequest.controls.lstbCDRRequestObjective;
             // arr_objective.removeAt(0);
             this.objectives.removeAt(0);
-            res.lstbCDRRequestObjective.forEach((x: any, index: any) => {
+            (res.lstbCDRRequestObjective ?? []).forEach((x: any, index: number) => {
               this.addObjective();
-              if (x.lstbCDRRequestObjectiveNewScheduleModels.length == 0) {
-                //  this.tempArray.push(x.lstbCDRRequestObjectiveNewScheduleModels);
-                x.lstbCDRRequestObjectiveNewScheduleModels = this.fb.array([]);
-              } else {
-                this.addObjectiveNewSchedule(index);
-                this.pageForm_bcdrRequest.get('lstbCDRRequestObjective')?.value["controls"][index].controls['lstbCDRRequestObjectiveNewScheduleModels'].controls[0].patchValue({
-                  requestObjectiveNewScheduleId: x.lstbCDRRequestObjectiveNewScheduleModels[0].requestObjectiveNewScheduleId,
-                  requestObjectiveMappingId: x.lstbCDRRequestObjectiveNewScheduleModels[0].requestObjectiveMappingId,
-
-                  result: x.lstbCDRRequestObjectiveNewScheduleModels[0].result,
-                  startTime: x.lstbCDRRequestObjectiveNewScheduleModels[0].startTime,
-                  endDtime: x.lstbCDRRequestObjectiveNewScheduleModels[0].endDtime,
-                  estimatedTime: x.lstbCDRRequestObjectiveNewScheduleModels[0].estimatedTime,
-                  comment: x.lstbCDRRequestObjectiveNewScheduleModels[0].comment,
-                  isActive: x.lstbCDRRequestObjectiveNewScheduleModels[0].isActive,
-                  createdBy: x.lstbCDRRequestObjectiveNewScheduleModels[0].createdBy,
-                  updatedBy: x.lstbCDRRequestObjectiveNewScheduleModels[0].updatedBy,
-                  createdOn: x.lstbCDRRequestObjectiveNewScheduleModels[0].createdOn,
-                  updatedOn: x.lstbCDRRequestObjectiveNewScheduleModels[0].updatedOn,
-                });
-              }
-              console.log(this.objectives.value);
 
               this.objectives.at(index).patchValue({
                 requestObjectiveMappingId: x.requestObjectiveMappingId,
@@ -1380,17 +1422,21 @@ export class BcdrrequestComponent implements OnInit {
                 recoveryStrategyEmailAddress: x.recoveryStrategyEmailAddress,
                 returnToOperationResult: x.returnToOperationResult,
                 returnToOperationResultComment: x.returnToOperationResultComment,
-                isActive: x.isActive,
-                createdBy: x.createdBy,
-                updatedBy: x.updatedBy,
-                createdOn: x.createdOn,
-                updatedOn: x.updatedOn
+                isActive: x.isActive
               });
-              // arr_objective.push(this.fb.group(x));
-              console.log(this.objectives.value);
-            })
 
-            //this.setActivityDates(res.activityStartDate, res.activityEndDate);
+              const schedules = x.lstbCDRRequestObjectiveNewScheduleModels ?? [];
+              if (schedules.length > 0) {
+                this.addObjectiveNewSchedule(index);
+                this.objectives
+                  .at(index)
+                  .get('lstbCDRRequestObjectiveNewScheduleModels')
+                  ?.get([0])
+                  ?.patchValue(schedules[0]);
+              }
+            });
+
+
             this.setRecoveryObjectiveDates();
             //this.setactualDate(res.actualStartDate, res.actualEndDate);
 
@@ -1507,12 +1553,14 @@ export class BcdrrequestComponent implements OnInit {
             // this.conditionalControlDisabled=true;
 
             if (res.requestStatus >= LookupValue.ApprovedbyApprover) {
-              // this.displayTabList = this.tabList;
-              if (res.actualStartDate == null)
+              this.displayTabList = this.tabList;
+              if (res.actualStartDate == null) {
                 this.pageForm_bcdrRequest.patchValue({
                   actualStartDate: this.currentCSTDateTime,
                   actualEndDate: this.currentCSTDateTime
                 });
+
+              }
 
               if (res.requestStatus == LookupValue.ApprovedbyApprover) {
                 this.isShowApprovebtn = true;
@@ -1526,7 +1574,7 @@ export class BcdrrequestComponent implements OnInit {
               this.IsEdit = false;
               this.IsdtTimeActivity = true;
             }
-            else if ((this.objPermission.isReView || this.objPermission.isApprove) && res.requestStatus != LookupValue.Draft) {
+            else if ((this.objPermission.isReView || this.objPermission.isApprove) && (res.requestStatus != LookupValue.Draft && res.requestStatus != LookupValue.ApprovedbyApprover)) {
               this.pageForm_bcdrRequest.disable();
             }
             else if (res.requestStatus === LookupValue.Draft) {
@@ -1781,11 +1829,27 @@ export class BcdrrequestComponent implements OnInit {
     });
 
     //checking Null/Undefined value in involvedTeam in edit 
-    if (this.lstTeamNames != null || this.lstTeamNames != undefined) {
+
+    const teamNames = this.lstTeamNames?.value;
+
+    if (Array.isArray(teamNames) && teamNames.length > 0) {
+
+      // ✅ Remove NaN values
+      const cleanedList = teamNames.filter(
+        (x: any) => !Number.isNaN(x)
+      );
+
+      // ✅ Update the control
+      this.lstTeamNames.setValue(cleanedList);
+
+      // ✅ Patch dependent field
       this.pageForm_bcdrRequest.patchValue({
-        involvedTeam: (typeof (this.lstTeamNames) != 'string' && typeof (this.lstTeamNames) != 'undefined') ? this.lstTeamNames.toString() : this.lstTeamNames
+        involvedTeam: cleanedList.length > 0
+          ? cleanedList.join(',')
+          : null
       });
     }
+
 
     //this.getActivityDates();
     this.getRecoveryObjectiveDates();
@@ -1813,9 +1877,9 @@ export class BcdrrequestComponent implements OnInit {
   }
 
   SubmitReturnToOperation() {
-    if (this.pageForm_bcdrRequest.get('lstbCDRRequestObjective')?.value.filter((x: any) => x.value.returnToOperationResultComment == null).length != 0
-      || this.pageForm_bcdrRequest.get('lstbCDRRequestObjective')?.value.filter((x: any) => x.value.returnToOperationResultComment == "").length != 0 ||
-      this.pageForm_bcdrRequest.get('lstbCDRRequestObjective')?.value.filter((x: any) => x.value.returnToOperationResult == null).length != 0
+    if (this.pageForm_bcdrRequest.get('lstbCDRRequestObjective')?.value.filter((x: any) => x.returnToOperationResultComment == null).length != 0
+      || this.pageForm_bcdrRequest.get('lstbCDRRequestObjective')?.value.filter((x: any) => x.returnToOperationResultComment == "").length != 0 ||
+      this.pageForm_bcdrRequest.get('lstbCDRRequestObjective')?.value.filter((x: any) => x.returnToOperationResult == null).length != 0
     ) {
       this.isbCDRRequestObjective = true;
       alert("Please fill all required fields in Return to Operation (Tab)");
@@ -1823,15 +1887,31 @@ export class BcdrrequestComponent implements OnInit {
 
       this.isbCDRRequestObjective = false;
       //checking Null/Undefined value in involvedTeam in edit 
-      if (this.lstTeamNames != null || this.lstTeamNames != undefined) {
+
+      const teamNames = this.lstTeamNames?.value;
+
+      if (Array.isArray(teamNames) && teamNames.length > 0) {
+
+        // ✅ Remove NaN values
+        const cleanedList = teamNames.filter(
+          (x: any) => !Number.isNaN(x)
+        );
+
+        // ✅ Update the control
+        this.lstTeamNames.setValue(cleanedList);
+
+        // ✅ Patch dependent field
         this.pageForm_bcdrRequest.patchValue({
-          involvedTeam: (typeof (this.lstTeamNames) != 'string' && typeof (this.lstTeamNames) != 'undefined') ? this.lstTeamNames.toString() : this.lstTeamNames
+          involvedTeam: cleanedList.length > 0
+            ? cleanedList.join(',')
+            : null
         });
       }
+
       let ArrayObjectiveModels: any = [];
-      if (this.pageForm_bcdrRequest.controls['lstbCDRRequestObjective'].value != undefined) {
+      if (this.pageForm_bcdrRequest.get('lstbCDRRequestObjective')?.value != undefined) {
         let lstObjectives: any;
-        this.pageForm_bcdrRequest.controls['lstbCDRRequestObjective'].value.forEach((element: any) => {
+        this.pageForm_bcdrRequest.get('lstbCDRRequestObjective')?.value.forEach((element: any) => {
           // if (element.recoveryStrategyStartTime != null && element.recoveryStrategyStartTime.length) {
           // lstObjectives.requestObjectiveMappingId = element.requestObjectiveMappingId;
           // lstObjectives.returnToOperationResult = element.returnToOperationResult;
@@ -1882,9 +1962,29 @@ export class BcdrrequestComponent implements OnInit {
 
   updatestatus() {
     let TeamName = null;
-    if (this.lstTeamNames != null) {
-      TeamName = typeof (this.lstTeamNames) != 'string' ? this.lstTeamNames.toString() : this.lstTeamNames
+
+    const teamNames = this.lstTeamNames?.value;
+
+    if (Array.isArray(teamNames) && teamNames.length > 0) {
+
+      // ✅ Remove NaN values
+      const cleanedList = teamNames.filter(
+        (x: any) => !Number.isNaN(x)
+      );
+
+      // ✅ Update the control
+      this.lstTeamNames.setValue(cleanedList);
+
+      // ✅ Patch dependent field
+      TeamName = cleanedList.length > 0
+        ? cleanedList.join(',')
+        : null
+
     }
+
+    // if (this.lstTeamNames != null) {
+    //   TeamName = typeof (this.lstTeamNames) != 'string' ? this.lstTeamNames.value?.toString() : null
+    // }
     let body =
     {
       "BCDRRequestId": this.pageForm_bcdrRequest.controls['requestId'].value,
@@ -1893,7 +1993,7 @@ export class BcdrrequestComponent implements OnInit {
       "ApproverId": this.pageForm_bcdrRequest.controls['approverId'].value,
       "CreatedBy": this.pageForm_bcdrRequest.controls['createdBy'].value,
       "InvolvedTeam": TeamName,
-      "recordStatus": this.Val_ReviewRequestStatus,
+      "recordStatus": this.Val_ReviewRequestStatus.value,
       "Comment": this.objPermission.isReView ? this.Val_ReviewerComment : this.Val_ApproverComment
     };
 
@@ -1936,6 +2036,19 @@ export class BcdrrequestComponent implements OnInit {
           }
         });
     }
+  }
+
+
+  deleteAttachmentDraft_Revise(id: any) {
+    let idx = this.attachmentList_recoplan.findIndex((x: any) => x.attachmentId == id);
+    this.attachmentList_recoplan.splice(idx, 1);
+    console.log(this.attachmentList_recoplan);
+    console.log(id);
+    this.baseService.callAPI('Delete', `/Attachment/Delete?attachmentId=${id}`, null)
+      .subscribe((data) => {
+        const res = this.baseService.GetResponse(data, true);
+
+      });
   }
 
   uploadReturnToResultFiles(requestId: any) {
@@ -2010,7 +2123,7 @@ export class BcdrrequestComponent implements OnInit {
     this.Assumptions.removeAt(0);
     this.getRequestList();
     this.activeTab = 1
-    // this.setDefaultTab();
+    this.setDefaultTab();
     this.createPageForm();
   }
 
@@ -2191,25 +2304,60 @@ export class BcdrrequestComponent implements OnInit {
     });
   }
 
-  getObjectiveNewScheduleActualDates(i: any) {
-    this.pageForm_bcdrRequest.get('lstbCDRRequestObjective')?.value[i].controls['lstbCDRRequestObjectiveNewScheduleModels'].controls[0].patchValue({
+
+  getObjectiveNewScheduleActualDates(i: number): void {
+
+    const objectivesFA = this.pageForm_bcdrRequest.get(
+      'lstbCDRRequestObjective'
+    ) as FormArray;
+
+    if (!objectivesFA || !objectivesFA.at(i)) return;
+
+    const objectiveFG = objectivesFA.at(i) as FormGroup;
+
+    const scheduleFA = objectiveFG.get(
+      'lstbCDRRequestObjectiveNewScheduleModels'
+    ) as FormArray;
+
+    if (!scheduleFA || !scheduleFA.at(0)) return;
+
+    const scheduleFG = scheduleFA.at(0) as FormGroup;
+
+    scheduleFG.patchValue({
       startTime: this.tempobjnewSchedularstart,
       endDtime: this.tempobjnewSchedularend
     });
   }
 
 
-  patchDateValueObjectiveNewScheduleDate(i: any, compname: any) {
-    if (compname == 'startTime') {
-      this.pageForm_bcdrRequest.get('lstbCDRRequestObjective')?.value[i].controls['lstbCDRRequestObjectiveNewScheduleModels'].controls[0].patchValue({
+
+  patchDateValueObjectiveNewScheduleDate(index: number, compname: 'startTime' | 'endTime') {
+
+    const objectivesFA = this.pageForm_bcdrRequest.get(
+      'lstbCDRRequestObjective'
+    ) as FormArray;
+
+    if (!objectivesFA?.at(index)) return;
+
+    const objectiveFG = objectivesFA.at(index) as FormGroup;
+
+    const scheduleFA = objectiveFG.get(
+      'lstbCDRRequestObjectiveNewScheduleModels'
+    ) as FormArray;
+
+    if (!scheduleFA?.at(0)) return;
+
+    const scheduleFG = scheduleFA.at(0) as FormGroup;
+
+    if (compname === 'startTime') {
+      scheduleFG.patchValue({
         startTime: this.tempobjnewSchedularstart
       });
     } else {
-      this.pageForm_bcdrRequest.get('lstbCDRRequestObjective')?.value[i].controls['lstbCDRRequestObjectiveNewScheduleModels'].controls[0].patchValue({
+      scheduleFG.patchValue({
         endDtime: this.tempobjnewSchedularend
       });
     }
-
   }
 
   // Main check function
@@ -2301,19 +2449,54 @@ export class BcdrrequestComponent implements OnInit {
    * Change items per page
    */
   changeItemsPerPage(newValue: any): void {
-    this.itemsPerPage.set(newValue);
+    this.pagenation.pageSize = newValue;
+    this.getRequestList();
+    // this.itemsPerPage.set(newValue);
   }
 
   onSerchChange(newVal: string): void {
-    this.search = newVal.trim();
+    console.log(newVal)
+    this.pagenation.search = newVal.trim();
     this.getRequestList();
   }
 
   onPageChange(newPage: number): void {
     this.pagenation.pageNo = newPage;
-    // this.getUsers()
+    this.getRequestList();
     console.log('Page changed to:', newPage);
   }
+
+  onShortChanges(name: any) {
+    this.pagenation.sort = name;
+    this.getRequestList();
+    console.log(this.pagenation.sort)
+  }
+
+
+
+
+  // --valiaditon check
+
+  CheckSpecialChar(event:any) {
+    return this.vHelper.CheckSpecialChar(event);
+  }
+
+  allowCertainSpecChar(event:any) {
+    return this.vHelper.allowCertainSpecChar(event);
+  }
+
+  OnlyNumber(event:any) {
+    return this.vHelper.OnlyNumber(event);
+  }
+
+  alfaNumricwithSpace(event:any) {
+    return this.vHelper.alfaNumricwithSpace(event);
+  }
+
+  onlyAlfabetic(event:any) {
+    return this.vHelper.onlyAlfabetic(event);
+  }
+
 
 
 

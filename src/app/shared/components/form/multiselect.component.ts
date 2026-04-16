@@ -58,7 +58,7 @@ export interface MultiSelectFieldConfig extends FieldConfig {
 
           <ng-container *ngIf="selectedItems.length > 0; else placeholder">
             <span *ngFor="let item of selectedItems; trackBy: trackByFn"
-                  class="flex items-center gap-1 px-2 py-1 text-xs rounded-lg
+                  class="flex items-center gap-1 px-3 py-1 text-xs rounded-md
                          bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
 
               {{ item.label }}
@@ -80,7 +80,7 @@ export interface MultiSelectFieldConfig extends FieldConfig {
         </div>
 
         <div class="flex items-center gap-2">
-          <i *ngIf="selectedItems.length > 0"
+          <i *ngIf="selectedItems.length > 0 && !isDisabled"
              (click)="clearAll($event)"
              class="fas fa-times text-red-500 hover:text-red-700 cursor-pointer">
           </i>

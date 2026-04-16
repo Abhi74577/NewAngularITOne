@@ -141,9 +141,23 @@
 
                 <ng-template [ngSwitchCase]="'Edit_info_conditional'">
 
-                  <button (click)="onAction(row, 'edit')"
-                    class="p-2 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 text-gray-400 hover:text-blue-600 transition">
-                    ✏️
+                  <button (click)="onAction(row, 'edit')" *ngIf="row.requestStatus !='Completed'"
+                    class="p-2 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 text-gray-600 dark:text-gray-400 hover:text-blue-600 transition">
+                    <i class="fa fa-edit" title="Edit"></i>
+                  </button>
+                   <button (click)="onAction(row, 'info')" *ngIf="row.requestStatus=='Completed'"
+                    class="p-2 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 text-gray-600 dark:text-gray-400 hover:text-blue-600 transition">
+                    <i class="fa fa-eye"></i>
+                  </button>
+
+                </ng-template>
+
+                  <ng-template [ngSwitchCase]="'download'">
+
+                
+                   <button (click)="onAction(row, 'download')" *ngIf="row.requestStatus=='Completed'"
+                    class="p-2 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 text-gray-600 dark:text-gray-400 hover:text-blue-600 transition">
+                    <i class="fa fa-download" title="Download"></i> 
                   </button>
 
                 </ng-template>

@@ -107,7 +107,7 @@ export class SidebarComponent implements OnInit {
   }
 
   getLogoText(): string {
-    return this.isExpanded() ? 'NewITOne' : 'N';
+    return this.isExpanded() ? 'ITOne' : 'IT';
   }
 
   isRouteActive(route?: string): boolean {

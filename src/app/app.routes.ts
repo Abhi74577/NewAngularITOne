@@ -10,11 +10,13 @@ import { TestLoaderComponent } from './pages/test-loader/test-loader.component';
 import { AuthGuard } from './core/guards/auth.guard';
 
 
+
 export const APP_ROUTES: Routes = [
   {
     path: 'login',
     component: LoginComponent,
   },
+
   {
     path: '',
     component: LayoutComponent,

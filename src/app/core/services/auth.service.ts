@@ -22,7 +22,7 @@ export class AuthService {
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
   public currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) { }
 
   /**
    * Login with static admin credentials
@@ -47,9 +47,9 @@ export class AuthService {
           observer.next({ success: true, message: 'Login successful!' });
           observer.complete();
         } else {
-          observer.next({ 
-            success: false, 
-            message: 'Invalid credentials. Use admin@example.com / admin123' 
+          observer.next({
+            success: false,
+            message: 'Invalid credentials. Use admin@example.com / admin123'
           });
           observer.complete();
         }
@@ -60,12 +60,31 @@ export class AuthService {
   /**
    * Logout the current user
    */
+  // logout(): void {
+  // localStorage.clear();
+  //   // this.isAuthenticatedSubject.next(false);
+  //   // this.currentUserSubject.next(null);
+  //   var ReturnURL = localStorage.getItem('sourceUrl')
+  //   window.open('ReturnURL')
+  //   this.router.navigate(['/login']);
+  // }
+
   logout(): void {
-  localStorage.clear();
+    const ReturnURL: any = localStorage.getItem('sourceUrl')?.toString()
+    localStorage.clear();
     // this.isAuthenticatedSubject.next(false);
     // this.currentUserSubject.next(null);
-    this.router.navigate(['/login']);
+
+    console.log(ReturnURL)
+    window.open(ReturnURL, '_self')
+    // this.router.navigate(['/login']);
   }
+
+  // logout(): void {
+  // localStorage.clear();
+
+  //   this.router.navigate(['/login']);
+  // }
 
   /**
    * Check if user is authenticated

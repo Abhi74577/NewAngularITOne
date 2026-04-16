@@ -23,7 +23,7 @@
 }
 
 .btn-secondary {
-  @apply px-5 py-2 bg-gray-300 rounded-lg hover:bg-gray-400;
+  @apply px-5 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 dark:text-gray-600;
 }
 
 .btn-danger {

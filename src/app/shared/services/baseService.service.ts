@@ -29,10 +29,10 @@ export class BaseService {
         this.AppVersion.next(pversion);
       })
   }
- 
-  callAPI(type:any, url:any, body:any) {
-    this.progressBarService.showProgress(10, true);
-    if (type === 'POST' || type === 'PUT') {
+
+  callAPI(type: any, url: any, body: any) {
+    // this.progressBarService.showProgress(10, true);
+    if (type === 'POST' || type === 'PUT' || type == 'GET') {
       this.progressBarService.showProgressBlock(true);
     }
     if ((type === 'POST' || type === 'PUT') && body !== undefined) { this.trimObj(body); }
@@ -42,10 +42,10 @@ export class BaseService {
         catchError((error) => this.handleError(error))
       );
   }
- 
-    // this.progressBarService.showProgress(10, true);
-  Export(type:any, url:any, body:any) {
-   // this.progressBarService.showProgress(10, true);
+
+  // this.progressBarService.showProgress(10, true);
+  Export(type: any, url: any, body: any) {
+    this.progressBarService.showProgressBlock(true);
     if (type === 'POST' || type === 'PUT') {
       this.progressBarService.showProgressBlock(true);
     }
@@ -57,7 +57,7 @@ export class BaseService {
   }
 
 
-  callFormAPI(type:any, url:any, body:any) {
+  callFormAPI(type: any, url: any, body: any) {
     this.http = new HttpClient(this.filehendling);
     this.progressBarService.showProgress(10, true);
     if (type === 'POST' || type === 'PUT') {
@@ -70,7 +70,7 @@ export class BaseService {
         catchError(this.handleError));
   }
 
-  callAPTask(type:any, url:any, body:any) {
+  callAPTask(type: any, url: any, body: any) {
     this.progressBarService.showProgress(10, true);
     if (type === 'POST' || type === 'PUT') {
       this.progressBarService.showProgressBlock(true);
@@ -87,7 +87,7 @@ export class BaseService {
     this.progressBarService.showProgressBlock(false);
     let errorMessage = '';
     if (error.error instanceof ErrorEvent) {
-      errorMessage = `Error: ${error.error.message}`;
+      errorMessage = `Error: ${error.message}`;
     } else {
       errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
     }
@@ -96,7 +96,7 @@ export class BaseService {
       this.clearCache();
       this.router.navigate(['/login']);
     }
-    this.toasterService.showMessage('error', error.error.message);
+    // this.toasterService.showMessage('error', error.message);
     if (error.error.statusCode === 403 || error.error.statusCode === 401) {
       this.clearCache();
       this.router.navigate(['/login']);
@@ -104,7 +104,7 @@ export class BaseService {
     return throwError(errorMessage);
   }
 
-  getHMAC(apiKey:any, secret:any, deviceId:any, nounce:any) {
+  getHMAC(apiKey: any, secret: any, deviceId: any, nounce: any) {
     if (!StringExtension.IsNullOrWhiteSpace(apiKey) && !StringExtension.IsNullOrWhiteSpace(secret)) {
       apiKey = apiKey.replace(/-/g, '');
       const stringVal = (`${(apiKey)}:${(deviceId)}:${(nounce)}`);
@@ -115,7 +115,7 @@ export class BaseService {
     }
 
   }
-getHeader(FromForm?: boolean) {
+  getHeader(FromForm?: boolean) {
     const userData = (this.getData(storageConst.userProfile));
     if (!StringExtension.IsNullOrWhiteSpace(userData)) {
       const user = JSON.parse(userData);
@@ -150,52 +150,28 @@ getHeader(FromForm?: boolean) {
         });
       }
     } else {
- 
+
       return new HttpHeaders({
         'X-APIKEY': '',
         Authorization: '',
         'Content-Type': 'application/json'
       });
- 
+
     }
   }
 
-GetResponseVarify(data:any, toaster:any) {
-    this.progressBarService.showProgress(100, false);
+  GetResponse(data: any, toaster: any) {
+    // this.progressBarService.showProgress(100, false);
     this.progressBarService.showProgressBlock(false);
-    if (data.body !== undefined) {
-      if (data.body.statusCodes !== 400) {
-        if (toaster) {
-          this.toasterService.showMessage('success', 'Verify successfully');
-        }
-        const decryptedData = Encryption.decryptfunction(data.body.data)
-        const decryptedMessage = Encryption.decryptfunction(data.body.message);
-        const decryptedStatusCode = Encryption.decryptfunction(data.body.statusCodes); // Implement your decryption logic here
-        return { data: decryptedData, message: decryptedMessage, statusCodes: decryptedStatusCode };
-      }
-      else{
-        if (toaster) {
-          this.toasterService.showMessage('warning', data.body.message);
-        }
-        const decryptedData = Encryption.decryptfunction(data.body.data); // Implement your decryption logic here
-        return JSON.parse(decryptedData, function (prop, value) {
-          var lower = prop.charAt(0).toLowerCase() + prop.substring(1);
-          if (prop === lower) return value;
-          else this[lower] = value;
-        });
-      }
-    }
-  }
- 
-GetResponse(data:any, toaster:any) {
-    this.progressBarService.showProgress(100, false);
-    this.progressBarService.showProgressBlock(false);
-    if (data.body !== undefined) {
+    if (data.body !== null) {
       if (data.body.statusCodes === 200) {
         if (toaster) {
-          this.toasterService.showMessage('success', data.body.message);
+          if (data.body.message !== null) {
+            this.toasterService.showMessage('success', data.body.message);
+          }
+
         }
- 
+
         const decryptedData = Encryption.decryptfunction(data.body.data); // Implement your decryption logic here
         return JSON.parse(decryptedData, function (prop, value) {
           var lower = prop.charAt(0).toLowerCase() + prop.substring(1);
@@ -206,7 +182,7 @@ GetResponse(data:any, toaster:any) {
         if (toaster) {
           this.toasterService.showMessage('warning', data.body.message);
         }
- 
+
         const decryptedData = Encryption.decryptfunction(data.body.data); // Implement your decryption logic here
         return JSON.parse(decryptedData, function (prop, value) {
           var lower = prop.charAt(0).toLowerCase() + prop.substring(1);
@@ -216,7 +192,7 @@ GetResponse(data:any, toaster:any) {
       }
       else if (data.body.statusCodes > 400 && data.body.statusCodes < 499) {
         this.toasterService.showMessage('warning', data.body.message);
- 
+
         const decryptedData = Encryption.decryptfunction(data.body.data); // Implement your decryption logic here
         return JSON.parse(decryptedData, function (prop, value) {
           var lower = prop.charAt(0).toLowerCase() + prop.substring(1);
@@ -228,7 +204,7 @@ GetResponse(data:any, toaster:any) {
         if (toaster) {
           this.toasterService.showMessage('warning', data.body.message);
         }
- 
+
         const decryptedData = Encryption.decryptfunction(data.body.data); // Implement your decryption logic here
         return JSON.parse(decryptedData, function (prop, value) {
           var lower = prop.charAt(0).toLowerCase() + prop.substring(1);
@@ -239,20 +215,20 @@ GetResponse(data:any, toaster:any) {
     }
   }
 
-  setData(id:any, data:any) {
+  setData(id: any, data: any) {
     localStorage.setItem(id, Encryption.encrypt(data));
     // this.persistenceService.set(id, Encryption.encrypt(data), { type: StorageType.LOCAL });
   }
-  getData(id:any) {
+  getData(id: any) {
     return Encryption.decrypt(localStorage.getItem(id));
     // return Encryption.decrypt(this.persistenceService.get(id, StorageType.LOCAL));
   }
 
-  setJSONData(id:any, data:any) {
+  setJSONData(id: any, data: any) {
     localStorage.setItem(id, Encryption.encrypt(JSON.stringify(data)));
     // this.persistenceService.set(id, Encryption.encrypt(JSON.stringify(data)), { type: StorageType.LOCAL });
   }
-  getJSONData(id:any) {
+  getJSONData(id: any) {
     const data = Encryption.decrypt(localStorage.getItem(id));
     // const data = Encryption.decrypt(this.persistenceService.get(id, StorageType.LOCAL));
     if (!StringExtension.IsNullOrWhiteSpace(data)) {
@@ -260,7 +236,7 @@ GetResponse(data:any, toaster:any) {
     }
     return JSON.parse('{}');
   }
-  removeData(id:any) {
+  removeData(id: any) {
     localStorage.removeItem(id)
     // this.persistenceService.remove(id, StorageType.LOCAL);
   }
@@ -272,7 +248,7 @@ GetResponse(data:any, toaster:any) {
   }
 
 
-  trimObj(obj:any) {
+  trimObj(obj: any) {
     if (obj === null) {
       return;
     }
@@ -281,7 +257,7 @@ GetResponse(data:any, toaster:any) {
         obj[e] = (typeof (obj[e]) === 'string' && !StringExtension.IsNullOrWhiteSpace(obj[e])) ? obj[e].trim() : obj[e];
       });
     } else if (typeof (obj) === 'object' && obj.length >= 0) {
-      obj.map((w:any) => {
+      obj.map((w: any) => {
         if (typeof (w) === 'object') {
           (Object.keys(w)).map(e => {
             w[e] = (typeof (w[e]) === 'string' && !StringExtension.IsNullOrWhiteSpace(w[e])) ? w[e].trim() : w[e];
@@ -291,7 +267,7 @@ GetResponse(data:any, toaster:any) {
     }
   }
 
-  lower(obj:any) {
+  lower(obj: any) {
     for (var prop in obj) {
       if (typeof obj[prop] === 'string') {
         obj[prop] = obj[prop].toLowerCase();
