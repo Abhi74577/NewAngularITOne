@@ -26,7 +26,7 @@ export class DashboardComponent implements OnInit {
     const ReturnURL: any = localStorage.getItem('sourceUrl')?.toString()
 
 
-    console.log(ReturnURL)
+    // console.log(ReturnURL)
     window.open(ReturnURL, '_self')
   }
   cards = [

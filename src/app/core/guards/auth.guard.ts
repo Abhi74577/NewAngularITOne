@@ -13,7 +13,7 @@ export class AuthGuard {
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
     const userProfile = this.baseService.getJSONData(storageConst.userProfile);
-    console.log("data Uid",userProfile)
+    // console.log("data Uid",userProfile)
     // If user is authenticated, allow access
     if (userProfile && userProfile.systemUserId !== undefined && userProfile.systemUserId > 0) {
       return true;

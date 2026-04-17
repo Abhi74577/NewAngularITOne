@@ -40,7 +40,10 @@ export interface MultiSelectFieldConfig extends FieldConfig {
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   template: `
-  <div class="flex flex-col">
+  <div class="flex flex-col 
+display: block;
+  width: 100%;
+">
 
     <label class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
       <span *ngIf="config.required" class="text-red-500">*</span>
@@ -48,17 +51,20 @@ export interface MultiSelectFieldConfig extends FieldConfig {
     </label>
 
     <div class="relative border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 shadow-sm
-                focus-within:ring-2 focus-within:ring-blue-500 hover:border-blue-400">
+                focus-within:ring-2 focus-within:ring-blue-500 hover:border-blue-400" [ngClass]="{
+          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+         control.invalid && control.touched
+        }">
 
       <div (click)="toggleDropdown($event)"
            class="flex justify-between items-center p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 
-           rounded-md transition">
+           rounded-md transition" >
 
         <div class="flex flex-wrap gap-2 flex-1">
 
           <ng-container *ngIf="selectedItems.length > 0; else placeholder">
             <span *ngFor="let item of selectedItems; trackBy: trackByFn"
-                  class="flex items-center gap-1 px-3 py-1 text-xs rounded-md
+                  class="flex items-center gap-1 px-2 py-0.5 text-xs rounded-md
                          bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
 
               {{ item.label }}
@@ -103,10 +109,11 @@ export interface MultiSelectFieldConfig extends FieldConfig {
           <input
             type="text"
             [formControl]="searchControl"
-            [disabled]="isDisabled"
+          
             placeholder="Search..."
             class="w-full px-2 py-1 text-sm rounded-md border border-gray-200 dark:border-gray-600
-                   bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 outline-none"
+                   bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 outline-none" 
+                   
           />
         </div>
 
@@ -133,7 +140,7 @@ export interface MultiSelectFieldConfig extends FieldConfig {
             [checked]="isSelected(option.value)"
             [disabled]="isDisabled"
             (click)="$event.stopPropagation()"
-            (change)="toggleOption(option)"
+            (change)="toggleOption(option)" 
           />
 
           <span class="text-sm text-gray-700 dark:text-gray-300">

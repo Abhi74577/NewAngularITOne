@@ -1,95 +1,158 @@
 <!-- Header -->
-<div
-    class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40 transition-colors duration-300">
+<!-- ================= HEADER ================= -->
+<div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700
+         sticky top-0 z-40 transition-colors duration-300">
+
     <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div class="flex items-center justify-between flex-wrap gap-4">
-            <!-- Title -->
+
+            <!-- TITLE -->
             <div class="flex items-center gap-3">
                 <div class="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
                     <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
+
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">BCDR Requests</h1>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Manage disaster recovery requests</p>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+                        BCDR Requests
+                    </h1>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        Manage disaster recovery requests
+                    </p>
                 </div>
             </div>
 
-            <!-- Actions -->
+            <!-- ACTIONS -->
             <div class="flex items-center gap-3">
 
+                <!-- FILTER BUTTON -->
+                <button *ngIf="showList" type="button" (click)="toggleFilter()" class="relative p-2 rounded-lg border
+                 border-gray-300 dark:border-gray-600
+                 bg-white dark:bg-gray-800
+                 text-gray-600 dark:text-gray-300
+                 hover:bg-gray-100 dark:hover:bg-gray-700
+                 transition-all duration-300">
 
-                <button
-                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white rounded-lg font-medium transition-all duration-200 transform hover:scale-105 flex items-center gap-2 shadow-md hover:shadow-lg">
-                    <!-- <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
-                        </path>
-                    </svg> -->
-                    <span *ngIf="showList" class="hidden sm:inline" (click)="showList = !showList; activeTab = 1">
-                        <i class="fas fa-plus"></i> Create Request
+                    <i class="fas fa-filter"></i>
+
+                    <!-- ACTIVE DOT -->
+                    <span *ngIf="showFilter" class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blue-600 rounded-full">
+                    </span>
+                </button>
+
+                <!-- CREATE / BACK -->
+                <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700
+                 dark:bg-blue-700 dark:hover:bg-blue-600
+                 text-white rounded-lg font-medium
+                 transition-all duration-200 transform hover:scale-105
+                 flex items-center gap-2 shadow-md hover:shadow-lg">
+
+                    <span *ngIf="showList" class="flex justify-center items-center gap-0.5"
+                        (click)="showList = false; activeTab = 1">
+                        <i class="fas fa-plus"></i>
+                        <p class="hidden md:block"> Create Request</p>
                     </span>
 
-                    <span *ngIf="!showList" (click)="showList = !showList; activeTab = 1; cancel()">
+                    <span *ngIf="!showList" (click)="showList = true; activeTab = 1; cancel()">
                         <i class="fas fa-angle-left"></i> Back to all Request
                     </span>
                 </button>
-                <button *ngIf="showList" type="button" (click)="filterClear()" class="btn-secondary">
+
+                <!-- REFRESH -->
+                <button *ngIf="showList" type="button" (click)="filterClear()" class="relative p-2 rounded-lg border
+                 border-gray-300 dark:border-gray-600
+                 bg-white dark:bg-gray-800
+                 text-gray-600 dark:text-gray-300
+                 hover:bg-gray-100 dark:hover:bg-gray-700
+                 transition-all duration-300">
                     <i class="fas fa-refresh"></i>
                 </button>
             </div>
         </div>
     </div>
 </div>
-<div class="max-w-full mx-auto p-6" *ngIf="showList">
-    <div class="px-6 py-4 border-b bg-gray-50 dark:bg-gray-900">
-        <form [formGroup]="objFilter" lass="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+
+<!-- ================= FILTER PANEL ================= -->
+<div *ngIf="showList" class="mx-auto relative px-6  mb-10
+         transition-all duration-500 ease-in-out" [ngClass]="{
+    'max-h-0 opacity-0 -translate-y-2 pointer-events-none': !showFilter,
+    'max-h-[1000px] opacity-100 translate-y-0': showFilter
+  }">
+
+    <div class="mt-4 rounded-xl border border-gray-200 dark:border-gray-700 p-2
+           bg-white dark:bg-gray-800 shadow-lg">
+
+        <!-- FILTER HEADER -->
+        <div class="flex items-center justify-between px-6 py-4 border-b
+             bg-gray-50 dark:bg-gray-900">
+
+            <h3 class="font-semibold text-gray-800 dark:text-gray-200
+                 flex items-center gap-2">
+                <i class="fas fa-filter text-blue-600"></i>
+                Filters
+            </h3>
+
+            <button type="button" (click)="toggleFilter()" class="text-gray-400 hover:text-red-500 transition">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- FILTER FORM -->
+        <form [formGroup]="objFilter" class="p-6">
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                <!-- DATE FILTER -->
                 <div class="space-y-1">
                     <label class="label">Filter By Date</label>
 
-                    <!-- Wrapper MUST be relative -->
                     <div class="relative">
                         <input [owlDateTime]="dateFilter" [owlDateTimeTrigger]="dateFilter" formControlName="dateFilter"
-                            [selectMode]="'range'" placeholder="Date Filter" class="w-full px-3 py-2.5 pr-10 rounded-lg border border-gray-300 dark:border-gray-600
-             bg-white dark:bg-gray-900 text-gray-900 dark:text-white
-             focus:ring-2 focus:ring-blue-500 outline-none" />
+                            [selectMode]="'range'" placeholder="Date Filter" class="w-full px-3 py-2.5 pr-10 rounded-lg
+                     border border-gray-300 dark:border-gray-600
+                     bg-white dark:bg-gray-900
+                     text-gray-900 dark:text-white
+                     focus:ring-2 focus:ring-blue-500 outline-none" />
 
-                        <!-- Calendar Icon -->
                         <i class="fas fa-calendar-alt absolute right-3 top-1/2 -translate-y-1/2
-             text-gray-400 hover:text-blue-500 cursor-pointer" [owlDateTimeTrigger]="dateFilter"></i>
+                      text-gray-400 hover:text-blue-500 cursor-pointer" [owlDateTimeTrigger]="dateFilter"></i>
 
                         <owl-date-time pickerType="calendar" #dateFilter></owl-date-time>
                     </div>
                 </div>
 
-                <app-multiselect [config]="{
-                    name: 'Division',
-                    label: 'Division',
-                    placeholder: 'Select Division',
-                    searchable: true,
-                    options: LstLKUPTechnology,
-                    required: false,
-                    multi: true
-                    }" [control]="$any(objFilter.get('technology'))">
+                <!-- DIVISION -->
+                <app-multiselect class="block w-full" [config]="{
+            name: 'Division',
+            label: 'Division',
+            placeholder: 'Select Division',
+            searchable: true,
+            options: LstLKUPTechnology,
+            required: false,
+            multi: true
+          }" [control]="$any(objFilter.get('technology'))">
                 </app-multiselect>
 
-                <app-multiselect [config]="{
-                    name: 'Status',
-                    label: 'Status',
-                    placeholder: 'Select Status',
-                    searchable: true,
-                    options: LstLKUPRequestStatus,
-                    required: false,
-                    multi: true
-                    }" [control]="$any(objFilter.get('status'))">
+                <!-- STATUS -->
+                <app-multiselect class="block w-full" [config]="{
+            name: 'Status',
+            label: 'Status',
+            placeholder: 'Select Status',
+            searchable: true,
+            options: LstLKUPRequestStatus,
+            required: false,
+            multi: true
+          }" [control]="$any(objFilter.get('status'))">
                 </app-multiselect>
 
             </div>
 
-            <div class="flex relative justify-end p-4 dark:bg-gray-900 gap-4 mt-5">
+            <!-- ACTION BUTTONS -->
+            <div class="flex justify-end gap-4 pt-6">
                 <button type="button" (click)="filterClear()" class="btn-danger">
                     Clear
                 </button>
@@ -97,11 +160,13 @@
                     Filter
                 </button>
             </div>
-        </form>
 
+        </form>
     </div>
 </div>
-<div class="max-w-full mx-auto p-6" *ngIf="showList">
+<div class="max-w-full mx-auto p-6" *ngIf="showList" [ngClass]="{
+    'mt-6': showFilter
+  }">
     <app-dynamic-table [dtUserOptions]="dtOptions" [isLoading]="isLoading()" (deleteClick)="onDelete($event)"
         (downloadClick)="onDownload($event)" (pageSizeChange)="changeItemsPerPage($event)"
         (onSort)="onShortChanges($event)" (onSearch)="onSerchChange($event)" (pageChange)="onPageChange($event)"
@@ -214,15 +279,15 @@
 
                     <input type="text" formControlName="subScenarioHeading" placeholder="Scenario Title" maxlength="100"
                         (keypress)="allowCertainSpecChar($event)" [ngClass]="{
-  '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
-  pageForm_bcdrRequest.get('subScenarioHeading')?.invalid &&
-  pageForm_bcdrRequest.get('subScenarioHeading')?.touched
-}" class="input" />
+                        '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+                        pageForm_bcdrRequest.get('subScenarioHeading')?.invalid &&
+                        pageForm_bcdrRequest.get('subScenarioHeading')?.touched
+                        }" class="input" />
 
                     <div *ngIf="
                         pageForm_bcdrRequest.get('subScenarioHeading')?.hasError('required') &&
                         pageForm_bcdrRequest.get('subScenarioHeading')?.touched
-                        " class="mt-1 text-xs text-red-600 dark:text-red-300">
+                        " class="mt-1 text-xs text-red-600 ">
                         This field is required.
                     </div>
                 </div>
@@ -247,7 +312,7 @@
                     <div *ngIf="
                         pageForm_bcdrRequest.get('subScenarioDetails')?.hasError('required') &&
                         pageForm_bcdrRequest.get('subScenarioDetails')?.touched
-                        " class="mt-1 text-xs text-red-600 dark:text-red-300">
+                        " class="mt-1 text-xs text-red-600 ">
                         This field is required.
                     </div>
                 </div>
@@ -255,8 +320,7 @@
 
                 <!-- Objectives -->
 
-                <div class="md:col-span-2 border
-                                 border-gray-200 dark:border-gray-700 rounded-lg">
+                <div class="md:col-span-2">
 
                     <!-- Header -->
                     <div class=" flex justify-between items-center px-2 py-2  rounded-t-lg
@@ -309,7 +373,7 @@
                                     <div *ngIf="
                                     objectiveForm.get('objectiveDetails')?.hasError('required') &&
                                     objectiveForm.get('objectiveDetails')?.touched
-                                    " class="mt-1 text-xs text-red-600 dark:text-red-300">
+                                    " class="mt-1 text-xs text-red-600 ">
                                         This field is required.
                                     </div>
                                 </div> <!-- Remove Button -->
@@ -332,8 +396,7 @@
                 <!-- ----Risk Section -- -->
 
 
-                <div class="md:col-span-2 border
-                                 border-gray-200 dark:border-gray-700 rounded-lg">
+                <div class="md:col-span-2 ">
 
                     <!-- Header -->
                     <div class=" flex justify-between items-center px-2 py-2  rounded-t-lg
@@ -382,7 +445,7 @@
                                     <div *ngIf="
                                     risk.get('details')?.hasError('required') &&
                                     risk.get('details')?.touched
-                                    " class="mt-1 text-xs text-red-600 dark:text-red-300">
+                                    " class="mt-1 text-xs text-red-600 ">
                                         This field is required.
                                     </div>
                                 </div> <!-- Remove Button -->
@@ -405,8 +468,7 @@
 
                 <!-- Assumption/Constrains -->
 
-                <div class="md:col-span-2 border
-                                 border-gray-200 dark:border-gray-700 rounded-lg">
+                <div class="md:col-span-2 ">
 
                     <!-- Header -->
                     <div class=" flex justify-between items-center px-2 py-2  rounded-t-lg
@@ -455,7 +517,7 @@
                                     <div *ngIf="
                                     assumptionForm.get('details')?.hasError('required') &&
                                     assumptionForm.get('details')?.touched
-                                    " class="mt-1 text-xs text-red-600 dark:text-red-300">
+                                    " class="mt-1 text-xs text-red-600 ">
                                         This field is required.
                                     </div>
                                 </div> <!-- Remove Button -->
@@ -478,8 +540,7 @@
 
                 <!-- Activity Timings (CST) -->
 
-                <div class="md:col-span-2 border
-                                 border-gray-200 dark:border-gray-700 rounded-lg">
+                <div class="md:col-span-2">
 
                     <!-- Header -->
                     <div class=" flex justify-between items-center px-2 py-2  rounded-t-lg
@@ -497,64 +558,79 @@
                     </div>
 
                     <!-- Fields -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 transition-all duration-300  p-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6
+                        bg-gray-50 dark:bg-gray-900
+                        border border-gray-200 dark:border-gray-700
+                        p-5 transition-all duration-300">
 
                         <!-- START DATE -->
-                        <div class="space-y-1">
-                            <label class="label"><span class="text-red-500 font-bold">*</span> Start Date
-                                (CST)</label>
+                        <div class="flex flex-col gap-1.5">
+                            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                <span class="text-red-500 font-bold">*</span>
+                                Start Date (CST)
+                            </label>
 
                             <div class="relative group">
-                                <input [owlDateTime]="startDatePicker" formControlName="activityStartDate"
-                                    [owlDateTimeTrigger]="startDatePicker" placeholder="Activity Start Time"
-                                    [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/20': isFieldInvalid('activityStartDate')}"
-                                    class="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 
-                                    bg-white dark:bg-gray-900 text-gray-900 dark:text-white
-                                    focus:ring-2 focus:ring-blue-500 outline-none pr-10"
-                                    (dateTimeChange)="checkDate(1, 'activityStartDate')" />
+                                <input [owlDateTime]="startDatePicker" [owlDateTimeTrigger]="startDatePicker"
+                                    formControlName="activityStartDate" placeholder="Select start date & time"
+                                    (dateTimeChange)="checkDate(1, 'activityStartDate')" [ngClass]="{
+                                    'border-red-500 bg-red-50 dark:bg-red-900/20': isFieldInvalid('activityStartDate')
+                                    }" class="w-full rounded-lg border px-3 py-2.5 pr-10
+                                    bg-white dark:bg-gray-900
+                                    text-gray-900 dark:text-white
+                                    border-gray-300 dark:border-gray-600
+                                    focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                                    outline-none transition" />
 
-                                <!-- Icon -->
-                                <i class="fas fa-calendar-alt absolute right-3 top-1/2 -translate-y-1/2 
-                                text-gray-400 group-hover:text-blue-500 transition cursor-pointer">
-                                </i>
+                                <!-- Trigger Icon -->
+                                <button type="button" [owlDateTimeTrigger]="startDatePicker" class="absolute right-3 top-1/2 -translate-y-1/2
+                                  text-gray-400 hover:text-blue-500 transition">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </button>
 
                                 <owl-date-time #startDatePicker></owl-date-time>
                             </div>
-                            <div *ngIf="isFieldInvalid('activityStartDate')"
-                                class="mt-1 text-xs text-red-600 dark:text-red-300">
+
+                            <p *ngIf="isFieldInvalid('activityStartDate')"
+                                class="text-xs text-red-600 dark:text-red-400">
                                 {{ getErrorMessage('activityStartDate') }}
-                            </div>
+                            </p>
                         </div>
 
                         <!-- END DATE -->
-                        <div class="space-y-1">
-                            <label class="label"><span class="text-red-500 font-bold">*</span> End Date
-                                (CST)</label>
+                        <div class="flex flex-col gap-1.5">
+                            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                <span class="text-red-500 font-bold">*</span>
+                                End Date (CST)
+                            </label>
 
                             <div class="relative group">
-                                <input [owlDateTime]="endDatePicker" formControlName="activityEndDate"
-                                    [owlDateTimeTrigger]="endDatePicker" placeholder="Activity End Time"
-                                    [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/20': isFieldInvalid('activityEndDate')}"
-                                    class="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 
-                                    bg-white dark:bg-gray-900 text-gray-900 dark:text-white
-                                    focus:ring-2 focus:ring-blue-500 outline-none pr-10"
-                                    (dateTimeChange)="checkDate(1, 'activityEndDate')" />
+                                <input [owlDateTime]="endDatePicker" [owlDateTimeTrigger]="endDatePicker"
+                                    formControlName="activityEndDate" placeholder="Select end date & time"
+                                    (dateTimeChange)="checkDate(1, 'activityEndDate')" [ngClass]="{
+          'border-red-500 bg-red-50 dark:bg-red-900/20': isFieldInvalid('activityEndDate')
+        }" class="w-full rounded-lg border px-3 py-2.5 pr-10
+               bg-white dark:bg-gray-900
+               text-gray-900 dark:text-white
+               border-gray-300 dark:border-gray-600
+               focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+               outline-none transition" />
 
-                                <!-- Icon -->
-                                <i class="fas fa-clock absolute right-3 top-1/2 -translate-y-1/2 
-                                text-gray-400 group-hover:text-blue-500 transition cursor-pointer">
-                                </i>
+                                <!-- Trigger Icon -->
+                                <button type="button" [owlDateTimeTrigger]="endDatePicker" class="absolute right-3 top-1/2 -translate-y-1/2
+                                  text-gray-400 hover:text-blue-500 transition">
+                                    <i class="fas fa-clock"></i>
+                                </button>
 
                                 <owl-date-time #endDatePicker></owl-date-time>
                             </div>
-                            <div *ngIf="isFieldInvalid('activityEndDate')"
-                                class="mt-1 text-xs text-red-600 dark:text-red-300">
+
+                            <p *ngIf="isFieldInvalid('activityEndDate')" class="text-xs text-red-600 dark:text-red-400">
                                 {{ getErrorMessage('activityEndDate') }}
-                            </div>
+                            </p>
                         </div>
 
                     </div>
-
                 </div>
 
             </div>
@@ -564,40 +640,47 @@
 
             @if( this.activeTab == 2){
             <!-- Business Partner Details -->
-            <div class="bg-white dark:bg-slate-900 rounded-md border border-gray-200 dark:border-gray-700">
+            <div class="bg-white dark:bg-slate-900 rounded-t-lg border border-gray-200 dark:border-gray-700">
 
-                <!-- HEADER -->
+                <!-- ================= HEADER ================= -->
+                <div class="
+                    flex items-center justify-between px-4 py-3
+                    bg-gray-100 dark:bg-gray-800
+                    border-b border-gray-200 dark:border-gray-700
+                    rounded-t-lg">
 
-                <div
-                    class="flex items-center gap-3  p-2 bg-gray-100 dark:bg-gray-800 rounded-md border  px-3 py-4  border-t border-gray-200 dark:border-gray-700">
-                    <h2 class="text-sm font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                    <h2 class="text-sm font-semibold text-blue-600 dark:text-blue-400">
                         Business Partner Details
                     </h2>
 
-                    <label class="flex items-center gap-2 cursor-pointer">
+                    <label class="flex items-center gap-2 cursor-pointer select-none">
                         <input type="checkbox" name="showPartnerDetails" [value]="showPartnerDetails"
-                            (change)="toggleDetails()" class="w-4 h-4 text-blue-600 rounded" />
+                            (change)="toggleDetails()" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" />
+
                         <span class="text-sm text-gray-600 dark:text-gray-300">
                             Add Details
                         </span>
                     </label>
-
                 </div>
 
-
-                <!-- FORM SECTION -->
-                <div *ngIf="showPartnerDetails || IsEdit || IsInfo"
-                    class="grid grid-cols-1 md:grid-cols-2 gap-4 transition-all duration-300 mt-2 p-4">
+                <!-- ================= FORM SECTION ================= -->
+                <div *ngIf="showPartnerDetails || IsEdit || IsInfo" class="grid grid-cols-1 md:grid-cols-2 gap-5
+           p-4
+           transition-all duration-300
+           bg-gray-50 dark:bg-slate-900
+           rounded-b-lg">
 
                     <!-- NAME -->
                     <div>
                         <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
                             Name
                         </label>
+
                         <input type="text" placeholder="Name of the business partner" maxlength="100"
-                            (keypress)="onlyAlfabetic($event);CheckSpecialChar($event)" class="input
-                    bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
-                    focus:ring-2 focus:ring-blue-500 outline-none" formControlName="bussinessPartnerName" />
+                            formControlName="bussinessPartnerName"
+                            (keypress)="onlyAlfabetic($event);CheckSpecialChar($event)" class="input bg-white dark:bg-gray-800
+               text-gray-800 dark:text-white
+               focus:ring-2 focus:ring-blue-500 outline-none" />
                     </div>
 
                     <!-- CONTACT -->
@@ -605,30 +688,33 @@
                         <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
                             Contact Number
                         </label>
-                        <input type="text" placeholder="Contact number of the business partner"
-                            formControlName="bussinessPartnerContactNumber" maxlength="100" class="input" [ngClass]="{
-                            '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
-                            pageForm_bcdrRequest.get('bussinessPartnerContactNumber')?.invalid &&
-                            pageForm_bcdrRequest.get('bussinessPartnerContactNumber')?.touched
-                            }" formControlName="bussinessPartnerContactNumber" />
-                        <div *ngIf="isFieldInvalid('bussinessPartnerContactNumber')"
-                            class="mt-1 text-xs text-red-600 dark:text-red-300">
+
+                        <input type="text" placeholder="Contact number of the business partner" maxlength="100"
+                            formControlName="bussinessPartnerContactNumber" class="input" [ngClass]="{
+          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+          pageForm_bcdrRequest.get('bussinessPartnerContactNumber')?.invalid &&
+          pageForm_bcdrRequest.get('bussinessPartnerContactNumber')?.touched
+        }" />
+
+                        <div *ngIf="isFieldInvalid('bussinessPartnerContactNumber')" class="mt-1 text-xs text-red-600">
                             {{ getErrorMessage('bussinessPartnerContactNumber') }}
                         </div>
                     </div>
 
                     <!-- ADDRESS -->
-                    <div class="md:col-span-1">
+                    <div>
                         <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
                             Address
                         </label>
-                        <textarea placeholder="Address of the business partner"
-                            formControlName="bussinessPartnerAddress" (keypress)="allowCertainSpecChar($event)" rows="2"
-                            class="input" [ngClass]="{
-  '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
-  pageForm_bcdrRequest.get('bussinessPartnerAddress')?.invalid &&
-  pageForm_bcdrRequest.get('bussinessPartnerAddress')?.touched
-}"></textarea>
+
+                        <textarea rows="2" placeholder="Address of the business partner"
+                            formControlName="bussinessPartnerAddress" (keypress)="allowCertainSpecChar($event)"
+                            class="input resize-none" [ngClass]="{
+          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+          pageForm_bcdrRequest.get('bussinessPartnerAddress')?.invalid &&
+          pageForm_bcdrRequest.get('bussinessPartnerAddress')?.touched
+        }">
+      </textarea>
                     </div>
 
                     <!-- EMAIL -->
@@ -636,29 +722,42 @@
                         <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
                             Email Address
                         </label>
+
                         <input type="email" placeholder="Email address of the business partner" maxlength="100"
-                            formControlName="bussinessPartnerEmailAddress" class="input " [ngClass]="{
-                            '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
-                            pageForm_bcdrRequest.get('bussinessPartnerEmailAddress')?.invalid &&
-                            pageForm_bcdrRequest.get('bussinessPartnerEmailAddress')?.touched
-                            }" />
-                        <div *ngIf="isFieldInvalid('bussinessPartnerEmailAddress')"
-                            class="mt-1 text-xs text-red-600 dark:text-red-300">
+                            formControlName="bussinessPartnerEmailAddress" class="input" [ngClass]="{
+          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+          pageForm_bcdrRequest.get('bussinessPartnerEmailAddress')?.invalid &&
+          pageForm_bcdrRequest.get('bussinessPartnerEmailAddress')?.touched
+        }" />
+
+                        <div *ngIf="isFieldInvalid('bussinessPartnerEmailAddress')" class="mt-1 text-xs text-red-600">
                             {{ getErrorMessage('bussinessPartnerEmailAddress') }}
                         </div>
                     </div>
 
                 </div>
-
             </div>
 
 
             <!-- Production location -->
-            <div class="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-gray-700 px-3 py-2">
+            <div class="bg-white dark:bg-slate-900 rounded-t-lg border border-gray-200 dark:border-gray-700">
 
-                <!-- HEADER -->
+                <!-- ================= HEADER ================= -->
+                <div class="
+                         flex items-center justify-between
+                         px-4 py-3
+                        bg-gray-100 dark:bg-gray-800
+                        border-b border-gray-200 dark:border-gray-700
+                        rounded-t-lg">
 
-                <div
+                    <h2 class="text-sm font-semibold text-blue-600 dark:text-blue-400">
+                        <span class="text-red-500">*</span> Production location
+                    </h2>
+
+
+                </div>
+
+                <!-- <div
                     class="flex items-center gap-3 mb-4 p-2 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                     <h2 class="text-sm font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1">
                         <span class="text-red-500">*</span>
@@ -666,11 +765,15 @@
                     </h2>
 
 
-                </div>
+                </div> -->
 
 
                 <!-- FORM SECTION -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 transition-all duration-300 mt-2">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5
+           p-4
+           transition-all duration-300
+           bg-gray-50 dark:bg-slate-900
+           rounded-b-lg">
 
                     <!-- NAME -->
                     <div>
@@ -679,12 +782,15 @@
                         </label>
                         <input type="text" placeholder="Name of the production location"
                             formControlName="productLocationName" maxlength="100"
-                            (keypress)="onlyAlfabetic($event);CheckSpecialChar($event)" [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/20': pageForm_bcdrRequest.get('productLocationName')?.hasError('required') &&
-                                    pageForm_bcdrRequest.get('productLocationName')?.touched}" class="input " />
+                            (keypress)="onlyAlfabetic($event);CheckSpecialChar($event)" [ngClass]="{
+          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+          pageForm_bcdrRequest.get('productLocationName')?.invalid &&
+          pageForm_bcdrRequest.get('productLocationName')?.touched
+        }" class="input " />
                         <div *ngIf="
                                     pageForm_bcdrRequest.get('productLocationName')?.hasError('required') &&
                                     pageForm_bcdrRequest.get('productLocationName')?.touched
-                                    " class="mt-1 text-xs text-red-600 dark:text-red-300">
+                                    " class="mt-1 text-xs text-red-600 ">
                             This field is required.
                         </div>
                     </div>
@@ -707,10 +813,12 @@
                             <span class="text-red-500">*</span> Contact Number
                         </label>
                         <input type="text" formControlName="productLocationContactNumber" maxlength="100"
-                            placeholder="Contact number of the production location" class="input"
-                            [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/20': isFieldInvalid('productLocationContactNumber')}" />
-                        <div *ngIf="isFieldInvalid('productLocationContactNumber')"
-                            class="mt-1 text-xs text-red-600 dark:text-red-300">
+                            placeholder="Contact number of the production location" class="input" [ngClass]="{
+          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+          pageForm_bcdrRequest.get('productLocationContactNumber')?.invalid &&
+          pageForm_bcdrRequest.get('productLocationContactNumber')?.touched
+        }" />
+                        <div *ngIf="isFieldInvalid('productLocationContactNumber')" class="mt-1 text-xs text-red-600 ">
                             {{ getErrorMessage('productLocationContactNumber') }}
 
                         </div>
@@ -722,12 +830,13 @@
                             <span class="text-red-500 font-bold">*</span> Email Address
                         </label>
                         <input type="email" placeholder="Email address of the production location"
-                            formControlName="productLocationEmailAddress"
-                            [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/20': isFieldInvalid('productLocationEmailAddress')}"
-                            class="input bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
+                            formControlName="productLocationEmailAddress" [ngClass]="{
+          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+          pageForm_bcdrRequest.get('productLocationEmailAddress')?.invalid &&
+          pageForm_bcdrRequest.get('productLocationEmailAddress')?.touched
+        }" class="input bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
                         focus:ring-2 focus:ring-blue-500 outline-none" />
-                        <div *ngIf="isFieldInvalid('productLocationEmailAddress')"
-                            class="mt-1 text-xs text-red-600 dark:text-red-300">
+                        <div *ngIf="isFieldInvalid('productLocationEmailAddress')" class="mt-1 text-xs text-red-600 ">
                             {{ getErrorMessage('productLocationEmailAddress') }}
                         </div>
                     </div>
@@ -738,11 +847,31 @@
 
 
             <!-- Recovery location -->
-            <div class="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-gray-700 px-3 py-2">
+            <div class="bg-white dark:bg-slate-900 rounded-t-lg border border-gray-200 dark:border-gray-700">
 
-                <!-- HEADER -->
+                <!-- ================= HEADER ================= -->
+                <div class="flex items-center justify-between
+                        px-4 py-3
+                        bg-gray-100 dark:bg-gray-800
+                        border-b border-gray-200 dark:border-gray-700
+                        rounded-t-lg">
 
-                <div
+                    <h2 class="text-sm font-semibold text-blue-600 dark:text-blue-400">
+                        <span class="text-red-500">*</span>
+                        Recovery location
+                    </h2>
+
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" name="showPartnerDetails" [value]="showPartnerDetails"
+                            class="w-4 h-4 text-blue-600 rounded"
+                            (change)="fillSameAsAbove($event,'productionlocation')" />
+                        <span *ngIf="!IsEdit && !IsInfo" class="text-sm text-gray-600 dark:text-gray-300">
+                            Same as above
+                        </span>
+                    </label>
+                </div>
+
+                <!-- <div
                     class="flex items-center gap-3 mb-4 p-2 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                     <h2 class="text-sm font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1">
                         <span class="text-red-500">*</span>
@@ -758,11 +887,15 @@
                         </span>
                     </label>
 
-                </div>
+                </div> -->
 
 
                 <!-- FORM SECTION -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 transition-all duration-300 mt-2">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5
+                    p-4
+                    transition-all duration-300
+                    bg-gray-50 dark:bg-slate-900
+                    rounded-b-lg">
 
                     <!-- NAME -->
                     <div>
@@ -771,14 +904,16 @@
                         </label>
                         <input type="text" placeholder="Name of the recovery location"
                             formControlName="recoveryLocationName" maxlength="100"
-                            (keypress)="onlyAlfabetic($event);CheckSpecialChar($event)"
-                            [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/20': isFieldInvalid('recoveryLocationName')}"
-                            class="input bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
+                            (keypress)="onlyAlfabetic($event);CheckSpecialChar($event)" [ngClass]="{
+          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+          pageForm_bcdrRequest.get('recoveryLocationName')?.invalid &&
+          pageForm_bcdrRequest.get('recoveryLocationName')?.touched
+        }" class="input bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
                             focus:ring-2 focus:ring-blue-500 outline-none" />
                         <div *ngIf="
                                     pageForm_bcdrRequest.get('recoveryLocationName')?.hasError('required') &&
                                     pageForm_bcdrRequest.get('recoveryLocationName')?.touched
-                                    " class="mt-1 text-xs text-red-600 dark:text-red-300">
+                                    " class="mt-1 text-xs text-red-600 ">
                             This field is required.
                         </div>
                     </div>
@@ -802,15 +937,18 @@
                         <input type="text" formControlName="recoveryLocationContactNumber"
                             placeholder="Contact number of the recovery location" maxlength="100" class="input
                         bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
-                        focus:ring-2 focus:ring-blue-500 outline-none" />
+                        focus:ring-2 focus:ring-blue-500 outline-none" [ngClass]="{
+          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+          pageForm_bcdrRequest.get('recoveryLocationContactNumber')?.invalid &&
+          pageForm_bcdrRequest.get('recoveryLocationContactNumber')?.touched
+        }" />
                         <!-- <div *ngIf="
                                     pageForm_bcdrRequest.get('recoveryLocationContactNumber')?.hasError('required') &&
                                     pageForm_bcdrRequest.get('recoveryLocationContactNumber')?.touched
-                                    " class="mt-1 text-xs text-red-600 dark:text-red-300">
+                                    " class="mt-1 text-xs text-red-600 ">
                             This field is required.
                         </div> -->
-                        <div *ngIf="isFieldInvalid('recoveryLocationContactNumber')"
-                            class="mt-1 text-xs text-red-600 dark:text-red-300">
+                        <div *ngIf="isFieldInvalid('recoveryLocationContactNumber')" class="mt-1 text-xs text-red-600 ">
                             {{ getErrorMessage('recoveryLocationContactNumber') }}
 
                         </div>
@@ -827,12 +965,12 @@
                             placeholder="Email address of the recovery location" maxlength="100" class="input border border-gray-300 bg-gray-50 dark:bg-gray-800
                             text-gray-800 dark:text-white
                             focus:outline-none focus:ring-2" [ngClass]="{
-                        'border-red-500 bg-red-50 dark:bg-red-900/20 focus:ring-red-500':
-                        isFieldInvalid('recoveryLocationEmailAddress')
-                        }" />
+          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+          pageForm_bcdrRequest.get('recoveryLocationEmailAddress')?.invalid &&
+          pageForm_bcdrRequest.get('recoveryLocationEmailAddress')?.touched
+        }" />
 
-                        <div *ngIf="isFieldInvalid('recoveryLocationEmailAddress')"
-                            class="mt-1 text-xs text-red-600 dark:text-red-300">
+                        <div *ngIf="isFieldInvalid('recoveryLocationEmailAddress')" class="mt-1 text-xs text-red-600 ">
                             {{ getErrorMessage('recoveryLocationEmailAddress') }}
                         </div>
                     </div>
@@ -890,7 +1028,7 @@
                                 <!-- CLIENT NAME -->
                                 <div class="w-full md:flex-1">
                                     <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
-                                        <span class="text-red-500 font-bold">*</span> Client Name
+                                        Client Name
                                     </label>
                                     <input type="text" formControlName="clientName" placeholder="Name of the client"
                                         maxlength="100" (keypress)="onlyAlfabetic($event);CheckSpecialChar($event)"
@@ -906,7 +1044,7 @@
                                     <div *ngIf="
                                     clientLOB.get('clientName')?.hasError('required') &&
                                     clientLOB.get('clientName')?.touched
-                                    " class="mt-1 text-xs text-red-600 dark:text-red-300">
+                                    " class="mt-1 text-xs text-red-600 ">
                                         This field is required.
                                     </div>
 
@@ -954,7 +1092,7 @@
                                             <div *ngIf="
                                                 lob.get('lOBName')?.hasError('required') &&
                                                 lob.get('lOBName')?.touched
-                                                " class="mt-1 text-xs text-red-600 dark:text-red-300">
+                                                " class="mt-1 text-xs text-red-600 ">
                                                 This field is required.
                                             </div>
                                         </div>
@@ -974,14 +1112,14 @@
                                             <div *ngIf="
                                                 lob.get('contactNumber')?.hasError('required') &&
                                                 lob.get('contactNumber')?.touched
-                                                " class="mt-1 text-xs text-red-600 dark:text-red-300">
+                                                " class="mt-1 text-xs text-red-600 ">
                                                 This field is required.
                                             </div>
 
                                             <div *ngIf="
                                                 lob.get('contactNumber')?.hasError('pattern') &&
                                                 (lob.get('contactNumber')?.touched || lob.get('contactNumber')?.dirty)
-                                                " class="mt-1 text-xs text-red-600 dark:text-red-300">
+                                                " class="mt-1 text-xs text-red-600 ">
                                                 Invalid contact number.
                                             </div>
 
@@ -1012,13 +1150,12 @@
                                             <div *ngIf="
                                                 lob.get('emailAddress')?.hasError('required') &&
                                                 lob.get('emailAddress')?.touched
-                                                " class="mt-1 text-xs text-red-600 dark:text-red-300">
+                                                " class="mt-1 text-xs text-red-600 ">
                                                 This field is required.
                                             </div>
 
                                             <div *ngIf="lob.get('emailAddress')?.hasError('email') &&
-                                                lob.get('emailAddress')?.touched"
-                                                class="mt-1 text-xs text-red-600 dark:text-red-300">
+                                                lob.get('emailAddress')?.touched" class="mt-1 text-xs text-red-600 ">
                                                 Please enter a valid email address.
                                             </div>
 
@@ -1046,13 +1183,16 @@
 
 
             <!-- Conferance -->
-            <div class="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-gray-700 px-3 py-2">
+            <div class="bg-white dark:bg-slate-900 rounded-t-lg border border-gray-200 dark:border-gray-700">
 
-                <!-- HEADER -->
+                <!-- ================= HEADER ================= -->
+                <div class="flex items-center justify-between
+                    px-4 py-3
+                    bg-gray-100 dark:bg-gray-800
+                    border-b border-gray-200 dark:border-gray-700
+                    rounded-t-lg">
 
-                <div
-                    class="flex items-center gap-3  p-2 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                    <h2 class="text-sm font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                    <h2 class="text-sm font-semibold text-blue-600 dark:text-blue-400">
                         <span class="text-red-500">*</span>
                         Conferance Bridge
                     </h2>
@@ -1061,8 +1201,12 @@
                 </div>
 
 
+
+
                 <!-- FORM SECTION -->
-                <div class="grid grid-cols-1  gap-4 transition-all duration-300 mt-3">
+                <div class="grid grid-cols-1  gap-5 p-4 transition-all duration-300
+                    bg-gray-50 dark:bg-slate-900
+                    rounded-b-lg">
 
                     <!-- NAME -->
                     <div>
@@ -1070,12 +1214,13 @@
                             <span class="text-red-500 font-bold">*</span> Conference Bridge Link
                         </label>
                         <input type="text" formControlName="conferanceBridge" placeholder="Teams meeting link"
-                            maxlength="500"
-                            [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/20': isFieldInvalid('conferanceBridge')}"
-                            class="input bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
+                            maxlength="500" [ngClass]="{
+                            '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+                            pageForm_bcdrRequest.get('conferanceBridge')?.invalid &&
+                            pageForm_bcdrRequest.get('conferanceBridge')?.touched
+                            }" class="input bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
                         focus:ring-2 focus:ring-blue-500 outline-none" />
-                        <div *ngIf="isFieldInvalid('conferanceBridge')"
-                            class="mt-1 text-xs text-red-600 dark:text-red-300">
+                        <div *ngIf="isFieldInvalid('conferanceBridge')" class="mt-1 text-xs text-red-600 ">
                             {{ getErrorMessage('conferanceBridge') }}
                         </div>
                     </div>
@@ -1086,14 +1231,17 @@
 
 
             <!-- Helpdesk  -->
-            <div
-                class="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4 space-y-5">
 
-                <!-- HEADER -->
+            <div class="bg-white dark:bg-slate-900 rounded-t-lg border border-gray-200 dark:border-gray-700">
 
-                <div
-                    class="flex items-center gap-3  p-2 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                    <h2 class="text-sm font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                <!-- ================= HEADER ================= -->
+                <div class="flex items-center justify-between
+                    px-4 py-3
+                    bg-gray-100 dark:bg-gray-800
+                    border-b border-gray-200 dark:border-gray-700
+                    rounded-t-lg">
+
+                    <h2 class="text-sm font-semibold text-blue-600 dark:text-blue-400">
                         <span class="text-red-500">*</span>
                         Helpdesk Details and Emergency Details
                     </h2>
@@ -1101,125 +1249,154 @@
 
                 </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2 mt-3">
-                        <span class="text-red-500 font-bold">*</span> Helpdesk Ticket Details
-                    </label>
 
-                    <!-- FORM SECTION -->
-                    <div class="flex justify-between gap-2 transition-all duration-300 mt-3">
 
-                        <!-- Ticket Number -->
-                        <div class="w-1/2">
-                            <input type="text" formControlName="helpdeskTicketNumber" placeholder="Ticket Number"
-                                maxlength="20" (keypress)="alfaNumricwithSpace($event)"
-                                [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/20': isFieldInvalid('helpdeskTicketNumber')}"
-                                class="input bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
+
+                <!-- FORM SECTION -->
+                <div class="grid grid-cols-1  gap-5 p-4 transition-all duration-300
+                    bg-gray-50 dark:bg-slate-900
+                    rounded-b-lg">
+
+                    <!-- <div
+                    class="flex items-center gap-3  p-2 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                    <h2 class="text-sm font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                        <span class="text-red-500">*</span>
+                        Helpdesk Details and Emergency Details
+                    </h2>
+
+
+                </div> -->
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2 mt-3">
+                            <span class="text-red-500 font-bold">*</span> Helpdesk Ticket Details
+                        </label>
+
+                        <!-- FORM SECTION -->
+                        <div class="flex justify-between gap-2 transition-all duration-300 mt-3">
+
+                            <!-- Ticket Number -->
+                            <div class="w-1/2">
+                                <input type="text" formControlName="helpdeskTicketNumber" placeholder="Ticket Number"
+                                    maxlength="20" (keypress)="alfaNumricwithSpace($event)" [ngClass]="{
+          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+          pageForm_bcdrRequest.get('helpdeskTicketNumber')?.invalid &&
+          pageForm_bcdrRequest.get('helpdeskTicketNumber')?.touched
+        }" class="input bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
                             focus:ring-2 focus:ring-blue-500 outline-none" />
-                            <div *ngIf="isFieldInvalid('helpdeskTicketNumber')"
-                                class="mt-1 text-xs text-red-600 dark:text-red-300">
-                                {{ getErrorMessage('helpdeskTicketNumber') }}
+                                <div *ngIf="isFieldInvalid('helpdeskTicketNumber')" class="mt-1 text-xs text-red-600 ">
+                                    {{ getErrorMessage('helpdeskTicketNumber') }}
+                                </div>
                             </div>
-                        </div>
 
-                        <!-- Ticket Details -->
-                        <div class="w-full">
-                            <input type="text" formControlName="helpdeskTicketDetails" placeholder="Ticket Details"
-                                (keypress)="allowCertainSpecChar($event)" maxlength="100"
-                                [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/20': isFieldInvalid('helpdeskTicketDetails')}"
-                                class="input bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
+                            <!-- Ticket Details -->
+                            <div class="w-full">
+                                <input type="text" formControlName="helpdeskTicketDetails" placeholder="Ticket Details"
+                                    (keypress)="allowCertainSpecChar($event)" maxlength="100" [ngClass]="{
+          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+          pageForm_bcdrRequest.get('helpdeskTicketDetails')?.invalid &&
+          pageForm_bcdrRequest.get('helpdeskTicketDetails')?.touched
+        }" class="input bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
                             focus:ring-2 focus:ring-blue-500 outline-none" />
-                            <div *ngIf="isFieldInvalid('helpdeskTicketDetails')"
-                                class="mt-1 text-xs text-red-600 dark:text-red-300">
-                                {{ getErrorMessage('helpdeskTicketDetails') }}
+                                <div *ngIf="isFieldInvalid('helpdeskTicketDetails')" class="mt-1 text-xs text-red-600 ">
+                                    {{ getErrorMessage('helpdeskTicketDetails') }}
+                                </div>
                             </div>
-                        </div>
 
+                        </div>
                     </div>
-                </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2 mt-3">
-                        <span class="text-red-500 font-bold">*</span> Helpdesk Contact Details
-                    </label>
 
-                    <!-- FORM SECTION -->
-                    <div class="flex justify-between gap-2 transition-all duration-300 mt-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2 mt-3">
+                            <span class="text-red-500 font-bold">*</span> Helpdesk Contact Details
+                        </label>
 
-                        <!-- Contact Number -->
-                        <div class="w-1/2">
-                            <input type="text" formControlName="helpdeskContactNumber" placeholder="Contact Number"
-                                maxlength="100"
-                                [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/20': isFieldInvalid('helpdeskContactNumber')}"
-                                class="input bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
+                        <!-- FORM SECTION -->
+                        <div class="flex justify-between gap-2 transition-all duration-300 mt-3">
+
+                            <!-- Contact Number -->
+                            <div class="w-1/2">
+                                <input type="text" formControlName="helpdeskContactNumber" placeholder="Contact Number"
+                                    maxlength="100" [ngClass]="{
+          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+          pageForm_bcdrRequest.get('helpdeskContactNumber')?.invalid &&
+          pageForm_bcdrRequest.get('helpdeskContactNumber')?.touched
+        }" class="input bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
                             focus:ring-2 focus:ring-blue-500 outline-none" />
-                            <div *ngIf="isFieldInvalid('helpdeskContactNumber')"
-                                class="mt-1 text-xs text-red-600 dark:text-red-300">
-                                {{ getErrorMessage('helpdeskContactNumber') }}
+                                <div *ngIf="isFieldInvalid('helpdeskContactNumber')" class="mt-1 text-xs text-red-600 ">
+                                    {{ getErrorMessage('helpdeskContactNumber') }}
+                                </div>
                             </div>
-                        </div>
 
-                        <!-- Email Address -->
-                        <div class="w-full">
-                            <input type="email" formControlName="helpdeskContactEmailAddress"
-                                placeholder="Email Address" maxlength="100"
-                                [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/20': isFieldInvalid('helpdeskContactEmailAddress')}"
-                                class="input bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
+                            <!-- Email Address -->
+                            <div class="w-full">
+                                <input type="email" formControlName="helpdeskContactEmailAddress"
+                                    placeholder="Email Address" maxlength="100" [ngClass]="{
+          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+          pageForm_bcdrRequest.get('helpdeskContactEmailAddress')?.invalid &&
+          pageForm_bcdrRequest.get('helpdeskContactEmailAddress')?.touched
+        }" class="input bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
                             focus:ring-2 focus:ring-blue-500 outline-none" />
-                            <div *ngIf="isFieldInvalid('helpdeskContactEmailAddress')"
-                                class="mt-1 text-xs text-red-600 dark:text-red-300">
-                                {{ getErrorMessage('helpdeskContactEmailAddress') }}
+                                <div *ngIf="isFieldInvalid('helpdeskContactEmailAddress')"
+                                    class="mt-1 text-xs text-red-600 ">
+                                    {{ getErrorMessage('helpdeskContactEmailAddress') }}
+                                </div>
                             </div>
-                        </div>
 
+                        </div>
                     </div>
-                </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2 mt-3">
-                        <span class="text-red-500 font-bold">*</span> Emergency Contact Details
-                    </label>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2 mt-3">
+                            <span class="text-red-500 font-bold">*</span> Emergency Contact Details
+                        </label>
 
-                    <!-- FORM SECTION -->
-                    <div class="flex justify-between gap-2 transition-all duration-300 mt-3">
+                        <!-- FORM SECTION -->
+                        <div class="flex justify-between gap-2 transition-all duration-300 mt-3">
 
-                        <!-- Contact Number -->
-                        <div class="w-1/2">
-                            <input type="text" formControlName="emergencyContactNumber" placeholder="Contact Number"
-                                [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/20': isFieldInvalid('emergencyContactNumber')}"
-                                class="input bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
+                            <!-- Contact Number -->
+                            <div class="w-1/2">
+                                <input type="text" formControlName="emergencyContactNumber" placeholder="Contact Number"
+                                    [ngClass]="{
+          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+          pageForm_bcdrRequest.get('emergencyContactNumber')?.invalid &&
+          pageForm_bcdrRequest.get('emergencyContactNumber')?.touched
+        }" class="input bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
                             focus:ring-2 focus:ring-blue-500 outline-none" />
-                            <div *ngIf="isFieldInvalid('emergencyContactNumber')"
-                                class="mt-1 text-xs text-red-600 dark:text-red-300">
-                                {{ getErrorMessage('emergencyContactNumber') }}
-                            </div>
+                                <div *ngIf="isFieldInvalid('emergencyContactNumber')"
+                                    class="mt-1 text-xs text-red-600 ">
+                                    {{ getErrorMessage('emergencyContactNumber') }}
+                                </div>
 
-                            <!-- <div *ngIf="
+                                <!-- <div *ngIf="
                                 pageForm_bcdrRequest.get('emergencyContactNumber')?.hasError('pattern') &&
                                 (pageForm_bcdrRequest.get('emergencyContactNumber')?.touched || pageForm_bcdrRequest.get('emergencyContactNumber')?.dirty)
-                                " class="mt-1 text-xs text-red-600 dark:text-red-300">
+                                " class="mt-1 text-xs text-red-600 ">
                                 Invalid contact number.
                             </div> -->
 
-                        </div>
-
-                        <!-- Email Address -->
-                        <div class="w-full">
-                            <input type="email" formControlName="emergencyContactEmailAddress"
-                                placeholder="Email Address" maxlength="100"
-                                [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/20': isFieldInvalid('emergencyContactEmailAddress')}"
-                                class="input bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
-                            focus:ring-2 focus:ring-blue-500 outline-none" />
-                            <div *ngIf="isFieldInvalid('emergencyContactEmailAddress')"
-                                class="mt-1 text-xs text-red-600 dark:text-red-300">
-                                {{ getErrorMessage('emergencyContactEmailAddress') }}
                             </div>
+
+                            <!-- Email Address -->
+                            <div class="w-full">
+                                <input type="email" formControlName="emergencyContactEmailAddress"
+                                    placeholder="Email Address" maxlength="100" [ngClass]="{
+          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+          pageForm_bcdrRequest.get('emergencyContactEmailAddress')?.invalid &&
+          pageForm_bcdrRequest.get('emergencyContactEmailAddress')?.touched
+        }" class="input bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
+                            focus:ring-2 focus:ring-blue-500 outline-none" />
+                                <div *ngIf="isFieldInvalid('emergencyContactEmailAddress')"
+                                    class="mt-1 text-xs text-red-600 ">
+                                    {{ getErrorMessage('emergencyContactEmailAddress') }}
+                                </div>
+                            </div>
+
                         </div>
-
                     </div>
+
                 </div>
-
-
 
             </div>
 
@@ -1326,7 +1503,7 @@
                     </textarea>
                     <div *ngIf="pageForm_bcdrRequest.get('recoveryTimeObjective')?.hasError('required') &&
                                     pageForm_bcdrRequest.get('recoveryTimeObjective')?.touched
-                                    " class="mt-1 text-xs text-red-600 dark:text-red-300">
+                                    " class="mt-1 text-xs text-red-600 ">
                         This field is required.
                     </div>
                 </div>
@@ -1344,8 +1521,7 @@
                                         bg-white dark:bg-gray-900 text-gray-900 dark:text-white
                                         focus:ring-2 focus:ring-blue-500 outline-none">
                     </textarea>
-                    <div *ngIf="isFieldInvalid('recoveryPointObjective')"
-                        class="mt-1 text-xs text-red-600 dark:text-red-300">
+                    <div *ngIf="isFieldInvalid('recoveryPointObjective')" class="mt-1 text-xs text-red-600 ">
                         {{ getErrorMessage('recoveryPointObjective') }}
                     </div>
                 </div>
@@ -1404,11 +1580,14 @@
                                     <!-- Name -->
                                     <div> <label class="label"> <span class="text-red-500">*</span> Name</label>
                                         <input type="text" placeholder="Name of the person" maxlength="100"
-                                            class="input" formControlName="recoveryTeamName"
-                                            (keypress)="onlyAlfabetic($event);CheckSpecialChar($event)" />
+                                            class="input" formControlName="recoveryTeamName" [ngClass]="{
+          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+       objectiveForm.get('recoveryTeamName')?.hasError('required') &&
+                                         objectiveForm.get('recoveryTeamName')?.touched
+        }" (keypress)="onlyAlfabetic($event);CheckSpecialChar($event)" />
                                         <div *ngIf="objectiveForm.get('recoveryTeamName')?.hasError('required') &&
                                          objectiveForm.get('recoveryTeamName')?.touched"
-                                            class="mt-1 text-xs text-red-600 dark:text-red-300">
+                                            class="mt-1 text-xs text-red-600 ">
                                             This field is required.
                                         </div>
                                     </div>
@@ -1417,11 +1596,14 @@
                                         <label class="label"> <span class="text-red-500">*</span>
                                             Designation</label>
                                         <input type="text" formControlName="recoveryTeamDesignation"
-                                            (keypress)="alfaNumricwithSpace($event)"
-                                            placeholder="Designation of the person" maxlength="100" class="input" />
+                                            (keypress)="alfaNumricwithSpace($event)" [ngClass]="{
+          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+       objectiveForm.get('recoveryTeamDesignation')?.hasError('required') &&
+                                         objectiveForm.get('recoveryTeamDesignation')?.touched
+        }" placeholder="Designation of the person" maxlength="100" class="input" />
                                         <div *ngIf="objectiveForm.get('recoveryTeamDesignation')?.hasError('required') &&
                                          objectiveForm.get('recoveryTeamDesignation')?.touched"
-                                            class="mt-1 text-xs text-red-600 dark:text-red-300">
+                                            class="mt-1 text-xs text-red-600 ">
                                             This field is required.
                                         </div>
                                     </div>
@@ -1429,46 +1611,56 @@
                                             Supervisor</label>
                                         <input type="text" placeholder="Name of the supervisor" maxlength="100"
                                             (keypress)="onlyAlfabetic($event);CheckSpecialChar($event)"
-                                            formControlName="recoveryTeamSupervisor" maxlength="200" class="input" />
+                                            formControlName="recoveryTeamSupervisor" maxlength="200" class="input"
+                                            [ngClass]="{
+          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+       objectiveForm.get('recoveryTeamSupervisor')?.hasError('required') &&
+                                         objectiveForm.get('recoveryTeamSupervisor')?.touched
+        }" />
                                         <div *ngIf="objectiveForm.get('recoveryTeamSupervisor')?.hasError('required') &&
                                          objectiveForm.get('recoveryTeamSupervisor')?.touched"
-                                            class="mt-1 text-xs text-red-600 dark:text-red-300">
+                                            class="mt-1 text-xs text-red-600 ">
                                             This field is required.
                                         </div>
                                     </div>
                                     <div> <label class="label"> <span class="text-red-500">*</span> Contact
                                             Number</label> <input type="text"
-                                            placeholder="List down the factor that we are assuming." maxlength="200"
-                                            formControlName="recoveryTeamContactNumber" [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/20': objectiveForm.get('recoveryTeamContactNumber')?.hasError('required') &&
-                                            objectiveForm.get('recoveryTeamContactNumber')?.touched}" class="input" />
+                                           placeholder="Contact number of the person" maxlength="200"
+                                            formControlName="recoveryTeamContactNumber" [ngClass]="{
+          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+       objectiveForm.get('recoveryTeamContactNumber')?.hasError('required') &&
+                                         objectiveForm.get('recoveryTeamContactNumber')?.touched
+        }" class="input" />
                                         <div *ngIf="objectiveForm.get('recoveryTeamContactNumber')?.hasError('required') &&
                                          objectiveForm.get('recoveryTeamContactNumber')?.touched"
-                                            class="mt-1 text-xs text-red-600 dark:text-red-300">
+                                            class="mt-1 text-xs text-red-600 ">
                                             This field is required.
                                         </div>
 
                                         <div *ngIf="
                                             objectiveForm.get('recoveryTeamContactNumber')?.hasError('pattern') &&
                                             (objectiveForm.get('recoveryTeamContactNumber')?.touched || objectiveForm.get('recoveryTeamContactNumber')?.dirty)
-                                            " class="mt-1 text-xs text-red-600 dark:text-red-300">
+                                            " class="mt-1 text-xs text-red-600 ">
                                             Invalid contact number.
                                         </div>
                                     </div>
                                     <div> <label class="label"> <span class="text-red-500">*</span> Email
                                             Address</label> <input type="email"
-                                            placeholder="List down the factor that we are assuming." maxlength="100"
-                                            formControlName="recoveryTeamEmailAddress"
-                                            [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/20': objectiveForm.get('recoveryTeamEmailAddress')?.hasError('required') &&                                      objectiveForm.get('recoveryTeamEmailAddress')?.touched}"
-                                            class="input" />
+                                          placeholder="Email address of the person" maxlength="100"
+                                            formControlName="recoveryTeamEmailAddress" [ngClass]="{
+          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+       objectiveForm.get('recoveryTeamEmailAddress')?.hasError('required') &&
+                                         objectiveForm.get('recoveryTeamEmailAddress')?.touched
+        }" class="input" />
                                         <div *ngIf="objectiveForm.get('recoveryTeamEmailAddress')?.hasError('required') &&
                                          objectiveForm.get('recoveryTeamEmailAddress')?.touched"
-                                            class="mt-1 text-xs text-red-600 dark:text-red-300">
+                                            class="mt-1 text-xs text-red-600 ">
                                             This field is required.
                                         </div>
                                         <div *ngIf="
                                             objectiveForm.get('recoveryTeamEmailAddress')?.hasError('pattern') &&
                                             (objectiveForm.get('recoveryTeamEmailAddress')?.touched || objectiveForm.get('recoveryTeamEmailAddress')?.dirty)
-                                            " class="mt-1 text-xs text-red-600 dark:text-red-300">
+                                            " class="mt-1 text-xs text-red-600 ">
                                             Please enter a valid email address.
                                         </div>
                                     </div>
@@ -1564,11 +1756,13 @@
                             <textarea
                                 placeholder="All the extenal and internal factors and other team's involvement. Other impact areas"
                                 formControlName="dependecies" (keypress)="allowCertainSpecChar($event)"
-                                [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/20': isFieldInvalid('dependecies')}"
+                               [ngClass]="{
+          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+      isFieldInvalid('dependecies')
+        }"
                                 rows="2" class="textbox">
                             </textarea>
-                            <div *ngIf="isFieldInvalid('dependecies')"
-                                class="mt-1 text-xs text-red-600 dark:text-red-300">
+                            <div *ngIf="isFieldInvalid('dependecies')" class="mt-1 text-xs text-red-600 ">
                                 {{ getErrorMessage('dependecies') }}
                             </div>
                         </div>
@@ -1590,8 +1784,12 @@
                                     <label class="label">
                                         <span class="text-red-500">*</span> Other Email Address</label>
                                     <input type="email" placeholder="Email address of the team involved" maxlength="100"
-                                        formControlName="emailAddress" class="input" />
-                                    <div class="mt-1 text-xs text-red-600 dark:text-red-300" *ngIf="TeamInvolvementForm.get('emailAddress')?.hasError('required') &&
+                                        formControlName="emailAddress" class="input"  [ngClass]="{
+          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+      TeamInvolvementForm.get('emailAddress')?.hasError('required') &&
+                                         TeamInvolvementForm.get('emailAddress')?.touched
+        }" />
+                                    <div class="mt-1 text-xs text-red-600 " *ngIf="TeamInvolvementForm.get('emailAddress')?.hasError('required') &&
                                          TeamInvolvementForm.get('emailAddress')?.touched">
                                         This field is required.
                                     </div>
@@ -1599,7 +1797,7 @@
                                     <span *ngIf="
                                     TeamInvolvementForm.get('emailAddress')?.hasError('email') &&
                                     TeamInvolvementForm.get('emailAddress')?.touched"
-                                        class="mt-1 text-xs text-red-600 dark:text-red-300">
+                                        class="mt-1 text-xs text-red-600 ">
                                         Invalid email address.
                                     </span>
 
@@ -1623,11 +1821,10 @@
                     <textarea
                         placeholder="If something goes wrong, defining the response time in case of actual scenario"
                         formControlName="expectedResponseTime" (keypress)="CheckSpecialChar($event)"
-                        [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/20': isFieldInvalid('expectedResponseTime')}"
+                        [ngClass]="{ '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20': isFieldInvalid('expectedResponseTime')}"
                         rows="2" class="textbox">
                     </textarea>
-                    <div *ngIf="isFieldInvalid('expectedResponseTime')"
-                        class="mt-1 text-xs text-red-600 dark:text-red-300">
+                    <div *ngIf="isFieldInvalid('expectedResponseTime')" class="mt-1 text-xs text-red-600 ">
                         {{ getErrorMessage('expectedResponseTime') }}
                     </div>
                 </div>
@@ -1647,11 +1844,10 @@
                     <textarea formControlName="overallRecoveryStrategy" rows="3"
                         placeholder="Outline the Overall Recovery Strategy with the plan flow."
                         (keypress)="allowCertainSpecChar($event)"
-                        [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/20': isFieldInvalid('overallRecoveryStrategy')}"
+                        [ngClass]="{ '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20': isFieldInvalid('overallRecoveryStrategy')}"
                         class="textbox">
                     </textarea>
-                    <div *ngIf="isFieldInvalid('overallRecoveryStrategy')"
-                        class="mt-1 text-xs text-red-600 dark:text-red-300">
+                    <div *ngIf="isFieldInvalid('overallRecoveryStrategy')" class="mt-1 text-xs text-red-600 ">
                         {{ getErrorMessage('overallRecoveryStrategy') }}
                     </div>
                 </div>
@@ -1765,11 +1961,10 @@
 
                         <textarea fplaceholder="Mention all the supported artifacts you've uploaded."
                             formControlName="supportedArtifacts" rows="3" (keypress)="allowCertainSpecChar($event)"
-                            [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/20': isFieldInvalid('supportedArtifacts')}"
+                            [ngClass]="{ '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20': isFieldInvalid('supportedArtifacts')}"
                             class="textbox">
                     </textarea>
-                        <div *ngIf="isFieldInvalid('supportedArtifacts')"
-                            class="mt-1 text-xs text-red-600 dark:text-red-300">
+                        <div *ngIf="isFieldInvalid('supportedArtifacts')" class="mt-1 text-xs text-red-600 ">
                             {{ getErrorMessage('supportedArtifacts') }}
                         </div>
                     </div>
@@ -1826,9 +2021,13 @@
                                         <label class="label">
                                             <span class="text-red-500">*</span> Expected Result</label>
                                         <input type="text" formControlName="recoveryStrategyExpectedResult"
-                                            placeholder="Expected Result" maxlength="100" class="input" />
+                                            placeholder="Expected Result" maxlength="100" class="input"  [ngClass]="{
+          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+      objectiveForm.get('recoveryStrategyExpectedResult')?.hasError('required') &&
+                                            objectiveForm.get('recoveryStrategyExpectedResult')?.touched
+        }" />
 
-                                        <div class="mt-1 text-xs text-red-600 dark:text-red-300" *ngIf="objectiveForm.get('recoveryStrategyExpectedResult')?.hasError('required') &&
+                                        <div class="mt-1 text-xs text-red-600 " *ngIf="objectiveForm.get('recoveryStrategyExpectedResult')?.hasError('required') &&
                                             objectiveForm.get('recoveryStrategyExpectedResult')?.touched"> The field is
                                             required.
                                         </div>
@@ -1837,9 +2036,13 @@
                                         <label class="label">
                                             <span class="text-red-500">*</span> Successor Team/Technician</label>
                                         <input type="text" formControlName="recoveryStrategySuccessorTeam"
-                                            placeholder="Successor Team/Technician"
+                                            placeholder="Successor Team/Technician"  [ngClass]="{
+          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+      objectiveForm.get('recoveryStrategySuccessorTeam')?.hasError('required') &&
+                                            objectiveForm.get('recoveryStrategySuccessorTeam')?.touched
+        }" 
                                             (keypress)="allowCertainSpecChar($event)" maxlength="100" class="input" />
-                                        <div class="mt-1 text-xs text-red-600 dark:text-red-300" *ngIf="objectiveForm.get('recoveryStrategySuccessorTeam')?.hasError('required') &&
+                                        <div class="mt-1 text-xs text-red-600 " *ngIf="objectiveForm.get('recoveryStrategySuccessorTeam')?.hasError('required') &&
                                             objectiveForm.get('recoveryStrategySuccessorTeam')?.touched"> The field is
                                             required.
                                         </div>
@@ -1848,15 +2051,19 @@
                                         <label class="label">
                                             <span class="text-red-500">*</span> Email</label>
                                         <input type="email" formControlName="recoveryStrategyEmailAddress"
-                                            placeholder="Email" maxlength="200" class="input" />
-                                        <div class="mt-1 text-xs text-red-600 dark:text-red-300" *ngIf="objectiveForm.get('recoveryStrategyEmailAddress')?.hasError('required') &&
+                                            placeholder="Email" maxlength="200" class="input"  [ngClass]="{
+          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+      objectiveForm.get('recoveryStrategyEmailAddress')?.hasError('required') &&
+                                            objectiveForm.get('recoveryStrategyEmailAddress')?.touched
+        }"  />
+                                        <div class="mt-1 text-xs text-red-600 " *ngIf="objectiveForm.get('recoveryStrategyEmailAddress')?.hasError('required') &&
                                             objectiveForm.get('recoveryStrategyEmailAddress')?.touched"> The field is
                                             required.
                                         </div>
                                         <div *ngIf="
                                             objectiveForm.get('recoveryStrategyEmailAddress')?.hasError('pattern') &&
                                             (objectiveForm.get('recoveryStrategyEmailAddress')?.touched || objectiveForm.get('recoveryStrategyEmailAddress')?.dirty)
-                                            " class="mt-1 text-xs text-red-600 dark:text-red-300">
+                                            " class="mt-1 text-xs text-red-600 ">
                                             Please enter a valid email address.
                                         </div>
                                     </div>
@@ -1924,7 +2131,7 @@
                                 </i>
 
                                 <owl-date-time #actualStartDate></owl-date-time>
-                                <div class="mt-1 text-xs text-red-600 dark:text-red-300" *ngIf="pageForm_bcdrRequest.get('actualStartDate')?.hasError('required') &&
+                                <div class="mt-1 text-xs text-red-600 " *ngIf="pageForm_bcdrRequest.get('actualStartDate')?.hasError('required') &&
                                             pageForm_bcdrRequest.get('actualStartDate')?.touched"> The field is
                                     required.
                                 </div>
@@ -1948,7 +2155,7 @@
                                 </i>
 
                                 <owl-date-time #actualEndDate></owl-date-time>
-                                <div class="mt-1 text-xs text-red-600 dark:text-red-300" *ngIf="pageForm_bcdrRequest.get('actualEndDate')?.hasError('required') &&
+                                <div class="mt-1 text-xs text-red-600 " *ngIf="pageForm_bcdrRequest.get('actualEndDate')?.hasError('required') &&
                                             pageForm_bcdrRequest.get('actualEndDate')?.touched"> The field is required.
                                 </div>
                             </div>
@@ -1967,11 +2174,10 @@
 
                     <textarea rows="3" placeholder="Return To Operation Details" formControlName="returnToOperation"
                         (keypress)="allowCertainSpecChar($event)"
-                        [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/20': isFieldInvalid('returnToOperation')}"
+                        [ngClass]="{ '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20': isFieldInvalid('returnToOperation')}"
                         class="textbox">
                       </textarea>
-                    <div *ngIf="isFieldInvalid('returnToOperation')"
-                        class="mt-1 text-xs text-red-600 dark:text-red-300">
+                    <div *ngIf="isFieldInvalid('returnToOperation')" class="mt-1 text-xs text-red-600 ">
                         {{ getErrorMessage('returnToOperation') }}
                     </div>
                 </div>
@@ -2107,13 +2313,13 @@
                                         {{objectiveForm.get('objectiveDetails')?.value || ('Objective ' + e + 1)}}
                                     </h3>
 
-                                    @if(e !== 0){
+                                    <!-- @if(e !== 0){
                                     <label class="flex items-center gap-2 text-sm">
                                         <input type="checkbox" class="w-4 h-4 text-blue-600"
                                             (change)="toggleDetails()" />
                                         Same as above
                                     </label>
-                                    }
+                                    } -->
 
                                 </div>
 
@@ -2148,7 +2354,7 @@
                                         </label>
 
 
-                                        <div class="mt-1 text-xs text-red-600 dark:text-red-300" *ngIf="pageForm_bcdrRequest.get('returnToOperationResult')?.hasError('required') &&
+                                        <div class="mt-1 text-xs text-red-600 " *ngIf="pageForm_bcdrRequest.get('returnToOperationResult')?.hasError('required') &&
                                             pageForm_bcdrRequest.get('returnToOperationResult')?.touched"> The field is
                                             required.
                                         </div>
@@ -2166,9 +2372,13 @@
                                         </label>
 
                                         <textarea rows="3" formControlName="returnToOperationResultComment"
-                                            placeholder="Comment" (keypress)="allowCertainSpecChar($event)"
+                                            placeholder="Comment"  [ngClass]="{
+          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+      pageForm_bcdrRequest.get('returnToOperationResultComment')?.hasError('required') &&
+                                            pageForm_bcdrRequest.get('returnToOperationResultComment')?.touched
+        }"  (keypress)="allowCertainSpecChar($event)"
                                             class="textbox"></textarea>
-                                        <div class="mt-1 text-xs text-red-600 dark:text-red-300" *ngIf="pageForm_bcdrRequest.get('returnToOperationResultComment')?.hasError('required') &&
+                                        <div class="mt-1 text-xs text-red-600 " *ngIf="pageForm_bcdrRequest.get('returnToOperationResultComment')?.hasError('required') &&
                                             pageForm_bcdrRequest.get('returnToOperationResultComment')?.touched"> The
                                             field is required.
                                         </div>
@@ -2206,7 +2416,7 @@
 
                                                     <owl-date-time #startTime></owl-date-time>
 
-                                                    <div class="mt-1 text-xs text-red-600 dark:text-red-300" *ngIf="objSchedule.get('startTime')?.hasError('required') &&
+                                                    <div class="mt-1 text-xs text-red-600 " *ngIf="objSchedule.get('startTime')?.hasError('required') &&
                                                          objSchedule.get('startTime')?.touched"> The field is required.
                                                     </div>
                                                 </div>
@@ -2219,18 +2429,18 @@
                                                 </label>
 
                                                 <div class="relative group">
-                                                    <input [owlDateTime]="endTime" formControlName="endTime"
-                                                        [owlDateTimeTrigger]="endTime" placeholder="End Time" class="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 
+                                                    <input [owlDateTime]="endDtime" formControlName="endDtime"
+                                                        [owlDateTimeTrigger]="endDtime" placeholder="End Time" class="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 
                                                     bg-white dark:bg-gray-900 text-gray-900 dark:text-white
                                                      focus:ring-2 focus:ring-blue-500 outline-none pr-10"
                                                         (dateTimeChange)="checkObjectiveNewScheduleDate('endDtime')" />
                                                     <i class="fas fa-clock absolute right-3 top-1/2 -translate-y-1/2 
                                                         text-gray-400 group-hover:text-blue-500 cursor-pointer"></i>
 
-                                                    <owl-date-time #endTime></owl-date-time>
+                                                    <owl-date-time #endDtime></owl-date-time>
 
-                                                    <div class="mt-1 text-xs text-red-600 dark:text-red-300" *ngIf="objSchedule.get('endTime')?.hasError('required') &&
-                                                            objSchedule.get('endTime')?.touched"> The field is
+                                                    <div class="mt-1 text-xs text-red-600 " *ngIf="objSchedule.get('endDtime')?.hasError('required') &&
+                                                            objSchedule.get('endDtime')?.touched"> The field is
                                                         required.
                                                     </div>
                                                 </div>
@@ -2245,8 +2455,12 @@
                                                 <input type="text" formControlName="estimatedTime"
                                                     placeholder="Estimate Time" maxlength="100" class="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 
                                                 bg-white dark:bg-gray-900 text-gray-900 dark:text-white
-                                                    focus:ring-2 focus:ring-blue-500 outline-none" />
-                                                <div class="mt-1 text-xs text-red-600 dark:text-red-300" *ngIf="objSchedule.get('estimatedTime')?.hasError('required') &&
+                                                    focus:ring-2 focus:ring-blue-500 outline-none" [ngClass]="{
+          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+    objSchedule.get('estimatedTime')?.hasError('required') &&
+                                                    objSchedule.get('estimatedTime')?.touched
+        }" />
+                                                <div class="mt-1 text-xs text-red-600 " *ngIf="objSchedule.get('estimatedTime')?.hasError('required') &&
                                                     objSchedule.get('estimatedTime')?.touched"> The field is required.
                                                 </div>
                                             </div>
@@ -2276,7 +2490,7 @@
                                                             class="text-sm text-gray-700 dark:text-gray-300">Fail</span>
                                                     </label>
 
-                                                    <div class="mt-1 text-xs text-red-600 dark:text-red-300" *ngIf="objSchedule.get('result')?.hasError('required') &&
+                                                    <div class="mt-1 text-xs text-red-600 " *ngIf="objSchedule.get('result')?.hasError('required') &&
                                                         objSchedule.get('result')?.touched"> The field is required.
                                                     </div>
 
@@ -2293,8 +2507,12 @@
 
                                                     <textarea rows="3" formControlName="comment" placeholder="Comment"
                                                         (keypress)="allowCertainSpecChar($event)"
-                                                        class="textbox"></textarea>
-                                                    <div class="mt-1 text-xs text-red-600 dark:text-red-300" *ngIf="objSchedule.get('comment')?.hasError('required') &&
+                                                        class="textbox" [ngClass]="{
+          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+    objSchedule.get('comment')?.hasError('required') &&
+                                            objSchedule.get('comment')?.touched
+        }" ></textarea>
+                                                    <div class="mt-1 text-xs text-red-600 " *ngIf="objSchedule.get('comment')?.hasError('required') &&
                                             objSchedule.get('comment')?.touched"> The
                                                         field is required.
                                                     </div>
@@ -2327,7 +2545,7 @@
                         [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/20': isFieldInvalid('whatWorkedWell')}"
                         class="textbox">
                       </textarea>
-                    <div *ngIf="isFieldInvalid('whatWorkedWell')" class="mt-1 text-xs text-red-600 dark:text-red-300">
+                    <div *ngIf="isFieldInvalid('whatWorkedWell')" class="mt-1 text-xs text-red-600 ">
                         {{ getErrorMessage('whatWorkedWell') }}
                     </div>
                 </div>
@@ -2343,8 +2561,7 @@
                         [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/20': isFieldInvalid('improvementsIdentified')}"
                         class="textbox">
                       </textarea>
-                    <div *ngIf="isFieldInvalid('improvementsIdentified')"
-                        class="mt-1 text-xs text-red-600 dark:text-red-300">
+                    <div *ngIf="isFieldInvalid('improvementsIdentified')" class="mt-1 text-xs text-red-600 ">
                         {{ getErrorMessage('improvementsIdentified') }}
                     </div>
                 </div>
@@ -2414,7 +2631,7 @@
                             </label>
 
                             <div *ngIf="isFieldInvalid('testGoalWasAchieved')"
-                                class="mt-1 text-xs text-red-600 dark:text-red-300 col-span-2">
+                                class="mt-1 text-xs text-red-600  col-span-2">
                                 {{ getErrorMessage('testGoalWasAchieved') }}
                             </div>
 
@@ -2433,8 +2650,7 @@
                                 [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/20': isFieldInvalid('opportunityDuringTest')}"
                                 class="textbox">
                             </textarea>
-                            <div *ngIf="isFieldInvalid('opportunityDuringTest')"
-                                class="mt-1 text-xs text-red-600 dark:text-red-300">
+                            <div *ngIf="isFieldInvalid('opportunityDuringTest')" class="mt-1 text-xs text-red-600 ">
                                 {{ getErrorMessage('opportunityDuringTest') }}
                             </div>
 
@@ -2452,8 +2668,7 @@
                                 [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/20': isFieldInvalid('recommendationsForTeam')}"
                                 class="textbox">
                             </textarea>
-                            <div *ngIf="isFieldInvalid('recommendationsForTeam')"
-                                class="mt-1 text-xs text-red-600 dark:text-red-300">
+                            <div *ngIf="isFieldInvalid('recommendationsForTeam')" class="mt-1 text-xs text-red-600 ">
                                 {{ getErrorMessage('recommendationsForTeam') }}
                             </div>
 

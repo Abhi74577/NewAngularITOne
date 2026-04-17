@@ -8,7 +8,7 @@ import { ColumnConfig, DynamicTableComponent, ExpandableTableConfig } from "@app
 import { BaseService } from "@app/shared/services/baseService.service";
 import { LookupType, LookupValue } from "@app/shared/models/LookUP";
 import { appUrl, storageConst } from "@app/shared/common";
-import {ValidationHelper} from '../../shared/models/inputValidation'
+import { ValidationHelper } from '../../shared/models/inputValidation'
 interface BcdrRequest {
   id: number;
   name: string;
@@ -82,10 +82,7 @@ export class BcdrrequestComponent implements OnInit {
   });
 
   pageForm_bcdrRequest!: FormGroup;
-  currentCSTDateTime = new Date().toLocaleString('en-US', {
-    timeZone: 'America/Chicago'
-  });
-  ;
+  currentCSTDateTime!: Date;
   showClientLOB = false;
 
   // Validators helper (mock)
@@ -159,6 +156,7 @@ export class BcdrrequestComponent implements OnInit {
   isRecoveryTeamCollapsed: boolean = true;
   RecoveryPlanFile: any = [];
   isRecoveryObjCollapsed: boolean = true;
+  showFilter: boolean = false;
   ReturnToResultFiles: any = [];
   isObjectiveResultCollapsed: boolean = true;
   lstTeamNames = new FormControl([]);
@@ -387,7 +385,21 @@ export class BcdrrequestComponent implements OnInit {
   toggleRecoveryObjSection() {
     this.isRecoveryObjCollapsed = !this.isRecoveryObjCollapsed;
   }
+
+
+  toggleFilter() {
+    this.showFilter = !this.showFilter;
+  }
+
+  setCurrentCST() {
+    this.currentCSTDateTime = new Date(
+      new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' })
+    );
+  }
+
   createPageForm() {
+    this.setCurrentCST()
+    console.log(this.currentCSTDateTime)
     this.pageForm_bcdrRequest = this.fb.group({
       requestId: [0],
       requestName: ['', Validators.required],
@@ -416,9 +428,9 @@ export class BcdrrequestComponent implements OnInit {
       helpdeskTicketNumber: [null, Validators.required],
       helpdeskTicketDetails: [null, Validators.required],
       emergencyContactNumber: [null, [Validators.required, Validators.pattern(this.vHelper.phoneNb_RegEx)]],
-      emergencyContactEmailAddress: [null, [Validators.required, Validators.email ]],
-      helpdeskContactNumber: ['+91-9365592206', [Validators.pattern(this.vHelper.phoneNb_RegEx)]],
-      helpdeskContactEmailAddress: ['Helpdesk@etsnetwork.com', [Validators.required, Validators.email ]],
+      emergencyContactEmailAddress: [null, [Validators.required, Validators.email]],
+      helpdeskContactNumber: ['+91-9365592206', [Validators.required, Validators.pattern(this.vHelper.phoneNb_RegEx)]],
+      helpdeskContactEmailAddress: ['Helpdesk@etsnetwork.com', [Validators.required, Validators.email]],
       isCommunicatedWithCustomer: ['No', Validators.required],
       isExternalClientNotified: ['No', Validators.required],
       recoveryTimeObjective: [null, Validators.required],
@@ -668,7 +680,7 @@ export class BcdrrequestComponent implements OnInit {
       requestObjectiveId: [0, Validators.required],
       result: [null, Validators.required],
       startTime: [this.currentCSTDateTime, Validators.required],
-      endTime: [this.currentCSTDateTime, Validators.required],
+      endDtime: [this.currentCSTDateTime, Validators.required],
       estimatedTime: [null, Validators.required],
       comment: [null, Validators.required],
       isActive: true,
@@ -892,9 +904,9 @@ export class BcdrrequestComponent implements OnInit {
     const control = this.pageForm_bcdrRequest.get(controlName);
     if (!control || !control.errors) return '';
 
-    if (control.hasError('required')) return 'This field is required';
+    if (control.hasError('required')) return 'This field is required.';
     if (control.hasError('email')) return ' Invalid email address.';
-    if (control.hasError('pattern')) return 'This field has an invalid format';
+    if (control.hasError('pattern')) return 'This field has an invalid format.';
     if (control.hasError('minlength')) {
       const minLength = control.errors['minlength']?.requiredLength;
       return `Minimum length is ${minLength} characters`;
@@ -904,7 +916,7 @@ export class BcdrrequestComponent implements OnInit {
       return `Maximum length is ${maxLength} characters`;
     }
 
-    return 'This field has a validation error';
+    return 'This field is required.';
   }
 
   /**
@@ -1296,7 +1308,7 @@ export class BcdrrequestComponent implements OnInit {
 
     if (event.type === 'edit' || event.type === 'info') {
 
-
+      this.showPartnerDetails = true;
       this.pageForm_bcdrRequest.reset();
       this.Val_ReviewerComment = null;
       this.Val_ApproverComment = null;
@@ -2107,6 +2119,8 @@ export class BcdrrequestComponent implements OnInit {
 
   }
   cancel() {
+    this.showFilter = false;
+    this.showPartnerDetails = false;
     this.IsEdit = false;
     this.IsInfo = false;
     this.showClientLOB = false;
@@ -2274,34 +2288,47 @@ export class BcdrrequestComponent implements OnInit {
 
 
 
-  checkObjectiveNewScheduleDate(compname: any) {
-    const objectives = this.pageForm_bcdrRequest.controls['lstbCDRRequestObjective']?.value ?? [];
+  checkObjectiveNewScheduleDate(compname: string): void {
+    const objectives =
+      this.pageForm_bcdrRequest.get('lstbCDRRequestObjective')?.value ?? [];
 
-    objectives.forEach((obj: any, index: number) => {
-      const sched = obj?.lstbCDRRequestObjectiveNewScheduleModels?.[0];
-      if (!sched) return; // nothing to validate for this objective
+    for (let index = 0; index < objectives.length; index++) {
+      const objective = objectives[index];
 
-      const { valid, message, start, end } = this.validateFullDateTime(
-        sched.startTime,
-        sched.endDtime,
-        { allowEqual: false } // change to true if you want to allow identical start/end
-      );
+      const sched =
+        objective?.lstbCDRRequestObjectiveNewScheduleModels?.[0];
 
-      if (!valid) {
-        alert(message ?? 'Invalid date-time selection.');
+      const start = sched?.startTime;
+      const end = sched?.endDtime;
+
+ 
+
+      /* ✅ 3. Start date must be LESS than end date */
+      if (new Date(start).getTime() >= new Date(end).getTime()) {
+        alert('Start date must be earlier than end date.');
         this.patchDateValueObjectiveNewScheduleDate(index, compname);
         return;
       }
 
-      // ✅ Keep local Date (no toISOString). If you prefer to store strings:
-      // this.tempobjnewSchedularstart = formatLocal(start!);
-      // this.tempobjnewSchedularend   = formatLocal(end!);
+      /* ✅ 4. Existing full date-time validation */
+      const result = this.validateFullDateTime(
+        start,
+        end,
+        { allowEqual: false }
+      );
 
-      this.tempobjnewSchedularstart = this.formatLocalISO(start!);
-      this.tempobjnewSchedularend = this.formatLocalISO(end!);
+      if (!result.valid) {
+        alert(result.message ?? 'Invalid date-time selection.');
+        this.patchDateValueObjectiveNewScheduleDate(index, compname);
+        return;
+      }
+
+      /* ✅ Store properly formatted local ISO strings */
+      this.tempobjnewSchedularstart = this.formatLocalISO(result.start!);
+      this.tempobjnewSchedularend = this.formatLocalISO(result.end!);
 
       this.getObjectiveNewScheduleActualDates(index);
-    });
+    }
   }
 
 
@@ -2331,7 +2358,7 @@ export class BcdrrequestComponent implements OnInit {
 
 
 
-  patchDateValueObjectiveNewScheduleDate(index: number, compname: 'startTime' | 'endTime') {
+  patchDateValueObjectiveNewScheduleDate(index: number, compname: any) {
 
     const objectivesFA = this.pageForm_bcdrRequest.get(
       'lstbCDRRequestObjective'
@@ -2477,23 +2504,23 @@ export class BcdrrequestComponent implements OnInit {
 
   // --valiaditon check
 
-  CheckSpecialChar(event:any) {
+  CheckSpecialChar(event: any) {
     return this.vHelper.CheckSpecialChar(event);
   }
 
-  allowCertainSpecChar(event:any) {
+  allowCertainSpecChar(event: any) {
     return this.vHelper.allowCertainSpecChar(event);
   }
 
-  OnlyNumber(event:any) {
+  OnlyNumber(event: any) {
     return this.vHelper.OnlyNumber(event);
   }
 
-  alfaNumricwithSpace(event:any) {
+  alfaNumricwithSpace(event: any) {
     return this.vHelper.alfaNumricwithSpace(event);
   }
 
-  onlyAlfabetic(event:any) {
+  onlyAlfabetic(event: any) {
     return this.vHelper.onlyAlfabetic(event);
   }
 

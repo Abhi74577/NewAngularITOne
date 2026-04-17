@@ -47,12 +47,12 @@ export class LoginComponent implements OnInit, OnDestroy {
   try {
     // ✅ Parse payload
     const data = JSON.parse(window.name);
-    console.log('✅ Data received from window.name:', data);
+    // console.log('✅ Data received from window.name:', data);
 
     // ✅ USER DATA
     if (data?.userData) {
       const decryptedUserData = Encryption.decrypt(data.userData);
-      console.log('✅ Decrypted userData:', decryptedUserData);
+      // console.log('✅ Decrypted userData:', decryptedUserData);
 
       // ✅ Store decrypted data (NOT encrypted)
       localStorage.setItem(
@@ -121,7 +121,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   onRememberMeChange(event: any) {
-    console.log('Remember Me:', event.target.checked);
+    // console.log('Remember Me:', event.target.checked);
   }
 
   onSubmit() {
@@ -181,7 +181,7 @@ export class LoginComponent implements OnInit, OnDestroy {
           
 
 
-            console.log(ReturnURL)
+            // console.log(ReturnURL)
             window.open(ReturnURL, '_self')
             // this.router.navigate(['/dashboard']);
           }, 500);
