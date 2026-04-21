@@ -9,6 +9,7 @@ import { BaseService } from "@app/shared/services/baseService.service";
 import { LookupType, LookupValue } from "@app/shared/models/LookUP";
 import { appUrl, storageConst } from "@app/shared/common";
 import { ValidationHelper } from '../../shared/models/inputValidation'
+import { ProgressbarService } from "@app/shared/services/progressbar.service";
 interface BcdrRequest {
   id: number;
   name: string;
@@ -222,7 +223,8 @@ export class BcdrrequestComponent implements OnInit {
   tempEndDate: any = this.currentCSTDateTime;
   tempobjnewSchedularstart: any = this.currentCSTDateTime;
   tempobjnewSchedularend: any = this.currentCSTDateTime;
-  constructor(private fb: FormBuilder, private baseService: BaseService, private route: ActivatedRoute, private vHelper: ValidationHelper) {
+  constructor(private fb: FormBuilder, private baseService: BaseService, private route: ActivatedRoute,
+    private progressBarService: ProgressbarService, private vHelper: ValidationHelper) {
 
   }
   ngOnInit(): void {
@@ -815,46 +817,90 @@ export class BcdrrequestComponent implements OnInit {
 
 
   selectRecoveryPlanFiles(event: any): void {
-    // const input = event.target as HTMLInputElement;
+  const input = event.target as HTMLInputElement;
 
-    // if (input.files && input.files.length > 0) {
-    //   const files = Array.from(input.files);
-    //   console.log('Selected files:', files);
-    // }
-
-    for (let index = 0; index < event.target.files.length; index++) {
-      const fileName = event.target.files[index].name;
-      const dotCount = (fileName.match(/\./g) || []).length;
-      if (dotCount > 1) {
-        alert("Error: Double extension detected (e.g., 'image.html.png'). Please upload a valid file.");
-        event.target.value = '';
-        continue;
-      }
-      this.RecoveryPlanFile.push(event.target.files[index]);
+    if (!input.files || input.files.length === 0) {
+      return;
     }
 
-  }
+    for (let index = 0; index < input.files.length; index++) {
+      const file = input.files[index];
+      const fileName = file.name;
 
+      const dotCount = (fileName.match(/\./g) || []).length;
+      if (dotCount > 1) {
+        alert(
+          "Error: Double extension detected (e.g., 'image.html.png'). Please upload a valid file."
+        );
+
+        // ✅ Reset input so user can reselect the same files
+        input.value = '';
+        return;
+      }
+
+      this.RecoveryPlanFile.push(file);
+    }
+
+    // ✅ VERY IMPORTANT: reset input after processing
+    input.value = '';
+
+    // for (let index = 0; index < event.target.files.length; index++) {
+    //   const fileName = event.target.files[index].name;
+    //   const dotCount = (fileName.match(/\./g) || []).length;
+    //   if (dotCount > 1) {
+    //     alert("Error: Double extension detected (e.g., 'image.html.png'). Please upload a valid file.");
+    //     event.target.value = '';
+    //     continue;
+    //   }
+    //   this.RecoveryPlanFile.push(event.target.files[index]);
+    // }
+
+  }
   selectReturnToResultFiles(event: any): void {
-    // const input = event.target as HTMLInputElement;
+    const input = event.target as HTMLInputElement;
 
-    // if (input.files && input.files.length > 0) {
-    //   const files = Array.from(input.files);
-    //   console.log('Selected files:', files);
-    // }
-
-    for (let index = 0; index < event.target.files.length; index++) {
-      const fileName = event.target.files[index].name;
-      const dotCount = (fileName.match(/\./g) || []).length;
-      if (dotCount > 1) {
-        alert("Error: Double extension detected (e.g., 'image.html.png'). Please upload a valid file.");
-        event.target.value = '';
-        continue;
-      }
-      this.ReturnToResultFiles.push(event.target.files[index]);
+    if (!input.files || input.files.length === 0) {
+      return;
     }
 
+    for (let index = 0; index < input.files.length; index++) {
+      const file = input.files[index];
+      const fileName = file.name;
+
+      const dotCount = (fileName.match(/\./g) || []).length;
+      if (dotCount > 1) {
+        alert(
+          "Error: Double extension detected (e.g., 'image.html.png'). Please upload a valid file."
+        );
+
+        // ✅ Reset input so user can reselect the same files
+        input.value = '';
+        return;
+      }
+
+      this.ReturnToResultFiles.push(file);
+    }
+
+    // ✅ VERY IMPORTANT: reset input after processing
+    input.value = '';
   }
+
+
+  // selectReturnToResultFiles(event: any): void {
+
+
+  //   for (let index = 0; index < event.target.files.length; index++) {
+  //     const fileName = event.target.files[index].name;
+  //     const dotCount = (fileName.match(/\./g) || []).length;
+  //     if (dotCount > 1) {
+  //       alert("Error: Double extension detected (e.g., 'image.html.png'). Please upload a valid file.");
+  //       event.target.value = '';
+  //       continue;
+  //     }
+  //     this.ReturnToResultFiles.push(event.target.files[index]);
+  //   }
+
+  // }
 
 
   removeFile(index: number): void {
@@ -1298,6 +1344,7 @@ export class BcdrrequestComponent implements OnInit {
             a.click();
             window.URL.revokeObjectURL(url);
             a.remove();
+            this.progressBarService.showProgressBlock(false);
           }
           else {
 
@@ -1588,6 +1635,7 @@ export class BcdrrequestComponent implements OnInit {
             }
             else if ((this.objPermission.isReView || this.objPermission.isApprove) && (res.requestStatus != LookupValue.Draft && res.requestStatus != LookupValue.ApprovedbyApprover)) {
               this.pageForm_bcdrRequest.disable();
+              this.lstTeamNames.disable()
             }
             else if (res.requestStatus === LookupValue.Draft) {
               this.IsEdit = false;
@@ -1606,6 +1654,7 @@ export class BcdrrequestComponent implements OnInit {
             }
             else {
               this.pageForm_bcdrRequest.disable();
+              this.lstTeamNames.disable()
             }
           }
         });
@@ -2119,6 +2168,7 @@ export class BcdrrequestComponent implements OnInit {
 
   }
   cancel() {
+    this.lstTeamNames.enable()
     this.showFilter = false;
     this.showPartnerDetails = false;
     this.IsEdit = false;
@@ -2130,6 +2180,7 @@ export class BcdrrequestComponent implements OnInit {
     this.attachmentList_recoplan = [];
     this.LstReviewRequestStatus = [];
     this.RecoveryPlanFile = [];
+    this.ReturnToResultFiles = []
     this.isShowApprovebtn = false;
     this.client.removeAt(0);
     this.Risks.removeAt(0);
@@ -2301,7 +2352,7 @@ export class BcdrrequestComponent implements OnInit {
       const start = sched?.startTime;
       const end = sched?.endDtime;
 
- 
+
 
       /* ✅ 3. Start date must be LESS than end date */
       if (new Date(start).getTime() >= new Date(end).getTime()) {

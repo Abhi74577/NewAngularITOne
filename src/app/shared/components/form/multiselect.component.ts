@@ -69,7 +69,7 @@ display: block;
 
               {{ item.label }}
 
-              <button *ngIf="isMulti"
+              <button *ngIf="isMulti && !isDisabled"
                       (click)="removeItem(item.value, $event)"
                       class="font-bold hover:opacity-70">
                 ×
