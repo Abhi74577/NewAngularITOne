@@ -654,7 +654,7 @@ export class BcdrrequestComponent implements OnInit {
       RequestTeamInvolvementMappingId: [0],
       requestId: [0],
       name: [null],
-      emailAddress: [null, [Validators.required, Validators.email, Validators.pattern(this.vHelper.email_RegEx)]],
+      emailAddress: [null, [ Validators.email, Validators.pattern(this.vHelper.email_RegEx)]],
       isActive: true,
       createdBy: [0],
       updatedBy: [0],

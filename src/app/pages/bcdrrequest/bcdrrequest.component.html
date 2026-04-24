@@ -686,11 +686,16 @@
 
 
                         <input type="checkbox" [checked]="showPartnerDetails" disabled
-                            class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" />
+                            class="w-4 h-4 px-2 py-1 text-blue-600 rounded focus:ring-blue-500" />
 
-                        <span class="text-sm text-gray-600 dark:text-gray-300 cursor-pointer" (click)="toggleDetails()">
+
+                        <span class="inline-flex items-center gap-1 px-2 py-1 text-sm font-medium
+                            rounded-md bg-blue-600 text-white
+                            hover:bg-blue-700 active:bg-blue-800
+                            cursor-pointer transition duration-200 shadow-sm" (click)="toggleDetails()">
                             Add Details
                         </span>
+
 
                     </label>
                 </div>
@@ -723,10 +728,10 @@
 
                         <input type="text" placeholder="Contact number of the business partner" maxlength="100"
                             formControlName="bussinessPartnerContactNumber" class="input" [ngClass]="{
-          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
-          pageForm_bcdrRequest.get('bussinessPartnerContactNumber')?.invalid &&
-          pageForm_bcdrRequest.get('bussinessPartnerContactNumber')?.touched
-        }" />
+                            '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+                            pageForm_bcdrRequest.get('bussinessPartnerContactNumber')?.invalid &&
+                            pageForm_bcdrRequest.get('bussinessPartnerContactNumber')?.touched
+                            }" />
 
                         <div *ngIf="isFieldInvalid('bussinessPartnerContactNumber')" class="mt-1 text-xs text-red-600">
                             {{ getErrorMessage('bussinessPartnerContactNumber') }}
@@ -739,7 +744,7 @@
                             Address
                         </label>
 
-                        <textarea rows="2" placeholder="Address of the business partner"
+                        <textarea rows="2" placeholder="Address of the business partner" maxlength="90"
                             formControlName="bussinessPartnerAddress" (keypress)="allowCertainSpecChar($event)"
                             class="input resize-none" [ngClass]="{
           '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
@@ -846,7 +851,7 @@
                         <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
                             <span class="text-red-500 font-bold">*</span> Email Address
                         </label>
-                        <input type="email" placeholder="Email address of the production location"
+                        <input type="email" placeholder="Email address of the production location" maxlength="100"
                             formControlName="productLocationEmailAddress" [ngClass]="{
           '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
           pageForm_bcdrRequest.get('productLocationEmailAddress')?.invalid &&
@@ -1821,7 +1826,7 @@
                                 </div>
                                 <div>
                                     <label class="label">
-                                        <span class="text-red-500">*</span> Other Email Address</label>
+                                        Other Email Address</label>
                                     <input type="email" placeholder="Email address of the team involved" maxlength="100"
                                         formControlName="emailAddress" class="input" [ngClass]="{
           '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
@@ -2515,7 +2520,7 @@
                                                 </label>
 
                                                 <input type="text" formControlName="estimatedTime"
-                                                    placeholder="Estimate Time" maxlength="100" class="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 
+                                                    placeholder="Estimate Time" maxlength="45" class="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 
                                                 bg-white dark:bg-gray-900 text-gray-900 dark:text-white
                                                     focus:ring-2 focus:ring-blue-500 outline-none" [ngClass]="{
           '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
@@ -2559,27 +2564,28 @@
                                                 </div>
                                             </div>
 
-                                            <div class="grid md:grid-cols-2 gap-4 mt-2">
 
-                                                <div class="md:col-span-2">
-                                                    <label
-                                                        class="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
-                                                        <span class="text-red-500">*</span> Comment
-                                                    </label>
+                                        </div>
 
-                                                    <textarea rows="3" formControlName="comment" placeholder="Comment"
-                                                        (keypress)="allowCertainSpecChar($event)" class="textbox"
-                                                        [ngClass]="{
+                                        <div class="mt-2">
+
+                                            <div class="md:col-span-2">
+                                                <label
+                                                    class="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
+                                                    <span class="text-red-500">*</span> Comment
+                                                </label>
+
+                                                <textarea rows="3" formControlName="comment" placeholder="Comment"
+                                                    (keypress)="allowCertainSpecChar($event)" class="textbox"
+                                                    maxlength="100" [ngClass]="{
           '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
     objSchedule.get('comment')?.hasError('required') &&
                                             objSchedule.get('comment')?.touched
         }"></textarea>
-                                                    <div class="mt-1 text-xs text-red-600 " *ngIf="objSchedule.get('comment')?.hasError('required') &&
+                                                <div class="mt-1 text-xs text-red-600 " *ngIf="objSchedule.get('comment')?.hasError('required') &&
                                             objSchedule.get('comment')?.touched"> The
-                                                        field is required.
-                                                    </div>
+                                                    field is required.
                                                 </div>
-
                                             </div>
 
                                         </div>
