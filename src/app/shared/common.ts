@@ -31,15 +31,15 @@ const s4 = Math.floor((1 + Math.random()) * 0x10000)
 // console.log("BaseUrlCommon",apiUrl)
 // export const appUrl = localStorage.getItem("url");
 
-export const apiUrl = `https://localhost:44329/api`; 
-export const appUrl = `https://localhost:44329/`;
+// export const apiUrl = `https://localhost:44329/api`; 
+// export const appUrl = `https://localhost:44329/`;
 
 // //Staging  
 // export const apiUrl = `http://10.10.4.37:880/api`;
 // export const appUrl = `http://10.10.4.37:880/`;
 
-// export const apiUrl = `https://10.10.4.35:10443/api`; 
-// export const appUrl = `https://10.10.4.35:10443/`;
+export const apiUrl = `https://10.10.4.35:10443/api`; 
+export const appUrl = `https://10.10.4.35:10443/`;
 
 // export const apiUrl = `https://itonestg.etechtexas.com/api`;
 // export const appUrl = `https://itonestg.etechtexas.com/`;

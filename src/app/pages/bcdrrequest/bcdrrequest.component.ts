@@ -1,6 +1,6 @@
 import { Component, OnInit, signal } from "@angular/core";
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, FormArray, Validators, AbstractControl, ValidationErrors, FormControl } from "@angular/forms";
-import { CommonModule } from "@angular/common";
+import { CommonModule, ViewportScroller } from "@angular/common";
 import { SelectComponent, MultiselectComponent } from "../../shared/components/form";
 import { ActivatedRoute, ɵEmptyOutletComponent } from "@angular/router";
 import { OwlDateTimeModule, OwlNativeDateTimeModule } from "@danielmoncada/angular-datetime-picker";
@@ -223,7 +223,7 @@ export class BcdrrequestComponent implements OnInit {
   tempEndDate: any = this.currentCSTDateTime;
   tempobjnewSchedularstart: any = this.currentCSTDateTime;
   tempobjnewSchedularend: any = this.currentCSTDateTime;
-  constructor(private fb: FormBuilder, private baseService: BaseService, private route: ActivatedRoute,
+  constructor(private fb: FormBuilder, private baseService: BaseService, private route: ActivatedRoute, private scroller: ViewportScroller,
     private progressBarService: ProgressbarService, private vHelper: ValidationHelper) {
 
   }
@@ -291,6 +291,8 @@ export class BcdrrequestComponent implements OnInit {
 
   filterClear() {
 
+    this.pagenation.pageNo = 1;
+    // this.pagenation.pageNo = 10;
     this.pagenation.search = '';
     this.pagenation.sort = 'requestid desc';
     this.objFilter.reset({
@@ -452,7 +454,7 @@ export class BcdrrequestComponent implements OnInit {
       returnToOperation: [null, Validators.required],
       whatWorkedWell: [null, Validators.required],
       improvementsIdentified: [null, Validators.required],
-      testGoalWasAchieved: [null, Validators.required],
+      testGoalWasAchieved: ['No', Validators.required],
       testGoalWasAchievedRetest: [null],
       learnOutOfThisActivity: [null],
       opportunityDuringTest: [null, Validators.required],
@@ -651,7 +653,7 @@ export class BcdrrequestComponent implements OnInit {
     const involvementForm = this.fb.group({
       RequestTeamInvolvementMappingId: [0],
       requestId: [0],
-      name: [null, Validators.required],
+      name: [null],
       emailAddress: [null, [Validators.required, Validators.email, Validators.pattern(this.vHelper.email_RegEx)]],
       isActive: true,
       createdBy: [0],
@@ -678,8 +680,8 @@ export class BcdrrequestComponent implements OnInit {
   addObjectiveNewSchedule(index: number) {
     const objectiveNewScheduleForm = this.fb.group({
       requestObjectiveNewScheduleId: [0],
-      requestObjectiveMappingId: [0, Validators.required],
-      requestObjectiveId: [0, Validators.required],
+      requestObjectiveMappingId: [0],
+      requestObjectiveId: [0],
       result: [null, Validators.required],
       startTime: [this.currentCSTDateTime, Validators.required],
       endDtime: [this.currentCSTDateTime, Validators.required],
@@ -806,18 +808,25 @@ export class BcdrrequestComponent implements OnInit {
 
 
 
-  nextTab() {
-    if (this.activeTab < 5) this.activeTab++;
-  }
+nextTab(event: Event) {
+
+  this.activeTab++;
+  
+// Keep or change scroll
+  this.scroller.scrollToPosition([0, 0]); // top
+
+}
+
 
   prevTab() {
     if (this.activeTab > 1) this.activeTab--;
+     this.scroller.scrollToPosition([0, 0]); // top
   }
 
 
 
   selectRecoveryPlanFiles(event: any): void {
-  const input = event.target as HTMLInputElement;
+    const input = event.target as HTMLInputElement;
 
     if (!input.files || input.files.length === 0) {
       return;
@@ -1356,6 +1365,7 @@ export class BcdrrequestComponent implements OnInit {
     if (event.type === 'edit' || event.type === 'info') {
 
       this.showPartnerDetails = true;
+      
       this.pageForm_bcdrRequest.reset();
       this.Val_ReviewerComment = null;
       this.Val_ApproverComment = null;
@@ -1424,7 +1434,7 @@ export class BcdrrequestComponent implements OnInit {
               returnToOperation: res.returnToOperation,
               whatWorkedWell: res.whatWorkedWell,
               improvementsIdentified: res.improvementsIdentified,
-              testGoalWasAchieved: res.testGoalWasAchieved,
+              testGoalWasAchieved: res.testGoalWasAchieved == null ? 'No' : 'Yes',
               testGoalWasAchievedRetest: res.testGoalWasAchievedRetest,
               learnOutOfThisActivity: res.learnOutOfThisActivity,
               opportunityDuringTest: res.opportunityDuringTest,
@@ -2186,10 +2196,11 @@ export class BcdrrequestComponent implements OnInit {
     this.Risks.removeAt(0);
     this.objectives.removeAt(0);
     this.Assumptions.removeAt(0);
-    this.getRequestList();
-    this.activeTab = 1
+    
+    this.activeTab = 1;
     this.setDefaultTab();
     this.createPageForm();
+    this.filterClear();
   }
 
   // Utility: normalize any input (Date, Moment-like, or string) to a real Date in local time

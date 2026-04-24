@@ -45,21 +45,47 @@
                 </button>
 
                 <!-- CREATE / BACK -->
-                <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700
+                <button class="px-2 py-2 bg-blue-600 hover:bg-blue-700
                  dark:bg-blue-700 dark:hover:bg-blue-600
                  text-white rounded-lg font-medium
                  transition-all duration-200 transform hover:scale-105
                  flex items-center gap-2 shadow-md hover:shadow-lg">
 
-                    <span *ngIf="showList" class="flex justify-center items-center gap-0.5"
+
+                    <span *ngIf="showList" class="group flex justify-center items-center gap-1 cursor-pointer"
                         (click)="showList = false; activeTab = 1">
                         <i class="fas fa-plus"></i>
-                        <p class="hidden md:block"> Create Request</p>
+
+                        <!-- Hidden by default, shown on hover -->
+                        <p class="max-w-0 overflow-hidden whitespace-nowrap opacity-0
+                            transition-all duration-300
+                            group-hover:max-w-xs group-hover:opacity-100">
+                            Create New Request
+                        </p>
                     </span>
 
-                    <span *ngIf="!showList" (click)="showList = true; activeTab = 1; cancel()">
-                        <i class="fas fa-angle-left"></i> Back to all Request
+
+                    <!-- <span *ngIf="showList" class="flex justify-center items-center gap-0.5"
+                        (click)="showList = false; activeTab = 1">
+                        <i class="fas fa-plus"></i>
+                        <p class="hidden md:block"> Create New Request</p>
+                    </span> -->
+
+                    <span *ngIf="!showList" (click)="showList = true; activeTab = 1; cancel()"
+                        class="group flex justify-center items-center gap-1 cursor-pointer">
+                        <i class="fas fa-angle-left"></i>
+
+                        <!-- Hidden by default, shown on hover -->
+                        <p class="max-w-0 overflow-hidden whitespace-nowrap opacity-0
+                            transition-all duration-300
+                            group-hover:max-w-xs group-hover:opacity-100">
+                            Back to all Request
+                        </p>
                     </span>
+
+                    <!-- <span *ngIf="!showList" (click)="showList = true; activeTab = 1; cancel()">
+                        <i class="fas fa-angle-left"></i> Back to all Request
+                    </span> -->
                 </button>
 
                 <!-- REFRESH -->
@@ -185,7 +211,7 @@
 
                 <div *ngFor="let tab of displayTabList; let i = index" class="flex items-center"
                     (click)="fnTabClick(tab.id)">
-                    @if( tab.id === 5 ) {
+                    @if( displayTabList.length === 5 ) {
 
                     <div (click)="activeTab = tab.id"
                         class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer transition-all"
@@ -204,7 +230,7 @@
                             'text-green-600': activeTab > tab.id,
                             'text-gray-500': activeTab < tab.id
                             }">
-                        {{ tab.name }} </div>
+                        {{ tab.name }}</div>
                     <div *ngIf="i < tabList.length - 1" class="w-10 h-[2px]" [ngClass]="{
                         'bg-green-500': activeTab > tab.id,
                         'bg-gray-300 dark:bg-gray-600': activeTab <= tab.id
@@ -653,13 +679,19 @@
                         Business Partner Details
                     </h2>
 
-                    <label class="flex items-center gap-2 cursor-pointer select-none"  *ngIf="(!IsEdit && !IsInfo) || (objPermission.isAdd && pageForm_bcdrRequest.controls['requestStatus'].value === 10)">
-                        <input type="checkbox" name="showPartnerDetails" [value]="showPartnerDetails"
-                            (change)="toggleDetails()" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" />
+                    <label class="flex items-center gap-2 cursor-pointer select-none"
+                        *ngIf="(!IsEdit && !IsInfo) || (objPermission.isAdd && pageForm_bcdrRequest.controls['requestStatus'].value === 10)">
+                        <!-- <input type="checkbox" name="showPartnerDetails" [value]="showPartnerDetails"
+                            (change)="toggleDetails()" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" /> -->
 
-                        <span class="text-sm text-gray-600 dark:text-gray-300">
+
+                        <input type="checkbox" [checked]="showPartnerDetails" disabled
+                            class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" />
+
+                        <span class="text-sm text-gray-600 dark:text-gray-300 cursor-pointer" (click)="toggleDetails()">
                             Add Details
                         </span>
+
                     </label>
                 </div>
 
@@ -807,22 +839,7 @@
 
                     </div>
 
-                    <!-- CONTACT -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
-                            <span class="text-red-500">*</span> Contact Number
-                        </label>
-                        <input type="text" formControlName="productLocationContactNumber" maxlength="100"
-                            placeholder="Contact number of the production location" class="input" [ngClass]="{
-          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
-          pageForm_bcdrRequest.get('productLocationContactNumber')?.invalid &&
-          pageForm_bcdrRequest.get('productLocationContactNumber')?.touched
-        }" />
-                        <div *ngIf="isFieldInvalid('productLocationContactNumber')" class="mt-1 text-xs text-red-600 ">
-                            {{ getErrorMessage('productLocationContactNumber') }}
 
-                        </div>
-                    </div>
 
                     <!-- EMAIL -->
                     <div>
@@ -838,6 +855,23 @@
                         focus:ring-2 focus:ring-blue-500 outline-none" />
                         <div *ngIf="isFieldInvalid('productLocationEmailAddress')" class="mt-1 text-xs text-red-600 ">
                             {{ getErrorMessage('productLocationEmailAddress') }}
+                        </div>
+                    </div>
+
+                    <!-- CONTACT -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
+                            <span class="text-red-500">*</span> Contact Number
+                        </label>
+                        <input type="text" formControlName="productLocationContactNumber" maxlength="100"
+                            placeholder="Contact number of the production location" class="input" [ngClass]="{
+          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+          pageForm_bcdrRequest.get('productLocationContactNumber')?.invalid &&
+          pageForm_bcdrRequest.get('productLocationContactNumber')?.touched
+        }" />
+                        <div *ngIf="isFieldInvalid('productLocationContactNumber')" class="mt-1 text-xs text-red-600 ">
+                            {{ getErrorMessage('productLocationContactNumber') }}
+
                         </div>
                     </div>
 
@@ -861,7 +895,7 @@
                         Recovery location
                     </h2>
 
-                    <label *ngIf="!IsEdit && !IsInfo"  class="flex items-center gap-2 cursor-pointer">
+                    <label *ngIf="!IsEdit && !IsInfo" class="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" name="showPartnerDetails" [value]="showPartnerDetails"
                             class="w-4 h-4 text-blue-600 rounded"
                             (change)="fillSameAsAbove($event,'productionlocation')" />
@@ -929,30 +963,7 @@
 
                     </div>
 
-                    <!-- CONTACT -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
-                            <span class="text-red-500">*</span> Contact Number
-                        </label>
-                        <input type="text" formControlName="recoveryLocationContactNumber"
-                            placeholder="Contact number of the recovery location" maxlength="100" class="input
-                        bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
-                        focus:ring-2 focus:ring-blue-500 outline-none" [ngClass]="{
-          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
-          pageForm_bcdrRequest.get('recoveryLocationContactNumber')?.invalid &&
-          pageForm_bcdrRequest.get('recoveryLocationContactNumber')?.touched
-        }" />
-                        <!-- <div *ngIf="
-                                    pageForm_bcdrRequest.get('recoveryLocationContactNumber')?.hasError('required') &&
-                                    pageForm_bcdrRequest.get('recoveryLocationContactNumber')?.touched
-                                    " class="mt-1 text-xs text-red-600 ">
-                            This field is required.
-                        </div> -->
-                        <div *ngIf="isFieldInvalid('recoveryLocationContactNumber')" class="mt-1 text-xs text-red-600 ">
-                            {{ getErrorMessage('recoveryLocationContactNumber') }}
 
-                        </div>
-                    </div>
 
 
                     <!-- EMAIL -->
@@ -964,14 +975,39 @@
                         <input type="email" formControlName="recoveryLocationEmailAddress"
                             placeholder="Email address of the recovery location" maxlength="100" class="input border border-gray-300 bg-gray-50 dark:bg-gray-800
                             text-gray-800 dark:text-white
-                            focus:outline-none focus:ring-2" [ngClass]="{
-          '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
-          pageForm_bcdrRequest.get('recoveryLocationEmailAddress')?.invalid &&
-          pageForm_bcdrRequest.get('recoveryLocationEmailAddress')?.touched
-        }" />
+                                                focus:outline-none focus:ring-2" [ngClass]="{
+                            '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+                            pageForm_bcdrRequest.get('recoveryLocationEmailAddress')?.invalid &&
+                            pageForm_bcdrRequest.get('recoveryLocationEmailAddress')?.touched
+                            }" />
 
                         <div *ngIf="isFieldInvalid('recoveryLocationEmailAddress')" class="mt-1 text-xs text-red-600 ">
                             {{ getErrorMessage('recoveryLocationEmailAddress') }}
+                        </div>
+                    </div>
+
+                    <!-- CONTACT -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
+                            <span class="text-red-500">*</span> Contact Number
+                        </label>
+                        <input type="text" formControlName="recoveryLocationContactNumber"
+                            placeholder="Contact number of the recovery location" maxlength="100" class="input
+                        bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white 
+                        focus:ring-2 focus:ring-blue-500 outline-none" [ngClass]="{
+                        '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
+                        pageForm_bcdrRequest.get('recoveryLocationContactNumber')?.invalid &&
+                        pageForm_bcdrRequest.get('recoveryLocationContactNumber')?.touched
+                        }" />
+                        <!-- <div *ngIf="
+                                    pageForm_bcdrRequest.get('recoveryLocationContactNumber')?.hasError('required') &&
+                                    pageForm_bcdrRequest.get('recoveryLocationContactNumber')?.touched
+                                    " class="mt-1 text-xs text-red-600 ">
+                            This field is required.
+                        </div> -->
+                        <div *ngIf="isFieldInvalid('recoveryLocationContactNumber')" class="mt-1 text-xs text-red-600 ">
+                            {{ getErrorMessage('recoveryLocationContactNumber') }}
+
                         </div>
                     </div>
 
@@ -1050,9 +1086,9 @@
 
                                 </div>
                                 <!-- DELETE BUTTON -->
-                                <div class="flex items-center justify-center md:mt-3"  
-                                *ngIf="(!IsEdit && !IsInfo) || (objPermission.isAdd && pageForm_bcdrRequest.controls['requestStatus'].value === 10)">
-                                    <button  type="button" (click)="deleteclient(l)" class="w-7 h-7 flex items-center justify-center rounded-full
+                                <div class="flex items-center justify-center md:mt-3"
+                                    *ngIf="(!IsEdit && !IsInfo) || (objPermission.isAdd && pageForm_bcdrRequest.controls['requestStatus'].value === 10)">
+                                    <button type="button" (click)="deleteclient(l)" class="w-7 h-7 flex items-center justify-center rounded-full
                                    bg-red-400 text-white hover:bg-red-700 shadow-sm">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -1080,7 +1116,8 @@
                                             <label
                                                 class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
                                                 LOB Name
-                                                <button type="button" *ngIf="((!IsEdit && !IsInfo) || (objPermission.isAdd && pageForm_bcdrRequest.controls['requestStatus'].value === 10) ) && lb==0"
+                                                <button type="button"
+                                                    *ngIf="((!IsEdit && !IsInfo) || (objPermission.isAdd && pageForm_bcdrRequest.controls['requestStatus'].value === 10) ) && lb==0"
                                                     (click)="addclientLOB(l); $event.stopPropagation()" class="w-7 h-7  items-center  justify-center rounded-full
                                            bg-green-500 text-white hover:bg-green-600 shadow-sm">
 
@@ -1102,9 +1139,10 @@
                                         <div>
                                             <label
                                                 class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
-                                                Contact Number 
-                                                <button type="button"  *ngIf="(!IsEdit && !IsInfo) || (objPermission.isAdd && pageForm_bcdrRequest.controls['requestStatus'].value === 10)" (click)="deleteclientLOB(l,lb)"
-                                                    class="w-7 h-7  items-center justify-center rounded-full
+                                                Contact Number
+                                                <button type="button"
+                                                    *ngIf="(!IsEdit && !IsInfo) || (objPermission.isAdd && pageForm_bcdrRequest.controls['requestStatus'].value === 10)"
+                                                    (click)="deleteclientLOB(l,lb)" class="w-7 h-7  items-center justify-center rounded-full
                                                     bg-red-400 text-white hover:bg-red-700 shadow-sm">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
@@ -1196,7 +1234,7 @@
 
                     <h2 class="text-sm font-semibold text-blue-600 dark:text-blue-400">
                         <span class="text-red-500">*</span>
-                        Conferance Bridge
+                        Conference Bridge
                     </h2>
 
 
@@ -1213,7 +1251,7 @@
                     <!-- NAME -->
                     <div>
                         <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
-                            <span class="text-red-500 font-bold">*</span> Conferance Bridge Link
+                            <span class="text-red-500 font-bold">*</span> Conference Bridge Link
                         </label>
                         <input type="text" formControlName="conferanceBridge" placeholder="Teams meeting link"
                             maxlength="500" [ngClass]="{
@@ -1873,8 +1911,7 @@
                         </p>
 
                         <input type="file" multiple class="hidden" (change)="selectRecoveryPlanFiles($event)"
-                            aaccept="image/*,.pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                             />
+                            aaccept="image/*,.pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
                     </label>
 
                     <!-- File List -->
@@ -1884,7 +1921,7 @@
                             <thead class="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
                                 <tr>
                                     <th class="px-3 py-2 text-left">#</th>
-                                    <th class="px-3 py-2 text-left">File</th>
+                                    <th class="px-3 py-2 text-left">File Name</th>
                                     <th class="px-3 py-2">Size</th>
                                     <th class="px-3 py-2 text-center">Action</th>
                                 </tr>
@@ -1922,7 +1959,7 @@
                             <thead class="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
                                 <tr>
                                     <th class="px-3 py-2 text-left">#</th>
-                                    <th class="px-3 py-2 text-left">File</th>
+                                    <th class="px-3 py-2 text-left">File Name</th>
                                     <!-- <th class="px-3 py-2">Size</th> -->
                                     <th class="px-3 py-2 text-center">Action</th>
                                 </tr>
@@ -2127,7 +2164,7 @@
                                     (dateTimeChange)="checkActualDate('actualStartDate')" />
 
                                 <!-- Icon -->
-                                   <!-- Trigger Icon -->
+                                <!-- Trigger Icon -->
                                 <button type="button" [owlDateTimeTrigger]="actualStartDate" class="absolute right-3 top-1/2 -translate-y-1/2
                                   text-gray-400 hover:text-blue-500 transition">
                                     <i class="fas fa-calendar-alt"></i>
@@ -2156,7 +2193,7 @@
                                     (dateTimeChange)="checkActualDate('actualEndDate')" />
 
                                 <!-- Icon -->
-                                   <!-- Trigger Icon -->
+                                <!-- Trigger Icon -->
                                 <button type="button" [owlDateTimeTrigger]="actualEndDate" class="absolute right-3 top-1/2 -translate-y-1/2
                                   text-gray-400 hover:text-blue-500 transition">
                                     <i class="fas fa-calendar-alt"></i>
@@ -2207,7 +2244,7 @@
                             <thead class="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
                                 <tr>
                                     <th class="px-3 py-2 text-left">#</th>
-                                    <th class="px-3 py-2 text-left">File</th>
+                                    <th class="px-3 py-2 text-left">File Name</th>
 
                                     <th class="px-3 py-2 text-center">Download</th>
                                 </tr>
@@ -2236,7 +2273,9 @@
                     </div>
 
                     <!-- Upload Box -->
-                    <label *ngIf="!IsInfo && pageForm_bcdrRequest.get('requestStatus')?.value != 25" class="flex flex-col items-center justify-center w-full p-6 border-2 border-dashed 
+                    <label *ngIf="!IsInfo 
+       && pageForm_bcdrRequest.get('requestStatus')?.value != 25
+       && pageForm_bcdrRequest.get('requestStatus')?.value != 41" class="flex flex-col items-center justify-center w-full p-6 border-2 border-dashed 
                         border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer 
                         hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-slate-800 transition">
 
@@ -2247,8 +2286,7 @@
                         </p>
 
                         <input type="file" multiple class="hidden" (change)="selectReturnToResultFiles($event)"
-                           accept="image/*,.pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                                         />
+                            accept="image/*,.pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
                     </label>
 
                     <!-- File List -->
@@ -2317,15 +2355,10 @@
                                 class="border rounded-lg p-4 bg-gray-50 dark:bg-slate-800">
 
                                 <!-- Title -->
-                                <div class="flex items-center justify-between mb-3">
-                                    <h3 class="text-sm font-semibold text-blue-600 dark:text-blue-400">
-                                        {{objectiveForm.get('objectiveTypeId')?.value === null ? '':
-                                        getLookupValueFromId(objectiveForm.get('objectiveTypeId')?.value)
-                                        + '-'}}
-                                        {{objectiveForm.get('objectiveDetails')?.value || ('Objective ' + e + 1)}}
-                                    </h3>
+                                <!-- <div class="flex items-center justify-between mb-3"> -->
 
-                                    <!-- @if(e !== 0){
+
+                                <!-- @if(e !== 0){
                                     <label class="flex items-center gap-2 text-sm">
                                         <input type="checkbox" class="w-4 h-4 text-blue-600"
                                             (change)="toggleDetails()" />
@@ -2333,13 +2366,21 @@
                                     </label>
                                     } -->
 
-                                </div>
+                                <!-- </div> -->
 
-                                <div class="grid md:grid-cols-2 gap-1 items-center">
+                                <div class="flex justify-start gap-3 mr-2 items-center">
 
                                     <!-- LABEL -->
                                     <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
                                         Result Of
+                                        <span
+                                            class="text-sm font-semibold text-blue-600 dark:text-blue-400">{{objectiveForm.get('objectiveTypeId')?.value
+                                            === null ? '':
+                                            getLookupValueFromId(objectiveForm.get('objectiveTypeId')?.value)
+                                            + '-'}}
+                                            {{objectiveForm.get('objectiveDetails')?.value || ('Objective ' + e +
+                                            1)}}</span>
+
                                     </label>
 
                                     <!-- RADIO GROUP -->
@@ -2384,7 +2425,7 @@
                                         </label>
 
                                         <textarea rows="3" formControlName="returnToOperationResultComment"
-                                            placeholder="Comment" [ngClass]="{
+                                            placeholder="Comment" maxlength="300" [ngClass]="{
           '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
       pageForm_bcdrRequest.get('returnToOperationResultComment')?.hasError('required') &&
                                             pageForm_bcdrRequest.get('returnToOperationResultComment')?.touched
@@ -2422,10 +2463,10 @@
                                                     bg-white dark:bg-gray-900 text-gray-900 dark:text-white
                                                     focus:ring-2 focus:ring-blue-500 outline-none pr-10"
                                                         (dateTimeChange)="checkObjectiveNewScheduleDate('startTime')" />
-                                                         <button type="button" [owlDateTimeTrigger]="startTime" class="absolute right-3 top-1/2 -translate-y-1/2
+                                                    <button type="button" [owlDateTimeTrigger]="startTime" class="absolute right-3 top-1/2 -translate-y-1/2
                                   text-gray-400 hover:text-blue-500 transition">
-                                    <i class="fas fa-calendar-alt"></i>
-                                </button>
+                                                        <i class="fas fa-calendar-alt"></i>
+                                                    </button>
                                                     <!-- <i class="fas fa-calendar-alt absolute right-3 top-1/2 -translate-y-1/2 
                                                         text-gray-400 group-hover:text-blue-500 cursor-pointer"></i> -->
 
@@ -2450,11 +2491,11 @@
                                                      focus:ring-2 focus:ring-blue-500 outline-none pr-10"
                                                         (dateTimeChange)="checkObjectiveNewScheduleDate('endDtime')" />
 
-                                                          <!-- Trigger Icon -->
-                                <button type="button" [owlDateTimeTrigger]="endDtime" class="absolute right-3 top-1/2 -translate-y-1/2
+                                                    <!-- Trigger Icon -->
+                                                    <button type="button" [owlDateTimeTrigger]="endDtime" class="absolute right-3 top-1/2 -translate-y-1/2
                                   text-gray-400 hover:text-blue-500 transition">
-                                    <i class="fas fa-calendar-alt"></i>
-                                </button>
+                                                        <i class="fas fa-calendar-alt"></i>
+                                                    </button>
                                                     <!-- <i class="fas fa-clock absolute right-3 top-1/2 -translate-y-1/2 
                                                         text-gray-400 group-hover:text-blue-500 cursor-pointer"></i> -->
 
@@ -2689,12 +2730,10 @@ isFieldInvalid('opportunityDuringTest')
                             </label>
 
                             <textarea rows="3" placeholder="Comment" formControlName="recommendationsForTeam"
-                                (keypress)="allowCertainSpecChar($event)"
-                               [ngClass]="{
+                                (keypress)="allowCertainSpecChar($event)" [ngClass]="{
           '!border-red-500 !focus:border-red-500 !focus:ring-red-500 bg-red-50 dark:bg-red-900/20':
 isFieldInvalid('recommendationsForTeam')
-        }"
-                                class="textbox">
+        }" class="textbox">
                             </textarea>
                             <div *ngIf="isFieldInvalid('recommendationsForTeam')" class="mt-1 text-xs text-red-600 ">
                                 {{ getErrorMessage('recommendationsForTeam') }}
@@ -2821,32 +2860,31 @@ isFieldInvalid('recommendationsForTeam')
 
             <!-- ================= FOOTER ================= -->
             <div class="flex relative justify-between px-6 py-4 border-t bg-gray-50 dark:bg-gray-900 mt-10">
-<div>
-<button type="button" (click)="prevTab()"  *ngIf="activeTab !== 1" class="btn-secondary">
-                    ← Previous
-                </button>
-</div>
-                
+                <div>
+                    <button type="button" (click)="prevTab()" *ngIf="activeTab !== 1" class="btn-secondary">
+                        ← Previous
+                    </button>
+                </div>
+
 
 
                 <div class="flex gap-3">
                     @if(displayTabList.length == 5){
-                    <button *ngIf="activeTab < 5" type="button" (click)="nextTab()" class="btn-primary">
+                    <button *ngIf="activeTab < 5" type="button" (click)="nextTab($event)" class="btn-primary">
                         Next →
                     </button>
                     }
                     @else{
-                    <button *ngIf="activeTab < 4" type="button" (click)="nextTab()" class="btn-primary">
+                    <button *ngIf="activeTab < 4" type="button" (click)="nextTab($event)" class="btn-primary">
                         Next →
                     </button>
                     }
 
 
-                    <button
-                        *ngIf="(activeTab===4 && !IsEdit && !IsInfo) || 
+                    <button *ngIf="(activeTab===4 && !IsEdit && !IsInfo) || 
                         ((objPermission.isAdd || objPermission.isEdit) && activeTab===4 &&
-                         pageForm_bcdrRequest.get('requestStatus')?.value == 10)"
-                        type="submit" [disabled]="pageForm_bcdrRequest.get('lstbCDRRequestObjective')?.invalid"
+                         pageForm_bcdrRequest.get('requestStatus')?.value == 10)" type="submit"
+                        [disabled]="pageForm_bcdrRequest.get('lstbCDRRequestObjective')?.invalid"
                         (click)="checkSubmitValidation(false)" class="btn-primary">
                         Submit
                         for approval ✔
@@ -2859,7 +2897,7 @@ isFieldInvalid('recommendationsForTeam')
 
                     <button [disabled]="this.pageForm_bcdrRequest.status == 'INVALID'"
                         *ngIf="activeTab===5 && (objPermission.isAdd || objPermission.isEdit) && isShowApprovebtn"
-                        type="submit" [disabled]="pageForm_bcdrRequest.get('lstbCDRRequestObjective')?.invalid"
+                        type="submit" [disabled]="this.pageForm_bcdrRequest.status == 'INVALID'"
                         (click)="checkValidationcANDSubmitReturnToOperation()" class="btn-primary">
                         Submit for Review ✔
                     </button>

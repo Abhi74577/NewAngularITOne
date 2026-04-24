@@ -22,6 +22,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   showPassword = false;
   errorMessage = '';
   successMessage = '';
+  isLoadingTemplate = true;
   private messageListener!: (event: MessageEvent) => void;
   constructor(
     private fb: FormBuilder,
@@ -36,66 +37,57 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
 
-  ngOnInit(): void {
 
-  // ✅ If nothing was passed via window.name, stop safely
+ngOnInit(): void {
+
+  // ✅ Start loader
+  this.isLoadingTemplate = true;
+
   if (!window.name) {
     console.warn('❌ window.name is empty – nothing to process');
+    this.isLoadingTemplate = false;
     return;
   }
 
   try {
-    // ✅ Parse payload
     const data = JSON.parse(window.name);
-    // console.log('✅ Data received from window.name:', data);
 
-    // ✅ USER DATA
     if (data?.userData) {
       const decryptedUserData = Encryption.decrypt(data.userData);
-      // console.log('✅ Decrypted userData:', decryptedUserData);
-
-      // ✅ Store decrypted data (NOT encrypted)
-      localStorage.setItem(
-        storageConst.userProfile,
-        data.userData
-      );
+      localStorage.setItem(storageConst.userProfile, data.userData);
     }
 
-    // ✅ MENU PERMISSIONS
     if (data?.menuPermission) {
-      localStorage.setItem(
-        storageConst.menuPermission,
-        data.menuPermission
-      );
+      localStorage.setItem(storageConst.menuPermission, data.menuPermission);
     }
 
-    // ✅ SOURCE URL
     if (data?.sourceUrl) {
       localStorage.setItem('sourceUrl', data.sourceUrl);
     }
 
-    // ✅ IMPORTANT: Clear window.name BEFORE navigation
+    // ✅ Clear window.name before routing
     window.name = '';
 
-    // ✅ ROUTING
     if (data?.routerName) {
       setTimeout(() => {
+        this.isLoadingTemplate = false;        // ✅ stop loader
         this.router.navigate([`/${data.routerName}`]);
-      }, 100); // small delay is safer
+      }, 100);
+    } else {
+      this.isLoadingTemplate = false;
     }
 
   } catch (error) {
     console.error('❌ Failed to parse window.name:', error);
-
-    // ✅ Always clear to prevent loop
     window.name = '';
 
-    // ✅ Fallback navigation
+    this.isLoadingTemplate = false;
     this.router.navigate(['/login']);
   }
 }
 
-  ngOnDestroy(): void {
+  
+ngOnDestroy(): void {
     window.removeEventListener('message', this.messageListener);
   }
 

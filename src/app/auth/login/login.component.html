@@ -1,5 +1,5 @@
 <!-- MAIN BACKGROUND -->
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-700 to-blue-900 p-4 md:p-6">
+<div *ngIf="!isLoadingTemplate" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-700 to-blue-900 p-4 md:p-6">
 
   <!-- CARD -->
   <div class="w-full max-w-5xl h-[100%] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
@@ -65,21 +65,24 @@
 
         <!-- PASSWORD -->
         <div class="relative">
-          <input
-            [type]="showPassword ? 'text' : 'password'"
-            formControlName="password"
-            placeholder="Password"
-            class="w-full px-4 py-3 rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm"
-          />
+  <input
+    [type]="showPassword ? 'text' : 'password'"
+    formControlName="password"
+    placeholder="Password"
+    class="w-full px-4 py-3 rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm"
+  />
 
-          <button
-            type="button"
-            (click)="togglePasswordVisibility()"
-            class="absolute right-4 top-3 text-blue-500 text-sm font-semibold"
-          >
-            SHOW
-          </button>
-        </div>
+  <button
+    type="button"
+    (click)="togglePasswordVisibility()"
+    class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+  >
+    <i
+      class="fa-solid"
+      [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'">
+    </i>
+  </button>
+</div>
 
         <!-- OPTIONS -->
         <!-- <div class="flex justify-between items-center text-sm flex-wrap gap-2">
@@ -108,3 +111,14 @@
 
   </div>
 </div>
+
+<!-- <div *ngIf="isLoadingTemplate" class="min-h-screen mx-auto flex items-center justify-center p-4 md:p-6">
+  <h3>Loading..</h3>
+</div> -->
+
+
+<div class="loader-overlay" *ngIf="isLoadingTemplate">
+  <div class="spinner"></div>
+  <p>Loading, please wait...</p>
+</div>
+

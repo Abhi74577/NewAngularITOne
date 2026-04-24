@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ThemeService } from '../../core/services/theme.service';
 import { storageConst } from '@app/shared/common';
+import { ProgressbarService } from '@app/shared/services/progressbar.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -10,25 +11,41 @@ import { storageConst } from '@app/shared/common';
   templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent implements OnInit {
-  constructor(public themeService: ThemeService) { }
+  isLoader = false
+  constructor(public themeService: ThemeService, private progressBarService: ProgressbarService) { }
+
 
   ngOnInit() {
+
+    // ✅ Show loader
+    this.isLoader = true;
 
     const userData = localStorage.getItem(storageConst.userProfile);
     const menuPermission = localStorage.getItem(storageConst.menuPermission);
 
     const payload = {
-      userData: userData, menuPermission: menuPermission, routerName: 'bcdrdashboard',
+      userData: userData,
+      menuPermission: menuPermission,
+      routerName: 'bcdrdashboard',
       sourceUrl: window.location.protocol + '//' + window.location.host + '/dashboard'
-    }
+    };
+
+    // ✅ Pass data via window.name
     window.name = JSON.stringify(payload);
 
-    const ReturnURL: any = localStorage.getItem('sourceUrl')?.toString()
+    const returnURL = localStorage.getItem('sourceUrl')?.toString();
 
-
-    // console.log(ReturnURL)
-    window.open(ReturnURL, '_self')
+    // ✅ Small delay gives smoother UX + guarantees DOM update
+    setTimeout(() => {
+      // ✅ hide loader
+      if (returnURL) {
+        
+        window.open(returnURL, '_self');
+        //  this.isLoader = false;
+      }
+    }, 300);
   }
+
   cards = [
     { title: 'Total Users', value: '12,345', icon: '👥', iconClass: 'fa-solid fa-users', trend: '+12%' },
     { title: 'Revenue', value: '$45,231', icon: '💰', iconClass: 'fa-solid fa-dollar-sign', trend: '+8%' },
